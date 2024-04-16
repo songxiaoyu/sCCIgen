@@ -1,0 +1,38 @@
+Package: STsimulator
+Title: STsimulator for ‘de novo’ spatial patterns
+Version: 1.0
+Authors@R: 
+    person("Xiaoyu", "Song", , "songxiaoyu152@gmail.com", role = c("aut", "cre"),
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+Description: What the package does (one paragraph).
+License: GPL (>= 3)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.1
+Imports: 
+    data.table,
+    doParallel,
+    dplyr,
+    fs,
+    foreach,
+    geometry,
+    Giotto,
+    here,
+    htmltools,
+    igraph,
+    MASS,
+    miniUI,
+    parallel,
+    raster,
+    readr,
+    shiny,
+    spatstat,
+    spatstat.geom,
+    spatstat.model,
+    spatstat.random,
+    stats,
+    stringr,
+    terra,
+    tibble,
+    tidyr,
+    utils
