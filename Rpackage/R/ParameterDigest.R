@@ -17,7 +17,10 @@ ParaDigest=function(input) {
 
   attach(para)
 
-
+  # check if the output directory exist; if not create one
+  if (file.exists(path_to_output_dir)==F){
+    dir.create(path_to_output_dir)
+  }
 
   # clean seeds
   if (num_simulated_datasets>1) {
