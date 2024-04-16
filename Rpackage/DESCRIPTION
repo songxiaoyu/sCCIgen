@@ -1,5 +1,5 @@
-Package: STsimulator
-Title: STsimulator for ‘de novo’ spatial patterns
+Package: sCCIgen
+Title: sCCIgen: A high-fidelity spatially resolved transcriptomics data simulator for cell-cell interaction studies.
 Version: 1.0
 Authors@R: 
     person("Xiaoyu", "Song", , "songxiaoyu152@gmail.com", role = c("aut", "cre"),

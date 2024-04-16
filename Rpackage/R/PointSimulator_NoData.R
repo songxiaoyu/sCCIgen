@@ -56,7 +56,7 @@ connectUp <- function(r, nRegion, seed=NULL){
 #'
 RandomRegionWindow <- function(nRegion=3, nGrid=20, seed=NULL){
   if (nRegion==1) {
-    win=vector(mode = "list", length = 1); win[[1]] = unit.square()
+    win=vector(mode = "list", length = 1); win[[1]] = spatstat.geom::unit.square()
   } else {
     # generate polygon
     r <- raster::raster(ncols=nGrid, nrows=nGrid,xmn=0, xmx=1, ymn=0, ymx=1)
