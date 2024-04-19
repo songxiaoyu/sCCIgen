@@ -198,7 +198,7 @@ ParaCellsST=function(para, feature, all_seeds) {
 
   if (ncol(feature)==4) {R=feature[,4]} else {R=rep(1, nrow(feature))}
   cell_loc=foreach (i = 1:num_simulated_datasets) %dopar% {
-    cell.region.loc.model.fc(n=num_simulated_cells,
+    cell.loc.model.fc(n=num_simulated_cells,
                                     PointLoc=feature[,c(2:3)],
                                     PointAnno=feature[,1],
                                     PointRegion=R,

@@ -148,7 +148,7 @@ cell.loc.1region.model.fc=function(n,
 
 
 
-# cell.region.loc.model.fc ---------------
+# cell.loc.model.fc ---------------
 #' Generate cell location data by modeling the spatial information of existing data.
 #' @param n No. of cells
 #' @param PointLoc The location of input cells on x, y axis.
