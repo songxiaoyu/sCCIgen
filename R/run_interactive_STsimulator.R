@@ -220,6 +220,14 @@ run_interactive_sCCIgen <- function() {
 
                                           shiny::uiOutput("button_addcellcellinteraction"),
 
+                                          shiny::uiOutput("button_select_addcellcellinteractionexpression"),
+
+                                          shiny::uiOutput("text_file_addcellcellinteractionexpression"),
+
+                                          shiny::uiOutput("button_read_file_addcellcellinteractionexpression"),
+
+                                          shiny::HTML(strrep(htmltools::br(), 1)),
+
                                           shiny::uiOutput("ask_addcellcellinteractionexpression"),
 
                                           shiny::uiOutput("addcellcellinteractionexpressionSelection1"),
@@ -227,6 +235,14 @@ run_interactive_sCCIgen <- function() {
                                           shiny::uiOutput("addcellcellinteractionexpressionSelection2"),
 
                                           shiny::uiOutput("button_addcellcellinteractionexpression"),
+
+                                          shiny::uiOutput("button_select_cellcellinteractionexpression_neighborhood"),
+
+                                          shiny::uiOutput("text_cellcellinteractionexpression_neighborhood_file"),
+
+                                          shiny::uiOutput("button_read_cellcellinteractionexpression_neighborhood_file"),
+
+                                          shiny::HTML(strrep(htmltools::br(), 1)),
 
                                           shiny::radioButtons(inputId = "multicell",
                                                               label = "What resolution would you like to use to simulate your data?",
@@ -1472,9 +1488,104 @@ run_interactive_sCCIgen <- function() {
           ))
         })
 
+        output$button_select_addcellcellinteractionexpression <- shiny::renderUI({
+          shinyFiles::shinyFilesButton(id = "file_cellcellinteractionexpression",
+                                       label = "Select the cell-cell interactions - expression
+                                       associated file",
+                                       title = "Please select a cell-cell interactions file",
+                                       multiple = FALSE,
+                                       viewtype = "list")
+        })
+
+        shinyFiles::shinyFileChoose(input,
+                                    id = "file_cellcellinteractionexpression",
+                                    roots = c(wd = getwd()) )
+
+        shiny::observeEvent(input$file_cellcellinteractionexpression, {
+          if(!is.null(input$file_cellcellinteractionexpression)) {
+            x <- paste0(getwd(),
+                        gsub("/wd", "",
+                             paste(unlist(input$file_cellcellinteractionexpression),
+                                   collapse = "/")))
+
+            output$text_file_addcellcellinteractionexpression <- shiny::renderUI({
+              shiny::strong({paste("Your selected file is:", x)})
+            })
+
+            output$button_read_file_addcellcellinteractionexpression <- shiny::renderUI({
+              shiny::actionButton("button_read_cellcellinteractionexpression_file",
+                                  "Read this file")
+            })
+
+            shiny::observeEvent(input$button_read_cellcellinteractionexpression_file, {
+              x_df <- read.delim(file = paste0(getwd(),
+                                               gsub("/wd", "",
+                                                    paste(unlist(input$file_cellcellinteractionexpression),
+                                                          collapse = "/"))),
+                                 sep = ",",
+                                 header = TRUE)
+
+              if(ncol(x_df) == 7) {
+                x_df$region <- rep("NULL", nrow(x_df))
+                colnames(x_df) <- c("cell_type_perturbed", "cell_type_adj",
+                                    "cutoff", "gene_id", "proportion", "mean", "sd",
+                                    "region")
+              } else if (ncol(x_df) == 8) {
+                colnames(x_df) <- c("region", "cell_type_perturbed", "cell_type_adj",
+                                    "cutoff", "gene_id", "proportion", "mean", "sd")
+              } else {
+                shiny::showModal(shiny::modalDialog(
+                  title = "Error",
+                  "Your custom file doesn't have the right format.",
+                  footer = modalButton("OK")
+                ))
+              }
+
+              if(ncol(x_df) == 8) {
+                x1 <- data.frame(parameters = character(),
+                                 value = character())
+
+                for (i in 1:nrow(x_df)) {
+
+                  x2 = data.frame(parameters = c(paste0("spatial_int_dist_",i,"_region"),
+                                                 paste0("spatial_int_dist_",i,"_cell_type_perturbed"),
+                                                 paste0("spatial_int_dist_",i,"_cell_type_adj"),
+                                                 paste0("spatial_int_dist_",i,"_dist_cutoff"),
+                                                 paste0("spatial_int_dist_",i,"_gene_id1"),
+                                                 paste0("spatial_int_dist_",i,"_gene_prop"),
+                                                 paste0("spatial_int_dist_",i,"_mean"),
+                                                 paste0("spatial_int_dist_",i,"_sd")),
+                                  value = c(x_df$region[i],
+                                            x_df$cell_type_perturbed[i],
+                                            x_df$cell_type_adj[i],
+                                            x_df$cutoff[i],
+                                            x_df$gene_id[i],
+                                            x_df$proportion[i],
+                                            x_df$mean[i],
+                                            x_df$sd[i]))
+
+                  x1 = rbind(x1, x2)
+                }
+
+                cellcellinteractions_df(x1)
+
+                shiny::showModal(shiny::modalDialog(
+                  title = "Success!",
+                  "Your interactions were saved.",
+                  footer = modalButton("OK")
+                ))
+              }
+
+            })
+          }
+        })
+
       } else {
         output$addcellcellinteractionSelection <- NULL
         output$button_addcellcellinteraction <- NULL
+        output$button_select_addcellcellinteractionexpression <- NULL
+        output$text_file_addcellcellinteractionexpression <- NULL
+        output$button_read_file_addcellcellinteractionexpression <- NULL
       }
     })
 
@@ -1587,10 +1698,109 @@ run_interactive_sCCIgen <- function() {
           ))
         })
 
+        output$button_select_cellcellinteractionexpression_neighborhood <- shiny::renderUI({
+          shinyFiles::shinyFilesButton(id = "file_cellcellinteraction_neighborhood",
+                                       label = "Select the file",
+                                       title = "Please select a file",
+                                       multiple = FALSE,
+                                       viewtype = "list")
+        })
+
+        shinyFiles::shinyFileChoose(input,
+                                    id = "file_cellcellinteraction_neighborhood",
+                                    roots = c(wd = getwd()) )
+
+        shiny::observeEvent(input$file_cellcellinteraction_neighborhood, {
+          if(!is.null(input$file_cellcellinteraction_neighborhood)) {
+            x <- paste0(getwd(),
+                        gsub("/wd", "",
+                             paste(unlist(input$file_cellcellinteraction_neighborhood),
+                                   collapse = "/")))
+
+            output$text_cellcellinteractionexpression_neighborhood_file <- shiny::renderUI({
+              shiny::strong({paste("Your selected file is:", x)})
+            })
+
+            output$button_read_cellcellinteractionexpression_neighborhood_file <- shiny::renderUI({
+              shiny::actionButton("button_read_cellcellinteraction_neighborhood_file",
+                                  "Read this interaction file")
+            })
+
+            shiny::observeEvent(input$button_read_cellcellinteraction_neighborhood_file, {
+              x_df <- read.delim(paste0(getwd(),
+                                        gsub("/wd", "",
+                                             paste(unlist(input$file_cellcellinteraction_neighborhood),
+                                                   collapse = "/"))),
+                                 header = TRUE, sep = ",")
+
+              if(ncol(x_df) == 9) {
+                x_df$region <- rep("NULL", nrow(x_df))
+                colnames(x_df) <- c("cell_type_perturbed", "cell_type_adj",
+                                    "cutoff", "gene_id1", "gene_id2",
+                                    "proportion", "bidirectional", "mean", "sd",
+                                    "region")
+              } else if(ncol(x_df) == 10) {
+                colnames(x_df) <- c("region", "cell_type_perturbed", "cell_type_adj",
+                                    "cutoff", "gene_id1", "gene_id2",
+                                    "proportion", "bidirectional", "mean", "sd")
+              } else {
+                shiny::showModal(shiny::modalDialog(
+                  title = "Error",
+                  "Your file doesn't have the right format.",
+                  footer = modalButton("OK")
+                ))
+              }
+
+              if(ncol(x_df) == 10) {
+                x1 <- data.frame(parameters = character(),
+                                 value = character())
+
+                for (i in seq_len(nrow(x_df))) {
+
+                  x2 <- data.frame(parameters = c(paste0("spatial_int_expr_",i,"_region"),
+                                                  paste0("spatial_int_expr_",i,"_cell_type_perturbed"),
+                                                  paste0("spatial_int_expr_",i,"_cell_type_adj"),
+                                                  paste0("spatial_int_expr_",i,"_dist_cutoff"),
+                                                  paste0("spatial_int_expr_",i,"_gene_id1"),
+                                                  paste0("spatial_int_expr_",i,"_gene_id2"),
+                                                  paste0("spatial_int_expr_",i,"_gene_prop"),
+                                                  paste0("spatial_int_expr_",i,"_bidirectional"),
+                                                  paste0("spatial_int_expr_",i,"_mean"),
+                                                  paste0("spatial_int_expr_",i,"_sd")),
+                                   value = c(x_df$region[i],
+                                             x_df$cell_type_perturbed[i],
+                                             x_df$cell_type_adj[i],
+                                             x_df$cutoff[i],
+                                             x_df$gene_id1[i],
+                                             x_df$gene_id2[i],
+                                             x_df$proportion[i],
+                                             x_df$bidirectional[i],
+                                             x_df$mean[i],
+                                             x_df$sd[i])
+                  )
+
+                  x1 <- rbind(x1, x2)
+                }
+
+                cellcellinteractionsexpression_df(x1)
+
+                shiny::showModal(shiny::modalDialog(
+                  title = "Success!",
+                  "Your cell-cell interactions were saved.",
+                  footer = modalButton("OK")
+                ))
+              }
+            })
+          }
+        })
+
       } else {
         output$addcellcellinteractionexpressionSelection1 <- NULL
         output$addcellcellinteractionexpressionSelection2 <- NULL
         output$button_addcellcellinteractionexpression <- NULL
+        output$button_select_cellcellinteractionexpression_neighborhood <- NULL
+        output$text_cellcellinteractionexpression_neighborhood_file <- NULL
+        output$button_read_cellcellinteractionexpression_neighborhood_file <- NULL
       }
     })
 
@@ -1707,7 +1917,6 @@ run_interactive_sCCIgen <- function() {
 
         if(ncol_feature_data() == 1) {
 
-
           param_df = rbind(param_df, c("custom_cell_type_proportions",
                                        custom_props()))
 
@@ -1716,7 +1925,6 @@ run_interactive_sCCIgen <- function() {
           param_df = rbind(param_df,c("cell_even_distribution",
                                       cell_even_distribution() ))
         }
-
 
         # simulation parameters for expression profiles
         param_df = rbind(param_df, c("expr_depth_ratio",
@@ -1729,7 +1937,6 @@ run_interactive_sCCIgen <- function() {
           param_df = rbind(param_df, c("copula_input",
                                        copula_input() ))
         }
-
 
         if(!is.null(spatialpatterns_df())) {
           param_df = rbind(param_df, spatialpatterns_df())
