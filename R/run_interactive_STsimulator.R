@@ -1411,24 +1411,30 @@ run_interactive_sCCIgen <- function() {
           output$addcellcellinteractionSelection <- shiny::renderUI({
             shiny::textInput(inputId = "cellcellinteractions",
                              label = "Specify the <Perturbed cell type>,<Adjacent cell type>,<Interaction
-                           distance threshold (default 0.1)>,<Gene ID (optional)>,<Gene proportion (optional)>,<Mean effect at log(count)
-                           scale (default = 0.5)>,<SD of effect at log(count) scale (default = 0)>. NOTE: if you don't provide a Gene ID,
-                           the gene proportion must be provided. If you're providing a Gene ID, the proportion will be automatically calculated
-                           and you can set the gene proportion = NULL.
-                           Separate the entries by blank space (e.g. 'cell_A,cell_B,0.1,NULL,0.1,0.5,0 cell_B,cell_C,0.2,gene_A,NULL,0.5,0').
-                           NOTE: Adjacent cell type cannot be the same as peturbed cell type.",
+                              distance threshold (default 0.1)>,<Gene ID (optional)>,<Gene proportion (optional)>,<Mean effect at log(count)
+                              scale (default = 0.5)>,<SD of effect at log(count) scale (default = 0)>. NOTE: if you don't provide a Gene ID,
+                              the gene proportion must be provided. If you're providing a Gene ID, the proportion will be automatically calculated
+                              and you can set the gene proportion = NULL.
+                              Separate the entries by blank space (e.g. 'cell_A,cell_B,0.1,NULL,0.1,0.5,0 cell_B,cell_C,0.2,gene_A,NULL,0.5,0').
+                              NOTE: Adjacent cell type cannot be the same as peturbed cell type.
+
+                              Alternatively, select a file separated by commas, where each line is an
+                              entry with the format described above.",
                            width = "100%")
           })
         } else { # num_regions > 1
           output$addcellcellinteractionSelection <- shiny::renderUI({
             shiny::textInput(inputId = "cellcellinteractions",
                              label = "Specify the <Region>,<Perturbed cell type>,<Adjacent cell type>,<Interaction
-                           distance threshold (default 0.1)>,<Gene ID (optional)>,<Gene proportion (optional)>,<Mean effect at log(count)
-                           scale (default = 0.5)>,<SD of effect at log(count) scale (default = 0)>. NOTE: if you don't provide a Gene ID,
-                           the gene proportion must be provided. If you're providing a Gene ID, the proportion will be automatically calculated
-                           and you can set the gene proportion = NULL.
-                           Separate the entries by blank space (e.g. '1,cell_A,cell_B,0.1,NULL,0.1,0.5,0 2,cell_B,cell_C,0.2,gene_A,NULL,0.5,0').
-                           NOTE: Adjacent cell type cannot be the same as peturbed cell type.",
+                              distance threshold (default 0.1)>,<Gene ID (optional)>,<Gene proportion (optional)>,<Mean effect at log(count)
+                              scale (default = 0.5)>,<SD of effect at log(count) scale (default = 0)>. NOTE: if you don't provide a Gene ID,
+                              the gene proportion must be provided. If you're providing a Gene ID, the proportion will be automatically calculated
+                              and you can set the gene proportion = NULL.
+                              Separate the entries by blank space (e.g. '1,cell_A,cell_B,0.1,NULL,0.1,0.5,0 2,cell_B,cell_C,0.2,gene_A,NULL,0.5,0').
+                              NOTE: Adjacent cell type cannot be the same as peturbed cell type.
+
+                              Alternatively, select a file separated by commas, where each line is an
+                              entry with the format described above.",
                            width = "100%")
           })
         }
@@ -1609,17 +1615,20 @@ run_interactive_sCCIgen <- function() {
           output$addcellcellinteractionexpressionSelection1 <- shiny::renderUI({
             shiny::textInput(inputId = "cellcellinteractionsexpression",
                              label = "Specify the <Perturbed cell type>,<Adjacent cell type>,
-                           <Interaction distance threshold (default 0.1)>,<Gene ID 1 (optional)>,
-                           <Gene ID 2 (optional)>,<Gene proportion (optional)>,
-                           <Bi-directional association (TRUE or FALSE, default = TRUE)>,<Mean effect at log(count)
-                           scale (default = 0.5)>,<SD of effect at log(count) scale (default = 0)>.
-                           NOTE: if you don't provide the Gene IDs, the proportion of genes with
-                           this pattern must be provided, and gene pairs will be randomly generated.
-                           If you're providing the Gene IDs, the proportion will be automatically
-                           calculated and you can set the gene proportion = NULL.
-                           Separate the entries by blank space (e.g. 'cell_A,cell_B,0.1,NULL,NULL,0.1,TRUE,0.5,0
-                           cell_B,cell_C,0.2,gene_A,gene_B,NULL,TRUE,0.5,0').
-                           NOTE: Adjacent cell type cannot be the same as peturbed cell type.",
+                              <Interaction distance threshold (default 0.1)>,<Gene ID 1 (optional)>,
+                              <Gene ID 2 (optional)>,<Gene proportion (optional)>,
+                              <Bi-directional association (TRUE or FALSE, default = TRUE)>,<Mean effect at log(count)
+                              scale (default = 0.5)>,<SD of effect at log(count) scale (default = 0)>.
+                              NOTE: if you don't provide the Gene IDs, the proportion of genes with
+                              this pattern must be provided, and gene pairs will be randomly generated.
+                              If you're providing the Gene IDs, the proportion will be automatically
+                              calculated and you can set the gene proportion = NULL.
+                              Separate the entries by blank space (e.g. 'cell_A,cell_B,0.1,NULL,NULL,0.1,TRUE,0.5,0
+                              cell_B,cell_C,0.2,gene_A,gene_B,NULL,TRUE,0.5,0').
+                              NOTE: Adjacent cell type cannot be the same as peturbed cell type.
+
+                              Alternatively, select a file separated by commas, where each line is an
+                              entry with the format described above.",
                            width = "100%")
           })
         } else { # num_regions > 1
@@ -1637,7 +1646,10 @@ run_interactive_sCCIgen <- function() {
                            calculated and you can set the gene proportion = NULL.
                            Separate the entries by blank space (e.g. '1,cell_A,cell_B,0.1,NULL,NULL,0.1,TRUE,0.5,0
                            2,cell_B,cell_C,0.2,gene_A,gene_B,NULL,TRUE,0.5,0').
-                           NOTE: Adjacent cell type cannot be the same as peturbed cell type.",
+                           NOTE: Adjacent cell type cannot be the same as peturbed cell type.
+
+                          Alternatively, select a file separated by commas, where each line is an
+                          entry with the format described above.",
                            width = "100%")
           })
         }
