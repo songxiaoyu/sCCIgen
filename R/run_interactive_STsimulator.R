@@ -1713,13 +1713,6 @@ run_interactive_sCCIgen <- function() {
 
           param_df = rbind(param_df, cell_type_proportions())
 
-          param_df = rbind(param_df, c("custom_cell_location_interactions",
-                                       custom_cell_location_interactions() ))
-
-          if(custom_cell_location_interactions() == TRUE) {
-            param_df = rbind(param_df, cell_location_interactions_df())
-          }
-
           param_df = rbind(param_df,c("cell_even_distribution",
                                       cell_even_distribution() ))
         }
