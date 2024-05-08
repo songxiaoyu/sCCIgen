@@ -7,7 +7,8 @@
 run_interactive_sCCIgen()
 }
 \value{
-A simulated dataset. Either as individual csv files with counts, cell features, or a Giotto object.
+A simulated dataset. Either as individual csv files with counts,
+cell features, or a Giotto object.
 }
 \description{
 Run interactive STsimulator

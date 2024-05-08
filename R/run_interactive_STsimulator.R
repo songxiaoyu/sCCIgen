@@ -1,14 +1,15 @@
 #' Run interactive STsimulator
 #'
-#' @import dplyr
-#' @return A simulated dataset. Either as individual csv files with counts, cell features, or a Giotto object.
+#' @import dplyr shiny
+#' @return A simulated dataset. Either as individual csv files with counts,
+#' cell features, or a Giotto object.
 #'
 #' @export
 #'
 run_interactive_sCCIgen <- function() {
 
   ui <- miniUI::miniPage(
-    miniUI::gadgetTitleBar("STsimulator"),
+    miniUI::gadgetTitleBar("sCCIgen"),
     miniUI::miniContentPanel(
       shiny::tabsetPanel(
         type = "tabs",
@@ -109,36 +110,28 @@ run_interactive_sCCIgen <- function() {
 
                                           shiny::uiOutput("user_cellfeature_text"),
 
+                                          shiny::HTML(strrep(htmltools::br(), 1)),
 
+                                          shiny::uiOutput("text_ask_data_directory"),
+
+                                          shiny::HTML(strrep(htmltools::br(), 1)),
+
+                                          shiny::uiOutput("button_ask_data_directory"),
+
+                                          shiny::HTML(strrep(htmltools::br(), 1)),
+
+                                          shiny::uiOutput("path_to_input_dir"),
+
+                                          shiny::HTML(strrep(htmltools::br(), 1)),
+
+                                          shiny::uiOutput("button_read_data"),
+
+                                          shiny::HTML(strrep(htmltools::br(), 2))
 
                           ), # ends Step 1: Select your dataset
 
                           shiny::tabPanel("Step 2: Select the simulation parameters",
 
-                                          shiny::HTML(strrep(htmltools::br(), 1)),
-
-                                          shiny::strong("Where is your input data located? ? Click the button to select your data directory."),
-
-                                          shiny::HTML(strrep(htmltools::br(), 2)),
-
-                                          shinyFiles::shinyDirButton(id = "inputdir",
-                                                                     label = "Select the data folder",
-                                                                     title = "Please select a folder",
-                                                                     multiple = FALSE,
-                                                                     viewtype = "list",
-                                                                     filename = "."
-                                          ),
-
-                                          shiny::HTML(strrep(htmltools::br(), 2)),
-
-                                          shiny::strong("Your selected directory is:"),
-
-                                          shiny::textOutput(outputId = "path_to_input_dir"),
-
-                                          shiny::HTML(strrep(htmltools::br(), 1)),
-
-                                          shiny::actionButton(inputId = "use_inputdata",
-                                                              label = "Use this directory and read my data"),
 
                                           shiny::HTML(strrep(htmltools::br(), 2)),
 
@@ -154,11 +147,27 @@ run_interactive_sCCIgen <- function() {
 
                                           shiny::uiOutput("button_customcellproportions"),
 
+                                          shiny::uiOutput("input_file_customcellproportions"),
+
+                                          shiny::uiOutput("text_file_customcellproportions"),
+
+                                          shiny::uiOutput("button_read_file_customcellproportions"),
+
                                           shiny::uiOutput("ask_custom_interaction"),
 
                                           shiny::uiOutput("custominteractionSelection"),
 
                                           shiny::uiOutput("button_custominteraction"),
+
+                                          shiny::uiOutput("button_select_interaction_file"),
+
+                                          shiny::HTML(strrep(htmltools::br(), 1)),
+
+                                          shiny::uiOutput("text_custom_interaction_file"),
+
+                                          shiny::uiOutput("button_read_custom_interaction_file"),
+
+                                          shiny::HTML(strrep(htmltools::br(), 1)),
 
                                           shiny::uiOutput("ask_even_distribution"),
 
@@ -197,6 +206,14 @@ run_interactive_sCCIgen <- function() {
 
                                           shiny::uiOutput("button_spatialpatterns"),
 
+                                          shiny::uiOutput("button_select_spatialpatterns_file"),
+
+                                          shiny::uiOutput("text_spatialpatterns_file"),
+
+                                          shiny::uiOutput("button_read_spatialpatterns_file"),
+
+                                          shiny::HTML(strrep(htmltools::br(), 1)),
+
                                           shiny::uiOutput("ask_addcellcellinteraction"),
 
                                           shiny::uiOutput("addcellcellinteractionSelection"),
@@ -205,7 +222,9 @@ run_interactive_sCCIgen <- function() {
 
                                           shiny::uiOutput("ask_addcellcellinteractionexpression"),
 
-                                          shiny::uiOutput("addcellcellinteractionexpressionSelection"),
+                                          shiny::uiOutput("addcellcellinteractionexpressionSelection1"),
+
+                                          shiny::uiOutput("addcellcellinteractionexpressionSelection2"),
 
                                           shiny::uiOutput("button_addcellcellinteractionexpression"),
 
@@ -229,7 +248,7 @@ run_interactive_sCCIgen <- function() {
                                           shiny::uiOutput("ask_multiple_seeds"),
 
                                           shiny::textInput(inputId = "outdir",
-                                                           label = "Provide the path to save the output: [default = working_directory/output_files]",
+                                                           label = "Provide the name of the output folder. This folder will be created under your working directory.",
                                                            value = "output_files",
                                                            width = "100%"),
 
@@ -292,7 +311,7 @@ run_interactive_sCCIgen <- function() {
       output$downloadCount <- shiny::downloadHandler(
         filename = paste0(input$dataset,"_count.tsv"),
         content = function(con) {
-          download.file(url = paste0("https://github.com/songxiaoyu/STsimulator/raw/main/DockerUI/example_data/",input$dataset,"_count.tsv"),
+          download.file(url = paste0("https://github.com/songxiaoyu/sCCIgen_data/raw/main/example_data/",input$dataset,"_count.tsv"),
                         destfile = con)
         }
       )
@@ -300,7 +319,7 @@ run_interactive_sCCIgen <- function() {
       output$downloadMeta <- shiny::downloadHandler(
         filename = paste0(input$dataset,"_meta.tsv"),
         content = function(con) {
-          download.file(url = paste0("https://github.com/songxiaoyu/STsimulator/raw/main/DockerUI/example_data/",input$dataset,"_meta.tsv"),
+          download.file(url = paste0("https://github.com/songxiaoyu/sCCIgen_data/raw/main/example_data/",input$dataset,"_meta.tsv"),
                         destfile = con)
         }
       )
@@ -308,7 +327,7 @@ run_interactive_sCCIgen <- function() {
       output$downloadExpr <- shiny::downloadHandler(
         filename = paste0(input$dataset,"_expr_pattern.tsv"),
         content = function(con) {
-          download.file(url = paste0("https://github.com/songxiaoyu/STsimulator/raw/main/DockerUI/example_data/",input$dataset,"_expr_pattern.tsv"),
+          download.file(url = paste0("https://github.com/songxiaoyu/sCCIgen_data/raw/main/example_data/",input$dataset,"_expr_pattern.tsv"),
                         destfile = con)
         }
       )
@@ -316,7 +335,7 @@ run_interactive_sCCIgen <- function() {
       output$downloadParameter <- shiny::downloadHandler(
         filename = paste0(input$dataset,"_parameter.tsv"),
         content = function(con) {
-          download.file(url = paste0("https://github.com/songxiaoyu/STsimulator/raw/main/DockerUI/example_data/",input$dataset,"_parameter.tsv"),
+          download.file(url = paste0("https://github.com/songxiaoyu/sCCIgen_data/raw/main/example_data/",input$dataset,"_parameter.tsv"),
                         destfile = con)
         }
       )
@@ -328,6 +347,7 @@ run_interactive_sCCIgen <- function() {
 
     expression_data_file <- shiny::reactiveVal()
     cell_feature_data_file <- shiny::reactiveVal()
+    path_to_input_dir <- shiny::reactiveVal()
 
     shiny::observeEvent(input$inputdata, {
 
@@ -355,13 +375,24 @@ run_interactive_sCCIgen <- function() {
 
 
         shiny::observeEvent(input$user_expression, {
+          x <- shiny::reactiveVal()
+          x_length <- shiny::reactiveVal()
 
-          expression_data_file(unlist(input$user_expression)[length(unlist(input$user_expression)) - 1])
+          x(gsub("/wd", "", paste(unlist(input$user_expression), collapse = "/")))
+          x_length(length(unlist(input$user_expression)))
+
+          if(x_length() >= 2) {
+            expression_data_file(unlist(input$user_expression)[x_length() - 1])
+            x_length(length(unlist(input$user_expression)) - 2)
+            path_to_input_dir(paste0(getwd(),
+                              paste(unlist(input$user_expression)[1:x_length()], collapse = "/")))
+          }
+
         })
 
         output$user_expression_text <- renderUI({
 
-          renderText({paste("Your expression file is:", expression_data_file())})
+          shiny::strong({paste("Your expression file is:", expression_data_file())})
         })
 
         output$userinputcellfeature_text <- renderUI({
@@ -392,25 +423,35 @@ run_interactive_sCCIgen <- function() {
                                     roots = c(wd = getwd()) )
 
         shiny::observeEvent(input$user_cellfeature, {
-          cell_feature_data_file(unlist(input$user_cellfeature)[length(unlist(input$user_cellfeature)) - 1])
+          x <- shiny::reactiveVal()
+          x_length <- shiny::reactiveVal()
+
+          x(gsub("/wd", "", paste(unlist(input$user_cellfeature), collapse = "/")))
+          x_length(length(unlist(input$user_cellfeature)))
+
+          if(x_length() >= 2) {
+            cell_feature_data_file(unlist(input$user_cellfeature)[x_length() - 1])
+          }
         })
 
         output$user_cellfeature_text <- renderUI({
-
-          renderText({paste("Your cell feature file is:", cell_feature_data_file())})
+          shiny::strong({paste("Your cell feature file is:", cell_feature_data_file())})
         })
-
 
         output$downloadExpression <- NULL
         output$downloadFeature <- NULL
+        output$text_ask_data_directory <- NULL
+        output$button_ask_data_directory <- NULL
 
       } else {
 
         output$userinputexpression_text <- NULL
         output$userinputexpression <- NULL
-        output$userinputexpression_text <- NULL
+        output$user_expression_text <- NULL
 
+        output$userinputcellfeature_text <- NULL
         output$userinputcellfeature <- NULL
+        output$user_cellfeature_text <- NULL
 
         # show download buttons
         output$downloadExpression <- renderUI({
@@ -424,39 +465,64 @@ run_interactive_sCCIgen <- function() {
         output$downloadselectedexpression <- shiny::downloadHandler(
           filename = paste0(input$inputdata,"_expr.Rdata"),
           content = function(con) {
-            download.file(url = paste0("https://github.com/josschavezf/STsimulator/raw/main/DockerUI/InputData/expression_data/",input$inputdata,"_expr.Rdata"),
+            download.file(url = paste0("https://github.com/songxiaoyu/sCCIgen_data/raw/main/InputData/expression_data/",input$inputdata,"_expr.Rdata"),
                           destfile = con)
           })
 
         output$downloadselectedcellfeature <- shiny::downloadHandler(
           filename = paste0(input$inputdata,"_cellfeature.Rdata"),
           content = function(con) {
-            download.file(url = paste0("https://github.com/josschavezf/STsimulator/raw/main/DockerUI/InputData/cell_feature_data/",input$inputdata,"_cellfeature.Rdata"),
+            download.file(url = paste0("https://github.com/songxiaoyu/sCCIgen_data/raw/main/InputData/cell_feature_data/",input$inputdata,"_cellfeature.Rdata"),
                           destfile = con)
           })
 
         expression_data_file(paste0(input$inputdata,"_expr.Rdata"))
         cell_feature_data_file(paste0(input$inputdata,"_cellfeature.Rdata"))
+
+        output$text_ask_data_directory <- renderUI({
+          shiny::strong("Where is your input data located? Click the button to select your data directory.")
+        })
+
+        output$button_ask_data_directory <- renderUI({
+          shinyFiles::shinyDirButton(id = "inputdir",
+                                     label = "Select the data folder",
+                                     title = "Please select a folder",
+                                     multiple = FALSE,
+                                     viewtype = "list",
+                                     filename = "."
+          )
+        })
+
+        shinyFiles::shinyDirChoose(input,
+                                   id = 'inputdir',
+                                   roots = c(wd = getwd()),
+                                   allowDirCreate = FALSE)
+
+        shiny::observeEvent(input$inputdir, {
+          x <- shiny::reactiveVal()
+          x(gsub("/wd", "", paste(unlist(input$inputdir), collapse = "/")))
+
+          path_to_input_dir(paste0(getwd(), x()))
+        })
+
       }
+
+      output$path_to_input_dir <- renderUI({
+        shiny::strong({paste("Your selected directory is:", path_to_input_dir() )})
+      })
+
     }) # ends download data
 
-    # Create parameters file
-
-    shinyFiles::shinyDirChoose(input,
-                               id = 'inputdir',
-                               roots = c(wd = getwd()),
-                               allowDirCreate = FALSE)
-
-    path_to_input_dir <- shiny::reactiveVal()
-
-    shiny::observeEvent(input$inputdir, {
-      x <- shiny::reactiveVal()
-      x(unlist(input$inputdir)["path2"])
-      path_to_input_dir(here::here(x()))
+    shiny::observeEvent(path_to_input_dir(), {
+      if (!is.null(path_to_input_dir())) {
+        output$button_read_data <- shiny::renderUI({
+          shiny::actionButton(inputId = "use_inputdata",
+                              label = "Use this directory and read my data")
+        })
+      }
     })
 
-    output$path_to_input_dir <- renderText({ path_to_input_dir() })
-
+    # Create parameters file
 
     expression_data_file_type <- shiny::reactiveVal()
     expression_data_cell_types <- shiny::reactiveVal()
@@ -517,7 +583,7 @@ run_interactive_sCCIgen <- function() {
 
         shiny::showModal(shiny::modalDialog(
           title = "Error reading input files",
-          "At least one of your input files were not found in your input directory.
+          "At least one of your input files was not found in your input directory.
           Verify that the expression and cellfeature files are in the right directory.",
           footer = modalButton("OK")
         ))
@@ -582,9 +648,144 @@ run_interactive_sCCIgen <- function() {
                                   width = "100%")
             })
 
+            output$ask_custom_interaction <- shiny::renderUI({
+              shiny::radioButtons(inputId = "custominteraction",
+                                  label = "Users can select cell type pairs and determine the strength. Strength < 0 indicates cell-cell inhibition; and strength > 0 indicates cell-cell attraction. Would you like to specify the cell-cell location interaction (inhibition/attraction)?",
+                                  choices = c("No cell-cell location interaction" = FALSE,
+                                              "Specify cell-cell location interaction (inhibition/attraction)" = TRUE),
+                                  width = "100%")
+            })
+
+            shiny::observeEvent(input$custominteraction, {
+
+              custom_cell_location_interactions(input$custominteraction)
+
+              if(input$custominteraction == TRUE) {
+
+                output$custominteractionSelection <- shiny::renderUI({
+                  shiny::textInput(inputId = "locationinteraction",
+                                   label = "To specify cell-cell location interaction, enter the cell type pairs
+                               followed by the interaction level (suggested value -2 to 2) in a format
+                               <cell_type_A>,<cell_type_B>,<value>. Separate the entries by blank space
+                               (e.g. 'cell_type_A,cell_type_B,1.2 cell_type_B,cell_type_C,-0.8').
+
+                               Alternatively, select a file separated by commas, where each line is an
+                               entry with the format described above.",
+                                   width = "100%")
+                })
+
+                output$button_custominteraction <- shiny::renderUI({
+                  shiny::actionButton("save_custominteraction",
+                                      "Use these interactions")
+                })
+
+                shiny::observeEvent(input$save_custominteraction, {
+
+                  shiny::observeEvent(input$locationinteraction, {
+                    x = unlist(stringr::str_split(input$locationinteraction,
+                                                  pattern = " "))
+
+                    for (i in x) {
+                      y = unlist(stringr::str_split(i,pattern = ","))
+                      if(length(y) != 3) {
+                        shiny::showModal(shiny::modalDialog(
+                          title = "Error",
+                          "Your custom cell-cell location interactions don't have
+                      the right format.",
+                          footer = modalButton("OK")
+                        ))
+                      }
+                    }
+
+                    cell_location_interactions_df(data.frame(parameters = paste0("cell_interaction_",
+                                                                                 1:length(x)),
+                                                             value = x))
+                  })
+
+                  shiny::showModal(shiny::modalDialog(
+                    title = "Success!",
+                    "Your custom cell-cell location interactions were saved.",
+                    footer = modalButton("OK")
+                  ))
+
+                })
+
+                output$button_select_interaction_file <- shiny::renderUI({
+
+                  shinyFiles::shinyFilesButton(id = "file_custom_interaction_file",
+                                               label = "Select the cell-cell location interaction file",
+                                               title = "Please select a cell-cell location interaction file",
+                                               multiple = FALSE,
+                                               viewtype = "list")
+                })
+
+                shinyFiles::shinyFileChoose(input,
+                                            id = "file_custom_interaction_file",
+                                            roots = c(wd = getwd()) )
+
+                shiny::observeEvent(input$file_custom_interaction_file, {
+
+                  if(!is.null(input$file_custom_interaction_file)) {
+                    x <- paste0(getwd(),
+                                gsub("/wd", "",
+                                     paste(unlist(input$file_custom_interaction_file),
+                                           collapse = "/")))
+
+                    output$text_custom_interaction_file <- shiny::renderUI({
+                      shiny::strong({paste("Your selected file is:", x)})
+                    })
+
+                    output$button_read_custom_interaction_file <- shiny::renderUI({
+                      shiny::actionButton("button_read_custom_interaction_file",
+                                          "Read this interaction file")
+                    })
+
+                    shiny::observeEvent(input$button_read_custom_interaction_file, {
+                      x_df <- read.delim(paste0(getwd(),
+                                                gsub("/wd", "",
+                                                     paste(unlist(input$file_custom_interaction_file),
+                                                           collapse = "/"))),
+                                         header = TRUE, sep = ",")
+
+                      if(ncol(x_df) == 3) {
+                        x_df$join <- paste(x_df$cell_type_A, x_df$cell_type_B, x_df$value,
+                                           sep = ",")
+
+                        cell_location_interactions_df(data.frame(parameters = paste0("cell_interaction_",
+                                                                                     1:nrow(x_df)),
+                                                                 value = x_df$join))
+
+                        shiny::showModal(shiny::modalDialog(
+                          title = "Success!",
+                          "Your custom cell location interactions were saved.",
+                          footer = modalButton("OK")
+                        ))
+                      } else {
+                        shiny::showModal(shiny::modalDialog(
+                          title = "Error",
+                          "Your file doesn’t have the right format.",
+                          footer = modalButton("OK")
+                        ))
+                      }
+
+                    })
+                  }
+
+                })
+
+              } else {
+                output$custominteractionSelection <- NULL
+                output$button_custominteraction <- NULL
+                output$button_select_interaction_file <- NULL
+                output$text_custom_interaction_file <- NULL
+                output$button_read_custom_interaction_file <- NULL
+              }
+            })
+
           } else {
             output$ask_windowmethod <- NULL
             output$ask_spatialpatterns <- NULL
+            output$ask_custom_interaction <- NULL
           }
         })
 
@@ -616,6 +817,7 @@ run_interactive_sCCIgen <- function() {
         output$ask_numberregions <- NULL
         output$ask_custom_cell_type_prop <- NULL
         output$ask_even_distribution <- NULL
+        output$ask_custom_interaction <- NULL
       } else { # when ncol == 1
         output$ask_model_per_region <- NULL
         output$ask_simulate_cells <- NULL
@@ -655,7 +857,14 @@ run_interactive_sCCIgen <- function() {
 
             output$customcellproportionsSelection <- shiny::renderUI({
               shiny::textInput(inputId = "cellproportions",
-                               label = "Enter the custom cell-type proportions in a format <region>,<cell_type>,<proportion>. Separate multiple entries by blank space (e.g '1,cell_type_A,0.25 1,cell_type_B,0.75 2,cell_type_C,1.0'). NOTE: Cell type proportions for a given region must sum up to 1.",
+                               label = "Enter the custom cell-type proportions in a format
+                               <region>,<cell_type>,<proportion>. Separate multiple entries by
+                               blank space (e.g '1,cell_type_A,0.25 1,cell_type_B,0.75 2,cell_type_C,1.0').
+
+                               Alternatively, select a file separated by commas, where each line is an
+                               entry with the format described above.
+
+                               NOTE: Cell type proportions for a given region must sum up to 1.",
                                width = "100%")
             })
 
@@ -692,26 +901,92 @@ run_interactive_sCCIgen <- function() {
               ))
             })
 
+            output$input_file_customcellproportions <- renderUI({
+
+              shinyFiles::shinyFilesButton(id = "file_customcellproportions",
+                                           label = "Select the cell proportion file",
+                                           title = "Please select a cell proportion file",
+                                           multiple = FALSE,
+                                           viewtype = "list")
+
+            })
+
+            shinyFiles::shinyFileChoose(input,
+                                        id = "file_customcellproportions",
+                                        roots = c(wd = getwd()) )
+
+            shiny::observeEvent(input$file_customcellproportions, {
+
+              x <- shiny::reactiveVal()
+
+              if(!is.null(input$file_customcellproportions)) {
+                x(paste0(getwd(),
+                         gsub("/wd", "", paste(unlist(input$file_customcellproportions), collapse = "/"))))
+
+                output$text_file_customcellproportions <- shiny::renderUI({
+                  shiny::strong({paste("Your selected file is:", x())})
+                })
+
+                output$button_read_file_customcellproportions <- shiny::renderUI({
+                  shiny::actionButton("read_file_customcellproportions", "Read this file")
+                })
+
+                shiny::observeEvent(input$read_file_customcellproportions,{
+                  x_df <- read.delim(paste0(getwd(),
+                                            gsub("/wd", "", paste(unlist(input$file_customcellproportions), collapse = "/"))),
+                                     header = TRUE, sep = ",")
+
+                  if(ncol(x_df) == 3) {
+                    x_df$join <- paste(x_df$region, x_df$annotation, x_df$proportion,
+                                        sep = ",")
+
+                    cell_type_proportions(data.frame(
+                      parameters = paste0("cell_type_proportion_", 1:nrow(x_df)),
+                      value = x_df$join))
+
+                    shiny::showModal(shiny::modalDialog(
+                      title = "Success!",
+                      "Your custom cell type proportions were saved.",
+                      footer = modalButton("OK")
+                    ))
+
+                  } else {
+                    shiny::showModal(shiny::modalDialog(
+                      title = "Error",
+                      "Your file doesn’t have the right format.",
+                      footer = modalButton("OK")
+                    ))
+                  }
+
+                })
+
+              }
+
+            })
+
           } else {
 
             output$customcellproportionsSelection <- NULL
             output$button_customcellproportions <- NULL
+            output$input_file_customcellproportions <- NULL
+            output$text_file_customcellproportions <- NULL
+            output$button_read_file_customcellproportions <- NULL
 
             x = cellfeature_data() %>%
               count(cell_type) %>%
               mutate(proportions = round(n/sum(n),3),
                      proportions2 = paste0(cell_type,",",proportions))
 
-
             shiny::observeEvent(input$numberregions, {
 
               if(!is.null(input$numberregions)) {
                 n_total = input$numberregions*length(x$proportions2)
 
-                cell_type_proportions(data.frame(parameters = paste0("cell_type_proportion_", 1:n_total),
-                                                 value = paste0(base::sort(rep(seq_len(input$numberregions),
-                                                                               length(x$proportions2))),
-                                                                ",", x$proportions2)) )
+                cell_type_proportions(
+                  data.frame(parameters = paste0("cell_type_proportion_", 1:n_total),
+                             value = paste0(base::sort(rep(seq_len(input$numberregions),
+                                                           length(x$proportions2))),
+                                            ",", x$proportions2)) )
               }
             })
 
@@ -738,12 +1013,16 @@ run_interactive_sCCIgen <- function() {
                                label = "To specify cell-cell location interaction, enter the cell type pairs
                                followed by the interaction level (suggested value -2 to 2) in a format
                                <cell_type_A>,<cell_type_B>,<value>. Separate the entries by blank space
-                               (e.g. 'cell_type_A,cell_type_B,1.2 cell_type_B,cell_type_C,-0.8')",
+                               (e.g. 'cell_type_A,cell_type_B,1.2 cell_type_B,cell_type_C,-0.8').
+
+                               Alternatively, select a file separated by commas, where each line is an
+                               entry with the format described above.",
                                width = "100%")
             })
 
             output$button_custominteraction <- shiny::renderUI({
-              shiny::actionButton("save_custominteraction", "Use these interactions")
+              shiny::actionButton("save_custominteraction",
+                                  "Use these interactions")
             })
 
             shiny::observeEvent(input$save_custominteraction, {
@@ -777,9 +1056,75 @@ run_interactive_sCCIgen <- function() {
 
             })
 
+            output$button_select_interaction_file <- shiny::renderUI({
+
+              shinyFiles::shinyFilesButton(id = "file_custom_interaction_file",
+                                           label = "Select the cell-cell location interaction file",
+                                           title = "Please select a cell-cell location interaction file",
+                                           multiple = FALSE,
+                                           viewtype = "list")
+            })
+
+            shinyFiles::shinyFileChoose(input,
+                                        id = "file_custom_interaction_file",
+                                        roots = c(wd = getwd()) )
+
+            shiny::observeEvent(input$file_custom_interaction_file, {
+
+              if(!is.null(input$file_custom_interaction_file)) {
+                x <- paste0(getwd(),
+                         gsub("/wd", "",
+                              paste(unlist(input$file_custom_interaction_file),
+                                    collapse = "/")))
+
+                output$text_custom_interaction_file <- shiny::renderUI({
+                  shiny::strong({paste("Your selected file is:", x)})
+                })
+
+                output$button_read_custom_interaction_file <- shiny::renderUI({
+                  shiny::actionButton("button_read_custom_interaction_file",
+                                      "Read this interaction file")
+                })
+
+                shiny::observeEvent(input$button_read_custom_interaction_file, {
+                  x_df <- read.delim(paste0(getwd(),
+                                            gsub("/wd", "",
+                                                 paste(unlist(input$file_custom_interaction_file),
+                                                       collapse = "/"))),
+                                     header = TRUE, sep = ",")
+
+                  if(ncol(x_df) == 3) {
+                    x_df$join <- paste(x_df$cell_type_A, x_df$cell_type_B, x_df$value,
+                                       sep = ",")
+
+                    cell_location_interactions_df(data.frame(parameters = paste0("cell_interaction_",
+                                                                                 1:nrow(x_df)),
+                                                             value = x_df$join))
+
+                    shiny::showModal(shiny::modalDialog(
+                      title = "Success!",
+                      "Your custom cell location interactions were saved.",
+                      footer = modalButton("OK")
+                    ))
+                  } else {
+                    shiny::showModal(shiny::modalDialog(
+                      title = "Error",
+                      "Your file doesn’t have the right format.",
+                      footer = modalButton("OK")
+                    ))
+                  }
+
+                })
+              }
+
+            })
+
           } else {
             output$custominteractionSelection <- NULL
             output$button_custominteraction <- NULL
+            output$button_select_interaction_file <- NULL
+            output$text_custom_interaction_file <- NULL
+            output$button_read_custom_interaction_file <- NULL
           }
         })
 
@@ -891,12 +1236,17 @@ run_interactive_sCCIgen <- function() {
                            NOTE: if you don't provide a Gene ID, the gene proportion must be provided.
                            If you're providing a Gene ID, the proportion will be automatically calculated
                            and you can set the gene proportion = NULL.
-                           Separate the entries by blank space (e.g. '1,cell_type_A,NULL,0.1,0.5,0 1,cell_type_A,gene_A,NULL,0.5,0')",
+                           Separate the entries by blank space
+                           (e.g. '1,cell_type_A,NULL,0.1,0.5,0 1,cell_type_A,gene_A,NULL,0.5,0')
+
+                           Alternatively, click the button to select a file separated by commma where each
+                           line contains an entry with the format mentioned above.",
                            width = "100%")
         })
 
         output$button_spatialpatterns <- shiny::renderUI({
-          shiny::actionButton("save_spatialpatterns", "Use these spatial patterns")
+          shiny::actionButton("save_spatialpatterns",
+                              "Use these spatial patterns")
         })
 
         shiny::observeEvent(input$save_spatialpatterns, {
@@ -941,9 +1291,90 @@ run_interactive_sCCIgen <- function() {
           ))
         })
 
+        output$button_select_spatialpatterns_file <- shiny::renderUI({
+          shinyFiles::shinyFilesButton(id = "file_spatialpatterns",
+                                       label = "Select the spatial patterns file",
+                                       title = "Please select a spatial patterns file",
+                                       multiple = FALSE,
+                                       viewtype = "list")
+        })
+
+        shinyFiles::shinyFileChoose(input,
+                                    id = "file_spatialpatterns",
+                                    roots = c(wd = getwd()) )
+
+        shiny::observeEvent(input$file_spatialpatterns, {
+
+          if(!is.null(input$file_spatialpatterns)) {
+            x <- paste0(getwd(),
+                        gsub("/wd", "",
+                             paste(unlist(input$file_spatialpatterns),
+                                   collapse = "/")))
+
+            output$text_spatialpatterns_file <- shiny::renderUI({
+              shiny::strong({paste("Your selected file is:", x)})
+            })
+
+            output$button_read_spatialpatterns_file <- shiny::renderUI({
+              shiny::actionButton("button_read_spatialpatterns_file",
+                                  "Read this file")
+            })
+
+            shiny::observeEvent(input$button_read_spatialpatterns_file, {
+              x_df <- read.delim(file = paste0(getwd(),
+                                               gsub("/wd", "",
+                                                    paste(unlist(input$file_spatialpatterns),
+                                                          collapse = "/"))),
+                                 sep = ",",
+                                 header = TRUE)
+
+              if(ncol(x_df) == 6) {
+                colnames(x_df) <- c("region", "annotation", "gene_id",
+                                    "proportion", "mean", "sd")
+
+                x_df2 <- data.frame(parameters = character(),
+                                    value = character())
+
+                for (i in seq_len(nrow(x_df))) {
+                  x_temp <- data.frame(parameters = c(paste0("spatial_pattern_",i,"_region"),
+                                                    paste0("spatial_pattern_",i,"_cell_type"),
+                                                    paste0("spatial_pattern_",i,"_gene_id"),
+                                                    paste0("spatial_pattern_",i,"_gene_prop"),
+                                                    paste0("spatial_pattern_",i,"_mean"),
+                                                    paste0("spatial_pattern_",i,"_sd")),
+                                      value = c(x_df$region[i],
+                                                x_df$annotation[i],
+                                                x_df$gene_id[i],
+                                                x_df$proportion[i],
+                                                x_df$mean[i],
+                                                x_df$sd[i]))
+                  x_df2 <- rbind(x_df2, x_temp)
+                }
+
+                spatialpatterns_df(x_df2)
+
+                shiny::showModal(shiny::modalDialog(
+                  title = "Success!",
+                  "Your custom spatial patterns were saved.",
+                  footer = modalButton("OK")
+                ))
+              } else {
+                shiny::showModal(shiny::modalDialog(
+                  title = "Error",
+                  "Your file doesn't have the right format.",
+                  footer = modalButton("OK")
+                ))
+              }
+            })
+          }
+        })
+
       } else {
         output$spatialpatternsSelection <- NULL
         output$button_spatialpatterns <- NULL
+        output$button_select_spatialpatterns_file <- NULL
+        output$text_spatialpatterns_file <- NULL
+        output$button_read_spatialpatterns_file <- NULL
       }
     })
 
@@ -1067,7 +1498,8 @@ run_interactive_sCCIgen <- function() {
       if(input$addcellcellinteractionexpression == TRUE) {
 
         if(num_regions() == 1 || num_regions() == "NULL") {
-          output$addcellcellinteractionexpressionSelection <- shiny::renderUI({
+          output$addcellcellinteractionexpressionSelection2 <- NULL
+          output$addcellcellinteractionexpressionSelection1 <- shiny::renderUI({
             shiny::textInput(inputId = "cellcellinteractionsexpression",
                              label = "Specify the <Perturbed cell type>,<Adjacent cell type>,
                            <Interaction distance threshold (default 0.1)>,<Gene ID 1 (optional)>,
@@ -1084,7 +1516,8 @@ run_interactive_sCCIgen <- function() {
                            width = "100%")
           })
         } else { # num_regions > 1
-          output$addcellcellinteractionexpressionSelection <- shiny::renderUI({
+          output$addcellcellinteractionexpressionSelection1 <- NULL
+          output$addcellcellinteractionexpressionSelection2 <- shiny::renderUI({
             shiny::textInput(inputId = "cellcellinteractionsexpression",
                              label = "Specify the <Region><Perturbed cell type>,<Adjacent cell type>,
                            <Interaction distance threshold (default 0.1)>,<Gene ID 1 (optional)>,
@@ -1117,7 +1550,7 @@ run_interactive_sCCIgen <- function() {
 
             for (i in 1:length(x_vector)) {
 
-              if(length(x_vector[i]) == 9) { # if the region is missed because the n_regions == 1, add NULL
+              if(num_regions() == 1 || num_regions() == "NULL") { # if the region is missed because the n_regions == 1, add NULL
                 x_vector[i] = paste0("NULL,", x_vector[i])
               }
 
@@ -1159,7 +1592,8 @@ run_interactive_sCCIgen <- function() {
         })
 
       } else {
-        output$addcellcellinteractionexpressionSelection <- NULL
+        output$addcellcellinteractionexpressionSelection1 <- NULL
+        output$addcellcellinteractionexpressionSelection2 <- NULL
         output$button_addcellcellinteractionexpression <- NULL
       }
     })
@@ -1263,10 +1697,7 @@ run_interactive_sCCIgen <- function() {
     path_to_output_dir <- shiny::reactiveVal()
 
     shiny::observeEvent(input$outdir, {
-
-      if(input$outdir == "output_files") {
-        path_to_output_dir(here::here("output_files"))
-      } else { path_to_output_dir(input$outdir) }
+      path_to_output_dir(fs::path(getwd(),input$outdir))
     })
 
     output_name <- shiny::reactiveVal()
@@ -1313,6 +1744,14 @@ run_interactive_sCCIgen <- function() {
           )
 
           param_df = rbind(param_df, df)
+
+          param_df = rbind(param_df, c("custom_cell_location_interactions",
+                                       custom_cell_location_interactions() ))
+
+          if(custom_cell_location_interactions() == TRUE) {
+            param_df = rbind(param_df, cell_location_interactions_df())
+          }
+
         }
 
         if(ncol_feature_data() > 1 & simulate_spatial_data() == TRUE) {
