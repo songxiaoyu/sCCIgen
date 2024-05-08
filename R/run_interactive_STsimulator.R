@@ -241,11 +241,7 @@ run_interactive_sCCIgen <- function() {
                                                               value = 1,
                                                               width = "100%"),
 
-                                          shiny::uiOutput("ask_seed_options"),
-
                                           shiny::uiOutput("ask_single_seed"),
-
-                                          shiny::uiOutput("ask_multiple_seeds"),
 
                                           shiny::textInput(inputId = "outdir",
                                                            label = "Provide the name of the output folder. This folder will be created under your working directory.",
@@ -1622,76 +1618,20 @@ run_interactive_sCCIgen <- function() {
 
     num_simulated_datasets <- shiny::reactiveVal()
     parent_simulation_seed <- shiny::reactiveVal()
-    simulation_seed_for_each_dataset <- shiny::reactiveVal()
-
 
     shiny::observeEvent(input$ndatasets, {
       num_simulated_datasets(input$ndatasets)
+    })
 
-      if(input$ndatasets > 1) {
+    output$ask_single_seed <- renderUI({
+      shiny::numericInput(inputId = "seed",
+                          label = "An umbrella seed is required for reproducible simulation. Specify an umbrella seed.",
+                          value = 1234,
+                          width = "100%")
+    })
 
-        output$ask_seed_options <- renderUI({
-          shiny::radioButtons(inputId = "seed_options",
-                              label = "An umbrella seed is required for reproducible simulation. Would you like to provide a different seed per dataset, or use a parent seed to all of them?",
-                              choices = c("I want to provide an individual seed per dataset" = TRUE,
-                                          "I want to use a parent seed for all of them" = FALSE),
-                              width = "100%")
-        })
-
-        shiny::observeEvent(input$seed_options, {
-          if(input$seed_options == TRUE) {
-
-            output$ask_single_seed <- NULL
-
-            output$ask_multiple_seeds <- renderUI({
-              shiny::textInput(inputId = "multipleseed",
-                               label = "Specify an umbrella seed for each dataset. Separate the seeds by comma (e.g. 1234,2942,1029)",
-                               value = character(0),
-                               width = "100%")
-            })
-
-            shiny::observeEvent(input$multipleseed, {
-              simulation_seed_for_each_dataset(input$multipleseed)
-              parent_simulation_seed(NULL)
-            })
-
-
-          } else {
-
-            output$ask_multiple_seeds <- NULL
-
-            output$ask_single_seed <- renderUI({
-              shiny::numericInput(inputId = "seed",
-                                  label = "Specify an umbrella seed for reproducible simulation.",
-                                  value = 1234,
-                                  width = "100%")
-            })
-
-            shiny::observeEvent(input$seed, {
-              parent_simulation_seed(input$seed)
-
-              x <- rep(input$seed, num_simulated_datasets())
-              x <- paste(x, collapse = ',')
-              simulation_seed_for_each_dataset(x)
-            })
-          }
-        })
-
-      } else {
-        output$ask_multiple_seeds <- NULL
-
-        output$ask_single_seed <- renderUI({
-          shiny::numericInput(inputId = "seed",
-                              label = "Specify an umbrella seed for reproducible simulation.",
-                              value = 1234,
-                              width = "100%")
-        })
-
-        shiny::observeEvent(input$seed, {
-          parent_simulation_seed(input$seed)
-        })
-
-      }
+    shiny::observeEvent(input$seed, {
+      parent_simulation_seed(input$seed)
     })
 
     path_to_output_dir <- shiny::reactiveVal()
@@ -1819,11 +1759,6 @@ run_interactive_sCCIgen <- function() {
         if(!is.null(parent_simulation_seed())) {
           param_df = rbind(param_df, c("parent_simulation_seed",
                                        parent_simulation_seed()))
-        }
-
-        if(!is.null(simulation_seed_for_each_dataset())) {
-          param_df = rbind(param_df, c("simulation_seed_for_each_dataset",
-                                       simulation_seed_for_each_dataset()))
         }
 
         param_df = rbind(param_df, c("path_to_output_dir",
