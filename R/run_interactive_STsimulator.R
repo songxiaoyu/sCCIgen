@@ -949,6 +949,7 @@ run_interactive_sCCIgen <- function() {
                                      header = TRUE, sep = ",")
 
                   if(ncol(x_df) == 3) {
+                    colnames(x_df) <- c("region", "annotation", "proportion")
                     x_df$join <- paste(x_df$region, x_df$annotation, x_df$proportion,
                                         sep = ",")
 
@@ -1106,6 +1107,8 @@ run_interactive_sCCIgen <- function() {
                                      header = TRUE, sep = ",")
 
                   if(ncol(x_df) == 3) {
+                    colnames(x_df) <- c("cell_type_A", "cell_type_B", "value")
+
                     x_df$join <- paste(x_df$cell_type_A, x_df$cell_type_B, x_df$value,
                                        sep = ",")
 
