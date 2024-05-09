@@ -26,6 +26,7 @@ Imports:
     raster,
     readr,
     shiny,
+    shinyFiles,
     spatstat,
     spatstat.geom,
     spatstat.model,
