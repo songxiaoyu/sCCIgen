@@ -4,7 +4,7 @@
 \alias{ParaCellsST}
 \title{Use parameters to simulate cell location based on modeling of existing SRT}
 \usage{
-ParaCellsST(para, feature, all_seeds)
+ParaCellsST(para, feature, seed_list)
 }
 \arguments{
 \item{para}{Parameters loaded and cleaned from the parameter file using function
@@ -12,7 +12,7 @@ ParaCellsST(para, feature, all_seeds)
 
 \item{feature}{Cell feature data}
 
-\item{all_seeds}{Seeds for all simulated data}
+\item{seed_list}{Seeds for all simulated data}
 }
 \description{
 Use parameters to simulate cell location. Here fit models on existing SRT data for simulation.

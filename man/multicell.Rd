@@ -4,7 +4,7 @@
 \alias{multicell}
 \title{Assigns cells into spatial spots for multi-cell resolution data}
 \usage{
-multicell(expr, cell_feature, NoSpot = 500)
+multicell(expr, cell_feature, NoSpot = 500, cl = 1)
 }
 \arguments{
 \item{expr}{expression profile of the cells}

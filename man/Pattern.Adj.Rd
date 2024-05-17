@@ -9,7 +9,7 @@ Pattern.Adj(
   sim.count,
   pattern.list = NULL,
   bond.extreme = T,
-  keep.total.count = T,
+  keep.total.count = F,
   integer = T
 )
 }
@@ -25,7 +25,7 @@ gene can have more than 10\% of the total counts across all genes.}
 
 \item{keep.total.count}{If additional spatial patterns are added, whether
 to rescale expression levels of all genes to keep the sequencing depth
-(default = TRUE).}
+(default = FALSE).}
 
 \item{integer}{Whether to keep counts as integer (default=TRUE).}
 }

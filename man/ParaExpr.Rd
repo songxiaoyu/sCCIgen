@@ -10,7 +10,7 @@ ParaExpr(
   expr,
   feature,
   CopulaEst = NULL,
-  all_seeds,
+  seed_list,
   model_params = NULL,
   ncores = 1
 )
@@ -27,7 +27,7 @@ ParaExpr(
 
 \item{CopulaEst}{Estimated Gaussian Copula function for gene-gene correlation. Default=NULL.}
 
-\item{all_seeds}{Seeds for all simulated data}
+\item{seed_list}{Seeds for all simulated data}
 
 \item{model_params}{The fitted models of genes, often from \code{ParaFitExpr} function.}
 

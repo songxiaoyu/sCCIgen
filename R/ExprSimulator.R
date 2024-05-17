@@ -236,6 +236,28 @@ Add.Spatial.Expr.Pattern= function(sim.count,
   return(list(SignalSummary=SignalSummary, beta.matrix=beta.matrix))
 }
 
+MergePPP=function(points.list) {
+  K=length(points.list)
+  if (K==1) {
+
+  }
+  # points
+  x.combine=unlist(lapply(1:K, function(f) points.list[[f]]$x))
+  y.combine=unlist(lapply(1:K, function(f) points.list[[f]]$y))
+  annotation=unlist(lapply(1:K, function(f) points.list[[f]]$marks))
+
+  win1=points.list[[1]]$window
+  for (k in 2:K) {
+    win1=union.owin(win1, points.list[[k]]$window)
+  }
+
+  points1=ppp(x.combine, y.combine, window=win1)
+  marks(points1)=annotation
+
+  return(points1)
+}
+
+
 # Add.Distance.Asso.Pattern -----------------------------------------------
 #' Add cell-cell expr-distance interaction to a pair of cell types
 #'
@@ -246,8 +268,7 @@ Add.Spatial.Expr.Pattern= function(sim.count,
 #' @param ppp.obj An object of class "ppp" representing simulated cell locations
 #' @param sim.count Simulated expression counts from single-cell expression
 #' data, before adding in additional spatial patterns.
-#' @param r Which region to add in the spatial pattern. If simulated data do
-#' not have multiple regions, r=1.
+#' @param r Which region to add in the spatial pattern.
 #' @param perturbed.cell.type Which cell type is perturbed from this cell-cell
 #' interaction (e.g. microglia).
 #' @param adjacent.cell.type Which cell type in the neighbor perturbs from
@@ -280,34 +301,62 @@ Add.Distance.Asso.Pattern = function(ppp.obj,
 
   set.seed(seed*478-50194)
 
-
   R=length(sim.count)
-  sim.count1=sim.count[[r]]
-  N=ncol(sim.count1)
-  G=nrow(sim.count1)
-  GeneAll=rownames(sim.count1)
+  GeneAll=rownames(sim.count[[1]])
+  G=length(GeneAll)
+  N=sapply(1:R, function(f) ncol(sim.count[[f]]))
 
   # key matrix
   beta.matrix=vector("list", length=R)
-  for (i in 1:R) {beta.matrix[[i]]=matrix(0, nrow=G,  ncol=ncol(sim.count[[i]]))}
-  colnames(beta.matrix[[r]])=colnames(sim.count1)
-  rownames(beta.matrix[[r]])=GeneAll
+  for (i in 1:R) {
+    beta.matrix[[i]]=matrix(0, nrow=G,  ncol=ncol(sim.count[[i]]))
+    colnames(beta.matrix[[i]])=colnames(sim.count[[i]])
+    rownames(beta.matrix[[i]])=GeneAll
+  }
 
-  # spatial info
-  nbr.idx=Find.Neighbor.Pairs(ppp.obj=ppp.obj[[r]],
-                              interacting.cell.type.pair=c(perturbed.cell.type,
-                                                           adjacent.cell.type),
-                              int.dist.threshold=int.dist.threshold)
 
   # GeneID
   if (is.null(GeneID)) {GeneID=sample(GeneAll, round(PropOfGenes * G))}
-
   beta=stats::rnorm(length(GeneID), delta.mean, delta.sd)
-  beta.matrix[[r]][GeneID, nbr.idx[,1]] = beta +  beta.matrix[[r]][GeneID, nbr.idx[,1]]
 
-  SignalSummary=data.frame(Type="DistanceAssoGenes", Region=r, CellType=perturbed.cell.type,
-                           GeneID, AdjCellType=adjacent.cell.type,
-                           AdjGene="NA",beta)
+  if (r == "NULL") {  # add interaction in all regions
+    N0=c(0, N)
+    for (i in 1:R) {
+      # spatial info
+      ppp.obj.combined=MergePPP(ppp.obj)
+      nbr.idx=Find.Neighbor.Pairs(ppp.obj=ppp.obj.combined,
+                                  interacting.cell.type.pair=c(perturbed.cell.type,
+                                                               adjacent.cell.type),
+                                  int.dist.threshold=int.dist.threshold)
+      N_b=sum(N0[1:i])
+      N_a=sum(N0[1:(i+1)])
+      idx=seq(N_b+1, N_a)
+      idx1=nbr.idx[,1][which(nbr.idx[,1] %in% idx)]-N_b
+      temp= beta +  beta.matrix[[i]][GeneID, idx1]
+      colnames(temp)=idx1
+      temp2=sapply(1:nrow(temp), function(f) tapply(temp[f,], idx1, sum))
+      beta.matrix[[i]][GeneID, as.numeric(rownames(temp2))] =t(temp2)
+    }
+  } else {  # add interaction in one region
+    nbr.idx=Find.Neighbor.Pairs(ppp.obj=ppp.obj[[r]],
+                                interacting.cell.type.pair=c(perturbed.cell.type,
+                                                             adjacent.cell.type),
+                                int.dist.threshold=int.dist.threshold)
+    idx1=nbr.idx[,1]
+    temp= beta +  beta.matrix[[r]][GeneID,idx1]
+    colnames(temp)=idx1
+    temp2=sapply(1:nrow(temp), function(f) tapply(temp[f,], idx1, sum))
+    beta.matrix[[i]][GeneID, as.numeric(rownames(temp2))] =t(temp2)
+
+  }
+
+  SignalSummary=data.frame(Type="DistanceAssoGenes",
+                           Region=r,
+                           CellType=perturbed.cell.type,
+                           GeneID,
+                           AdjCellType=adjacent.cell.type,
+                           AdjGene="NA",
+                           beta)
 
 
   return(list(SignalSummary=SignalSummary, beta.matrix=beta.matrix))
@@ -357,58 +406,103 @@ Add.Expr.Asso.Pattern = function(ppp.obj, sim.count, r,
 
   set.seed(seed*3+194)
 
-
   R=length(sim.count)
-  sim.count1=sim.count[[r]]
-  N=ncol(sim.count1)
-  G=nrow(sim.count1)
-  GeneAll=rownames(sim.count1)
+  GeneAll=rownames(sim.count[[1]])
+  G=length(GeneAll)
+  N=sapply(1:R, function(f) ncol(sim.count[[f]]))
 
   # key matrix
   beta.matrix=vector("list", length=R)
-  for (i in 1:R) {beta.matrix[[i]]=matrix(0, nrow=G,  ncol=ncol(sim.count[[i]]))}
-  colnames(beta.matrix[[r]])=colnames(sim.count1)
-  rownames(beta.matrix[[r]])=GeneAll
-
-  # spatial info
-  nbr.idx=Find.Neighbor.Pairs(ppp.obj=ppp.obj[[r]],
-                              interacting.cell.type.pair=c(perturbed.cell.type, adjacent.cell.type),
-                              int.dist.threshold=int.dist.threshold)
-
-  # GeneID
-  if (is.null(GenePairIDMatrix)) {GenePairIDMatrix=matrix(sample(GeneAll, 2*round(PropOfGenes * G)),
-                                                          ncol=2)}
-
-  beta=stats::rnorm(nrow(GenePairIDMatrix), delta.mean, delta.sd)
-
-  # 1 --> 2
-  count2=sim.count1[GenePairIDMatrix[,2], nbr.idx[,2]]
-
-  beta.matrix[[r]][GenePairIDMatrix[,1], nbr.idx[,1]]=
-    beta.matrix[[r]][GenePairIDMatrix[,1], nbr.idx[,1]]+
-    beta*log(count2+1)
-
-  SignalSummary=data.frame(Type="ExprAssoGenes", Region=r, CellType=perturbed.cell.type,
-                           GeneID=GenePairIDMatrix[,1], AdjCellType=adjacent.cell.type,
-                           AdjGene=GenePairIDMatrix[,2], beta)
-
-
-  # 2 --> 1
-  if (Bidirectional==T) {
-    count1=sim.count1[GenePairIDMatrix[,1], nbr.idx[,1]]
-
-    beta.matrix[[r]][GenePairIDMatrix[,2], nbr.idx[,2]]=
-      beta.matrix[[r]][GenePairIDMatrix[,2], nbr.idx[,2]]+
-      beta*log(count1+1)
-
-    SignalSummary=rbind(SignalSummary,
-                        data.frame(Type="ExprAssoGenes", Region=r, CellType=adjacent.cell.type ,
-                             GeneID=GenePairIDMatrix[,2], AdjCellType=perturbed.cell.type,
-                             AdjGene=GenePairIDMatrix[,1], beta))
-
+  for (i in 1:R) {
+    beta.matrix[[i]]=matrix(0, nrow=G,  ncol=ncol(sim.count[[i]]))
+    colnames(beta.matrix[[i]])=colnames(sim.count[[i]])
+    rownames(beta.matrix[[i]])=GeneAll
   }
 
+  # GeneID
+  if (is.null(GenePairIDMatrix)) {
+    GenePairIDMatrix=matrix(sample(GeneAll, 2*round(PropOfGenes * G)),ncol=2)
+    }
+  # effect size
+  beta=stats::rnorm(nrow(GenePairIDMatrix), delta.mean, delta.sd)
 
+  if (r == "NULL") { # add interaction to all regions
+    # spatial info
+    ppp.obj.combined=MergePPP(ppp.obj)
+    sim.count.combined=list.cbind(sim.count)
+    beta.matrix.combined=list.cbind(beta.matrix)
+    nbr.idx=Find.Neighbor.Pairs(ppp.obj=ppp.obj.combined,
+                                interacting.cell.type.pair=c(perturbed.cell.type,
+                                                             adjacent.cell.type),
+                                int.dist.threshold=int.dist.threshold)
+
+    # 1 --> 2
+    count2=sim.count.combined[GenePairIDMatrix[,2], nbr.idx[,2]]
+
+    beta.matrix.combined[GenePairIDMatrix[,1], nbr.idx[,1]]=
+      beta.matrix.combined[GenePairIDMatrix[,1], nbr.idx[,1]]+
+      beta*log(count2+1)
+
+    SignalSummary=data.frame(Type="ExprAssoGenes", Region=r, CellType=perturbed.cell.type,
+                             GeneID=GenePairIDMatrix[,1], AdjCellType=adjacent.cell.type,
+                             AdjGene=GenePairIDMatrix[,2], beta)
+    # 2 --> 1
+    if (Bidirectional==T) {
+      count1=sim.count.combined[GenePairIDMatrix[,1], nbr.idx[,1]]
+
+      beta.matrix.combined[GenePairIDMatrix[,2], nbr.idx[,2]]=
+        beta.matrix.combined[GenePairIDMatrix[,2], nbr.idx[,2]]+
+        beta*log(count1+1)
+
+      SignalSummary=rbind(SignalSummary,
+                          data.frame(Type="ExprAssoGenes", Region=r, CellType=adjacent.cell.type ,
+                                     GeneID=GenePairIDMatrix[,2], AdjCellType=perturbed.cell.type,
+                                     AdjGene=GenePairIDMatrix[,1], beta))
+    }
+    N0=c(0, N)
+    for (i in 1:R) {
+      N_b=sum(N0[1:i])+1
+      N_a=sum(N0[1:(i+1)])
+      beta.matrix[[i]]=beta.matrix.combined[, (N_b:N_a)]
+    }
+
+
+  } else { # add interaction to one region
+
+    # spatial info
+    nbr.idx=Find.Neighbor.Pairs(ppp.obj=ppp.obj[[r]],
+                                interacting.cell.type.pair=c(perturbed.cell.type, adjacent.cell.type),
+                                int.dist.threshold=int.dist.threshold)
+
+
+    idx1=nbr.idx[,1]
+    idx2=nbr.idx[,2]
+    # 1 --> 2
+    count2=sim.count[[r]][GenePairIDMatrix[,2], idx2]
+    temp=beta.matrix[[r]][GenePairIDMatrix[,1], idx1]+beta*log(count2+1)
+    colnames(temp)=idx1
+    temp2=sapply(1:nrow(temp), function(f) tapply(temp[f,], idx1, sum))
+    beta.matrix[[r]][GeneID, as.numeric(rownames(temp2))] =t(temp2)
+
+    SignalSummary=data.frame(Type="ExprAssoGenes", Region=r, CellType=perturbed.cell.type,
+                             GeneID=GenePairIDMatrix[,1], AdjCellType=adjacent.cell.type,
+                             AdjGene=GenePairIDMatrix[,2], beta)
+
+
+    # 2 --> 1
+    if (Bidirectional==T) {
+      count1=sim.count[[r]][GenePairIDMatrix[,1], idx1]
+      temp=beta.matrix[[r]][GenePairIDMatrix[,1], idx2]+beta*log(count1+1)
+      colnames(temp)=idx2
+      temp2=sapply(1:nrow(temp), function(f) tapply(temp[f,], idx2, sum))
+      beta.matrix[[r]][GeneID, as.numeric(rownames(temp2))] =t(temp2)
+
+      SignalSummary=rbind(SignalSummary,
+                          data.frame(Type="ExprAssoGenes", Region=r, CellType=adjacent.cell.type ,
+                                     GeneID=GenePairIDMatrix[,2], AdjCellType=perturbed.cell.type,
+                                     AdjGene=GenePairIDMatrix[,1], beta))
+    }
+    }
 
   return(list(SignalSummary=SignalSummary, beta.matrix=beta.matrix))
 }
@@ -426,35 +520,34 @@ ExprPattern=function(pattern.list.i){
 # Pattern.adj.1region --------
 
 Pattern.adj.1region= function(sim.count1, combined.beta.matrix,
-                    bond.extreme=T, keep.total.count=T,
+                    bond.extreme=T, keep.total.count=F,
                     integer=T) {
-  if (is.null(combined.beta.matrix)) {
-    # integer
-    if (integer==T) {
-      sim.count1.update=round(sim.count1)
-    } else {
-      sim.count1.update=sim.count1
-    }
-  } else {
+  # w vs w/o combined.beta.matrix
+  if (is.null(combined.beta.matrix)) {sim.count1.update=sim.count1} else{
     sim.count1.update= exp(log(sim.count1+1) +combined.beta.matrix)-1
+  }
 
-    # bond extreme values bonds at 10% reads
-    if (bond.extreme==T) {
-      TenPerReads=apply(sim.count1.update, 2, sum, na.rm=T)/10
-      for (i in 1:ncol(sim.count1.update)) {
-        sim.count1.update[,i][which(sim.count1.update[,i]>TenPerReads[i])]=TenPerReads[i]
-      }
-    }
-    # scale by total count
-    if (keep.total.count==T) {
-      ratio=sum(sim.count1, na.rm=T)/sum(sim.count1.update, na.rm=T)
-      sim.count1.update=sim.count1.update*ratio
-    }
-    # integer
-    if (integer==T) {
-      sim.count1.update=round(sim.count1.update)
-    }
+  # bond extreme values
+  if (bond.extreme==T) {
 
+    cut=quantile(sim.count1.update, probs=0.975, na.rm=T)*10
+    sim.count1.update[which(sim.count1.update>cut)]=cut
+
+    ten_pct=apply(sim.count1.update, 2, mean, na.rm=T)*100
+    for (i in 1:ncol(sim.count1.update)) {
+      sim.count1.update[,i][which(sim.count1.update[,i]>ten_pct[i])]=ten_pct[i]
+    }
+  }
+
+  # scale by total count
+  if (keep.total.count==T) {
+    ratio=sum(sim.count1, na.rm=T)/sum(sim.count1.update, na.rm=T)
+    sim.count1.update=sim.count1.update*ratio
+  }
+
+  # integer
+  if (integer==T) {
+    sim.count1.update=round(sim.count1.update)
   }
 
   return(sim.count1.update)
@@ -474,14 +567,14 @@ Pattern.adj.1region= function(sim.count1, combined.beta.matrix,
 #' gene can have more than 10% of the total counts across all genes.
 #' @param keep.total.count If additional spatial patterns are added, whether
 #' to rescale expression levels of all genes to keep the sequencing depth
-#' (default = TRUE).
+#' (default = FALSE).
 #' @param integer Whether to keep counts as integer (default=TRUE).
 #' @return Updated simulated gene expression counts by taking into consideration
 #' of spatial patterns.
 #' @export
 
 Pattern.Adj= function(sim.count, pattern.list=NULL,
-                            bond.extreme=T, keep.total.count=T,
+                            bond.extreme=T, keep.total.count=F,
                             integer=T) {
   R=length(sim.count)
 
@@ -519,6 +612,10 @@ Pattern.Adj= function(sim.count, pattern.list=NULL,
 #' \item{count:}{count}
 #' @import spatstat
 #' @export
+#'
+#'
+
+
 MergeRegion=function(points.list, expr.list) {
   K=length(points.list)
   # points

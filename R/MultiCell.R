@@ -12,28 +12,40 @@
 #' @import dplyr
 #' @export
 
-multicell=function(expr, cell_feature, NoSpot=500) {
+multicell=function(expr, cell_feature, NoSpot=500, cl=1) {
   cell_loc=cell_feature[,c("x.loc", "y.loc")]
   xrange=range(cell_loc[,1])
   yrange=range(cell_loc[,2])
   m=round(sqrt(NoSpot))
+  mm=m^2
 
   r <- raster::raster(ncols=m, nrows=m,xmn=xrange[1],
                       xmx=xrange[2], ymn=yrange[1], ymx=yrange[2])
   spot.idx=raster::cellFromXY(r, cbind(cell_loc[,1], cell_loc[,2]))
-  #
   # deal with spots with no cell
-  expr2=sapply(1:nrow(expr), function(f1) sapply(
-    1: (m^2), function(f2) sum(as.numeric(expr[f1, spot.idx==f2]), na.rm=T)))
-  expr3=t(expr2)
-  rownames(expr3)=rownames(expr)
-  colnames(expr3)=paste0("Spot", 1:ncol(expr3))
+
+  if (cl==1) {
+    expr2=matrix(0, ncol=mm, nrow=nrow(expr))
+    for (i in 1: mm) {
+      expr2[,i]=apply(expr, 1, function(f) sum(as.numeric(f)[spot.idx==i], na.rm=T))
+    }
+  } else {
+
+    expr2=foreach (i = 1: mm, .combine="cbind") %dopar% {
+      apply(expr, 1, function(f) sum(as.numeric(f)[spot.idx==i], na.rm=T))
+    }
+
+  }
+
+
+  rownames(expr2)=rownames(expr)
+  colnames(expr2)=paste0("Spot", 1:mm)
 
   # Spot Coordinates
-  spot_col=raster::colFromCell(r, 1:nrow(expr2))
-  spot_row=raster::rowFromCell(r, 1:nrow(expr2))
-  spot_coordinates=raster::xyFromCell(r, 1:nrow(expr2))
-  spot_loc=data.frame(Spot=colnames(expr3), col=spot_col,
+  spot_col=raster::colFromCell(r, 1:mm)
+  spot_row=raster::rowFromCell(r, 1:mm)
+  spot_coordinates=raster::xyFromCell(r, 1:mm) %>% round(., digits = 3)
+  spot_loc=data.frame(Spot=colnames(expr2), col=spot_col,
                       row=spot_row, spot_coordinates)
 
 
@@ -44,7 +56,7 @@ multicell=function(expr, cell_feature, NoSpot=500) {
       mutate(count=1) %>%
       summarise(abundance = sum(count))
     # add zero
-    dat2=data.frame(spot.idx=setdiff(1: (m^2), spot.idx),
+    dat2=data.frame(spot.idx=setdiff(1:mm, spot.idx),
                     region=dat1$region[1],
                     abundance=0)
     dat=rbind(dat1, dat2) %>%
@@ -66,7 +78,7 @@ multicell=function(expr, cell_feature, NoSpot=500) {
       mutate(count=1) %>%
       summarise(abundance = sum(count))
     # add zero
-    dat2=data.frame(spot.idx=setdiff(1: (m^2), spot.idx),
+    dat2=data.frame(spot.idx=setdiff(1: mm, spot.idx),
                     annotation=dat1$annotation[1],
                     abundance=0)
     dat=rbind(dat1, dat2) %>%
@@ -75,5 +87,5 @@ multicell=function(expr, cell_feature, NoSpot=500) {
     spot_loc=data.frame(spot_loc, dat[,-1])
   }
 
-  return(list(count=expr3, spot_feature=spot_loc))
+  return(list(count=expr2, spot_feature=spot_loc))
 }

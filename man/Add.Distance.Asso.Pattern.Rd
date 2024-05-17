@@ -24,8 +24,7 @@ Add.Distance.Asso.Pattern(
 \item{sim.count}{Simulated expression counts from single-cell expression
 data, before adding in additional spatial patterns.}
 
-\item{r}{Which region to add in the spatial pattern. If simulated data do
-not have multiple regions, r=1.}
+\item{r}{Which region to add in the spatial pattern.}
 
 \item{perturbed.cell.type}{Which cell type is perturbed from this cell-cell
 interaction (e.g. microglia).}
