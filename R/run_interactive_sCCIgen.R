@@ -1,8 +1,8 @@
-#' Run interactive STsimulator
+#' Run interactive sCCIgen
 #'
 #' @import dplyr shiny
-#' @return A simulated dataset. Either as individual csv files with counts,
-#' cell features, or a Giotto object.
+#' @return A simulated dataset. Either individual csv files with counts
+#' and cell features, or a Giotto object.
 #'
 #' @export
 #'
@@ -1458,12 +1458,12 @@ run_interactive_sCCIgen <- function() {
 
             for (i in 1:length(x_vector)) {
 
-              if(length(x_vector[i] == 7)) {# if the region is missed because the n_regions == 1, add NULL
-                x_vector[i] = paste0("NULL,", x_vector[i])
-              }
+              if(num_regions() == 1 || num_regions() == "NULL") {
+                y = c("NULL", unlist(stringr::str_split(x_vector[i],
+                                              pattern = ",")))
+              } else {y = unlist(stringr::str_split(x_vector[i],
+                                                    pattern = ","))}
 
-              y = unlist(stringr::str_split(x_vector[i],
-                                            pattern = ","))
               if(length(y) == 8) {
                 x = data.frame(parameters = c(paste0("spatial_int_dist_",i,"_region"),
                                               paste0("spatial_int_dist_",i,"_cell_type_perturbed"),
