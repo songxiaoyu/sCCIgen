@@ -9,7 +9,6 @@ ParaExpr(
   cell_loc_list,
   expr,
   feature,
-  CopulaEst = NULL,
   seed_list,
   model_params = NULL,
   ncores = 1
@@ -25,13 +24,13 @@ ParaExpr(
 
 \item{feature}{Cell feature data}
 
-\item{CopulaEst}{Estimated Gaussian Copula function for gene-gene correlation. Default=NULL.}
-
 \item{seed_list}{Seeds for all simulated data}
 
-\item{model_params}{The fitted models of genes, often from \code{ParaFitExpr} function.}
+\item{model_params}{The fitted models of genes.}
 
 \item{ncores}{No. of cores for simulation}
+
+\item{CopulaEst}{Estimated Gaussian Copula function for gene-gene correlation. Default=NULL.}
 }
 \value{
 Simulated gene expression data for each cell.

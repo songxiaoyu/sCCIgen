@@ -308,7 +308,7 @@ fit_model_scDesign2 <- function(data_mat, cell_type_sel,
                                 sim_method = c('copula', 'ind'),
                                 marginal = c('auto_choose', 'zinb', 'nb', 'poisson'),
                                 jitter = TRUE, zp_cutoff = 0.8,
-                                min_nonzero_num = 2, ncores = 2){
+                                min_nonzero_num = 3, ncores = 1){
   sim_method <- match.arg(sim_method)
   marginal <- match.arg(marginal)
 
@@ -325,7 +325,7 @@ fit_model_scDesign2 <- function(data_mat, cell_type_sel,
                           min_nonzero_num = min_nonzero_num)
     }, mc.cores = ncores)
   }else if(sim_method == 'ind'){
-    param <- mclapply(1:length(cell_type_sel), function(iter){
+    param <- parallel::mclapply(1:length(cell_type_sel), function(iter){
       fit_wo_copula(x=data_mat[, colnames(data_mat) == cell_type_sel[iter]],
                     marginal=marginal,
                     jitter = jitter,
@@ -335,36 +335,6 @@ fit_model_scDesign2 <- function(data_mat, cell_type_sel,
 
   names(param) <- cell_type_sel
   param
-}
-
-# Est_GeneCopula ---------------
-#' Estimate Gaussian Copula for Gene Expression Matrix
-#' @param expr Expression levels of input data
-#' @param anno Cell type annotation of input data
-#' @param zp_cutoff Cutoff for fitting zero-inflated models.
-#' @param min_nonzero_num The minimum number of required non-zero values for a gene to be
-#'                        fitted a marginal model.
-#' @param ncores No of cores for parallel computing.
-#' @return Estimated Gaussian Copula
-#' @export
-
-Est_GeneCopula <- function(expr, anno,  zp_cutoff = 0.8, min_nonzero_num =
-                             3, ncores = 1) {
-  expr=as.matrix(expr)
-  colnames(expr)=anno
-  ct=unique(anno)
-  copula=fit_model_scDesign2(data_mat=expr,
-                             cell_type_sel=ct, sim_method = 'copula',
-                             marginal = 'auto_choose',
-                             jitter = TRUE,
-                             zp_cutoff = zp_cutoff,
-                             min_nonzero_num = min_nonzero_num,
-                             ncores = ncores)
-  CopulaEst=lapply(1:length(copula), function(f1) copula[[f1]]$cov_mat)
-  # CopulaEst2=lapply(CopulaEst, function(f)
-  #   round(f, digits=2)) # do not guarantee positive definite
-  return(CopulaEst)
-
 }
 
 

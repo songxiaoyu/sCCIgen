@@ -11,8 +11,8 @@ fit_model_scDesign2(
   marginal = c("auto_choose", "zinb", "nb", "poisson"),
   jitter = TRUE,
   zp_cutoff = 0.8,
-  min_nonzero_num = 2,
-  ncores = 2
+  min_nonzero_num = 3,
+  ncores = 1
 )
 }
 \arguments{

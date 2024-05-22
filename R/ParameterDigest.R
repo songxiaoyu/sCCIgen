@@ -1,3 +1,14 @@
+############################
+# ParaDigest
+# loadRData
+# ParaCellsNoST
+# ParaCellsST
+# ParaSTExistingCells
+# ParaPattern
+# ParaExpr
+# ParaSimulation
+############################
+
 # ----------------- ParaDigest ---------------
 #' Digest the parameter file.
 #'
@@ -83,49 +94,6 @@ CellFeatureLoad=function(para){
   return(feature)
 }
 
-# ----------- ParaCopula ---------------
-#' Use parameters to estimate Gaussian Copula
-#'
-#' Use parameters to determine the Gaussian Copula values.
-#' @param para Parameters loaded and cleaned from the parameter file using function
-#' `ParaDigest`.
-#' @param expr Gene expression data
-#' @param feature Cell feature data
-#' @param ncores No. of cores
-#'
-ParaCopula=function(para, expr, feature, ncores=1){
-  # Copula -- add region info
-  if (gene_cor=="FALSE") {copula_input="NULL"; CopulaEst=NULL}
-  if (gene_cor=="TRUE" & copula_input!="NULL") {CopulaEst=loadRData(copula_input)}
-  if (gene_cor=="TRUE" & copula_input=="NULL") {
-
-    expr=as.matrix(expr)
-    anno=feature[,1]
-    colnames(expr)=anno
-    #L=length(unique(anno))
-    if (region_specific_model!="TRUE") {
-      CopulaEst=list(Est_GeneCopula(expr=expr,
-                                    anno=anno, zp_cutoff=0.8, ncores=ncores))
-    }
-    if (region_specific_model=="TRUE") {
-      Ridx=unique(feature[,4])
-      R=length(Ridx)
-      for (r in 1:R) {
-        CopulaEst[[r]]=Est_GeneCopula(expr=expr,
-                                      anno=anno, zp_cutoff=0.8, ncores=ncores)
-        l=length( CopulaEst[[r]])
-
-      }
-      names(CopulaEst)=Ridx
-    }
-   # save
-   out_path_name=fs::path(path_to_output_dir,
-                          paste0(output_name, "_Copula.RData"))
-   save(CopulaEst, file=out_path_name)
-   print("Finish estimating gene-gene correlation in expression data")
-  }
-  return(CopulaEst)
-}
 
 
 
@@ -369,44 +337,6 @@ ParaPattern=function(para, sim_count, cell_loc_list_i,
 }
 
 
-# ----------------- ParaFitExpr ---------------
-#' ParaFitExpr
-#'
-#' Fit models for gene expression based on input parameters.
-#' @param para Parameters loaded and cleaned from the parameter file using function
-#' `ParaDigest`.
-#' @param expr Expression data
-#' @param feature Cell feature data
-#' @param CopulaEst Estimated Gaussian Copula function for gene-gene correlation
-#' @param ncores No. of cores for estimation
-#' @param save Whether to save the fitted model or not
-#' @param save_name Provide the path and name for saving the fitted model
-#' @return A list of fitted models for genes in each cell type.
-#' @export
-#'
-ParaFitExpr=function(para, expr, feature,
-                     CopulaEst, ncores=1, save=F, save_name=NULL){
-  sim_method=ifelse(gene_cor=="TRUE", "copula", "ind")
-  # fit by input data
-
-   model_params=Use_scDesign2_model_params(expr=expr,
-                                      feature=feature,
-                                      Copula=CopulaEst,
-                                      sim_method = sim_method,
-                                      region_specific_model=region_specific_model,
-                                      ncores=ncores)
-   if (save==T) {
-     if (is.null(save_name)) {
-       save_name=fs::path(path_to_output_dir, output_name)
-     }
-
-     save(model_params,
-               file=paste0(save_name, "_FitExpr.Rdata"))
-   }
-    return(model_params)
-}
-
-
 # ----------------- ParaExpr ---------------
 #' Simualte gene expression data based on parameters
 #'
@@ -419,20 +349,16 @@ ParaFitExpr=function(para, expr, feature,
 #' @param CopulaEst Estimated Gaussian Copula function for gene-gene correlation. Default=NULL.
 #' @param seed_list Seeds for all simulated data
 #' @param ncores No. of cores for simulation
-#' @param model_params The fitted models of genes, often from `ParaFitExpr` function.
+#' @param model_params The fitted models of genes.
 #' @return Simulated gene expression data for each cell.
 #' @export
 #'
 
 ParaExpr=function(para, cell_loc_list, expr, feature,
-                  CopulaEst=NULL, seed_list, model_params=NULL, ncores=1){
+                 seed_list, model_params=NULL, ncores=1){
 
   sim_method=ifelse(gene_cor=="TRUE", "copula", "ind")
-  # fit by input data
-  if (is.null(model_params)) {
-    model_params=ParaFitExpr(para, expr, feature,
-                             CopulaEst, ncores=ncores, save=F)
-  }
+
   # simulate
 
   for (i in 1:num_simulated_datasets) {
@@ -524,8 +450,6 @@ ParaSimulation <- function(input, ModelFitFile=NULL) {
   # Digest parameters
   para=ParaDigest(input)
 
-
-
   attach(para)
 
   # Load  data
@@ -536,16 +460,13 @@ ParaSimulation <- function(input, ModelFitFile=NULL) {
 
   # Simulate cells
   if (path==1) {
-    cell_loc_list=ParaCellsNoST(para=para,
-                                seed_list=all_seeds[[1]])
+    cell_loc_list=ParaCellsNoST(para=para, seed_list=all_seeds[[1]])
   }
   if (path==2) {
-    cell_loc_list=ParaCellsST(para=para, feature=feature,
-                              seed_list=all_seeds[[1]])
+    cell_loc_list=ParaCellsST(para=para, feature=feature, seed_list=all_seeds[[1]])
   }
   if (path==3) {
-    cell_loc_list=ParaExistingCellsST(m=num_simulated_datasets,
-                                      feature=feature)
+    cell_loc_list=ParaExistingCellsST(m=num_simulated_datasets, feature=feature)
   }
   print("Finished simulating the cell spatial maps")
 
@@ -560,21 +481,24 @@ ParaSimulation <- function(input, ModelFitFile=NULL) {
   }
   expr2=expr[,idxc]
 
-  # Copula - from parameter file
-  CopulaEst=ParaCopula(para=para, expr=expr2,
-                            feature=feature, ncores=ncores)
-  # ModelFitFile=ParaFitExpr(para=para, expr=expr2, feature=feature,
-  #                          CopulaEst=CopulaEst, ncores=ncores, save=T)
-  # Simulate Expr for these cells
-  if( is.null(ModelFitFile)==F) {
-    load(ModelFitFile)
-  } else {model_params=NULL}
+
+  # model parameters
+  if (is.null(ModelFitFile)==F) {
+    model_params=readRDS(ModelFitFile)
+  } else {
+    if (exists("copula_input")) {model_params=readRDS(copula_input)
+    }else{
+      sim_method=ifelse(gene_cor=="TRUE", "copula", "ind")
+      model_params=Est_ModelPara(sim_method=sim_method, expr=expr2, anno=feature[,1], ncores=ncores)
+
+    }
+  }
 
   ParaExpr(para=para,
            cell_loc_list=cell_loc_list,
            expr=expr2, feature=feature,
-           CopulaEst=CopulaEst, seed_list=all_seeds[[1]],
-           ncores=ncores, model_params=model_params)
+           model_params=model_params, seed_list=all_seeds[[1]],
+           ncores=ncores)
   print("Finished simulating the expression of cells")
   detach(para)
   print("Finished the simulation")

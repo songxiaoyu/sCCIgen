@@ -1,3 +1,61 @@
+################### List of Functions #########################
+# Est_ModelPara
+# generate_marginal_params
+# Use_scDesign2_1region
+# Use_scDesign2
+# Find.Neighbor.Pairs
+# Add.Spatial.Expr.Pattern
+# Add.Distance.Asso.Pattern
+# Add.Expr.Asso.Pattern
+# ExprPattern
+# Pattern.adj.1region
+# Pattern.Adj
+# MergeRegion
+##########################################
+
+
+
+
+# Est_ModelPara ---------------
+#' Estimate Marginal distribution and Gaussian Copula for Gene Expression Matrix
+#' @param expr Expression levels of input data
+#' @param anno Cell type annotation of input data
+#' @param ncores No of cores for parallel computing.
+#' @param region description
+#' @param sim_method c('ind', 'copula')
+#' @return Estimated Gaussian Copula
+#' @export
+
+Est_ModelPara <- function(expr, anno, sim_method=c('ind', 'copula'), region=NULL, ncores = 1) {
+  expr=as.matrix(expr)
+  colnames(expr)=anno
+  if (is.null(region)==T) {
+    ct=names(table(colnames(expr)))
+    copula1=fit_model_scDesign2(data_mat=expr,
+                               cell_type_sel=ct, sim_method =sim_method,
+                               marginal = 'zinb',
+                               ncores = ncores)
+    copula=list(copula1)
+  } else {
+    R=unique(region)
+    copula=vector(mode = "list", length = length(R))
+    for (r in R) {
+      expr2=expr[, region==r]
+      ct=names(table(colnames(expr2)))
+      copula1=fit_model_scDesign2(data_mat=expr2,
+                                 cell_type_sel=ct, sim_method = sim_method,
+                                 marginal = 'zinb',
+                                 ncores = ncores)
+      copula[[r]]=copula1
+    }
+
+  }
+
+  return(copula)
+
+}
+
+
 
 # Use_scDesign2_1region ------
 Use_scDesign2_1region=function(ppp.obj1, Genes, model_params,
@@ -29,70 +87,6 @@ Use_scDesign2_1region=function(ppp.obj1, Genes, model_params,
 
 
 
-# Use_scDesign2_model_params ------
-#' Generate model parameters from data.
-#'
-#' This function generates model parameters from input data for all cell types in regions.
-#' @param expr Gene expression level (count).
-#' @param feature Cell features (e.g. cell type, spatial coordinates, regions) of reference data.
-#' @param Copula Gene expression (count) in reference data.
-#' @param sim_method Simulate independent genes using'ind' or correlated genes using 'copula'.
-#' @param region_specific_model Whether estimation model differ in different regions.
-#' @param ncores No of cores
-#' @return Provide model parameters including marginal distributions and copula
-#' (if not NULL) for all cell types in all regions.
-#' @export
-
-Use_scDesign2_model_params=function(expr,
-                       feature,
-                       Copula=NULL,
-                       sim_method = c('copula', 'ind'),
-                       region_specific_model,
-                       ncores=1) {
-
-  expr=as.matrix(expr)
-  cell_type_sel=names(table(colnames(expr)))
-  Genes=rownames(expr)
-
-  if (region_specific_model!="TRUE") { # not region specific
-    model_params=  fit_model_scDesign2(data_mat=expr,
-                                       cell_type_sel=cell_type_sel,
-                                       sim_method = 'ind',
-                                       marginal='zinb',
-                                       ncores = ncores)
-    if (sim_method=="copula") {
-      CellType=names(model_params)
-      for (i in 1:length(CellType)){model_params[[CellType[i]]]$cov_mat=Copula[[1]][[i]]}
-    }
-  }
-
-  #  region specific model
-  if (region_specific_model=="TRUE") { #  region specific
-
-    Region=feature[,4]
-    Runiq=unique(Region)
-    R=length(Runiq)
-
-    model_params= foreach (r = 1:R) %dopar% {
-      idx=which(Region==Runiq[r])
-
-      model_params1=fit_model_scDesign2(data_mat=expr[,idx],
-                                         cell_type_sel=cell_type_sel,
-                                         sim_method = 'ind',
-                                         marginal='zinb',
-                                         ncores = ncores)
-      if (sim_method=="copula") {
-        CellType=names(model_params1)
-        for (i in 1:length(CellType)){model_params1[[CellType[i]]]$cov_mat=Copula[[r]][[i]]}
-      }
-      model_params1
-    }
-
-  }
-
-  return(model_params)
-}
-
 # Use_scDesign2 ------
 #' Generate expression profile under no spatial patterns.
 #'
@@ -122,23 +116,37 @@ Use_scDesign2=function(ppp.obj,
   cell_type_sel=names(table(colnames(expr)))
   Genes=rownames(expr)
 
+
   if (region_specific_model!="TRUE") { # not region specific
 
-    sim.count= foreach (r = 1:R) %dopar%{
-      Use_scDesign2_1region(ppp.obj1=ppp.obj[[r]],
-                                           Genes=Genes,
-                                           model_params=model_params,
-                                           depth_simu_ref_ratio=depth_simu_ref_ratio,
-                                           cell_type_sel=cell_type_sel,
-                                           seed=seed*31+r*931,
-                                           sim_method = sim_method)
-    }
-  }
+
+    if (R==1) {
+
+      sim.count =list(Use_scDesign2_1region(ppp.obj1=ppp.obj[[r]],
+                              Genes=Genes,
+                              model_params=model_params[[1]],
+                              depth_simu_ref_ratio=depth_simu_ref_ratio,
+                              cell_type_sel=cell_type_sel,
+                              seed=seed*31+r*931,
+                              sim_method = sim_method))
+      } else { # end if R==1
+
+        sim.count= foreach (r = 1:R) %dopar%{
+          Use_scDesign2_1region(ppp.obj1=ppp.obj[[r]],
+                                Genes=Genes,
+                                model_params=model_params[[1]],
+                                depth_simu_ref_ratio=depth_simu_ref_ratio,
+                                cell_type_sel=cell_type_sel,
+                                seed=seed*31+r*931,
+                                sim_method = sim_method)
+          }
+        } # end else of R==1
+    } # end not region specific
 
   #  region specific model
   if (region_specific_model=="TRUE") { #  region specific
 
-    Region=feature[,4] # imput region
+    Region=feature[,4] # input region
     Runiq=unique(Region)
 
     sim.count= foreach (r = 1:R) %dopar% {
