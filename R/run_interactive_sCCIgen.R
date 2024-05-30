@@ -75,8 +75,8 @@ run_interactive_sCCIgen <- function() {
                                                         type annotation and spatial coordinate on 2D (x, y).
                                                         PMID: 35549429" = "SeqFishPlusCortex_033023",
                                                         "Ovarian cancer MERFISH data: It includes (1) count matrix
-                                                        for 550 genes by 355,633 cells of 6 cell types (tumor, adipose,
-                                                        endo-immune, macro-immune, macrophage, and others), and (2) cell
+                                                        for 550 genes by 355,633 cells of 6 cell types (tumor, adipocyte,
+                                                        endothelial, T-cell, macrophage, and others), and (2) cell
                                                         feature matrix including cell type annotation and spatial
                                                         coordinate on 2D. Data source: vizgen" = "MERFISH_OV",
                                                         "I want to use my own dataset" = "user_input"),

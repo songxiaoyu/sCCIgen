@@ -122,12 +122,12 @@ Use_scDesign2=function(ppp.obj,
 
     if (R==1) {
 
-      sim.count =list(Use_scDesign2_1region(ppp.obj1=ppp.obj[[r]],
+      sim.count =list(Use_scDesign2_1region(ppp.obj1=ppp.obj[[1]],
                               Genes=Genes,
                               model_params=model_params[[1]],
                               depth_simu_ref_ratio=depth_simu_ref_ratio,
                               cell_type_sel=cell_type_sel,
-                              seed=seed*31+r*931,
+                              seed=seed*31+1*931,
                               sim_method = sim_method))
       } else { # end if R==1
 
@@ -246,18 +246,19 @@ Add.Spatial.Expr.Pattern= function(sim.count,
 
 MergePPP=function(points.list) {
   K=length(points.list)
-  if (K==1) {
 
-  }
   # points
   x.combine=unlist(lapply(1:K, function(f) points.list[[f]]$x))
   y.combine=unlist(lapply(1:K, function(f) points.list[[f]]$y))
   annotation=unlist(lapply(1:K, function(f) points.list[[f]]$marks))
 
   win1=points.list[[1]]$window
-  for (k in 2:K) {
-    win1=union.owin(win1, points.list[[k]]$window)
+  if (K>1) {
+    for (k in 2:K) {
+      win1=union.owin(win1, points.list[[k]]$window)
+    }
   }
+
 
   points1=ppp(x.combine, y.combine, window=win1)
   marks(points1)=annotation
