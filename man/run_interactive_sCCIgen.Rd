@@ -7,8 +7,10 @@
 run_interactive_sCCIgen()
 }
 \value{
-A simulated dataset. Either individual csv files with counts
-and cell features, or a Giotto object.
+Either a .csv parameter file or a simulated dataset. If running the
+simulation, individual csv files with counts and cell features are locally
+saved. Optionally, a Giotto, Seurat, or SpatialExperiment object is created
+and saved locally as an .RDS file.
 }
 \description{
 Run interactive sCCIgen

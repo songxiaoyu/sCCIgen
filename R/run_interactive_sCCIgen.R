@@ -1,8 +1,10 @@
 #' Run interactive sCCIgen
 #'
 #' @import dplyr shiny
-#' @return A simulated dataset. Either individual csv files with counts
-#' and cell features, or a Giotto object.
+#' @returns Either a .csv parameter file or a simulated dataset. If running the
+#' simulation, individual csv files with counts and cell features are locally
+#' saved. Optionally, a Giotto, Seurat, or SpatialExperiment object is created
+#' and saved locally as an .RDS file.
 #'
 #' @export
 #'
@@ -293,10 +295,12 @@ run_interactive_sCCIgen <- function() {
                                          width = "100%",
                                          value = "parameter_file.tsv"),
 
-                        shiny::radioButtons(inputId = "createGiotto",
-                                            label = "By the default, the simulation will create the expression, metadata, and pattern output files. Optionally, you can also create a Giotto object.",
-                                            choices = c("Run the simulation and create the default output files" = FALSE,
-                                                        "Run the simulation and create a Giotto object" = TRUE),
+                        shiny::radioButtons(inputId = "createObjects",
+                                            label = "By the default, the simulation will create the expression, metadata, and pattern output files. Optionally, you can also create additional objects.",
+                                            choices = c("Run the simulation and create the default output files" = "default",
+                                                        "Run the simulation and create a Giotto object" = "Giotto",
+                                                        "Run the simulation and create a Seurat object" = "Seurat",
+                                                        "Run the simulation and create a SpatialExperiment object" = "SpatialExperiment"),
                                             width = "100%"),
 
                         shiny::uiOutput("createGiottoSelection"),
@@ -2002,22 +2006,22 @@ run_interactive_sCCIgen <- function() {
       parameter_file(input$inputparamfile)
     })
 
-    create_Giotto <- shiny::reactiveVal()
-    giotto_folder <- shiny::reactiveVal()
+    create_Objects <- shiny::reactiveVal()
+    object_folder <- shiny::reactiveVal()
 
-    shiny::observeEvent(input$createGiotto, {
-      create_Giotto(input$createGiotto)
+    shiny::observeEvent(input$createObjects, {
+      create_Objects(input$createObjects)
 
-      if(input$createGiotto) {
-        output$createGiottoSelection <- renderUI({
-          shiny::textInput(inputId = "giottofolder",
-                           label = "Specify the folder name to export the Giotto object",
-                           value = "giottobject",
+      if(input$createObjects != "Default") {
+        output$createObjectSelection <- renderUI({
+          shiny::textInput(inputId = "objectfolder",
+                           label = "Specify the folder name to export the additional object",
+                           value = "additional_object",
                            width = "100%")
         })
 
-        shiny::observeEvent(input$giottofolder, {
-          giotto_folder(input$giottofolder)
+        shiny::observeEvent(input$objectfolder, {
+          object_folder(input$objectfolder)
         })
       }
 
@@ -2026,33 +2030,27 @@ run_interactive_sCCIgen <- function() {
 
         ParaSimulation(input = parameter_file())
 
-        if(create_Giotto()) {
+        if(create_Objects() == "Giotto" ) {
 
-          x_param = ParaDigest(parameter_file())
+          x <- sCCIgen_to_Giotto(parameter_file())
+          Giotto::saveGiotto(x, foldername = object_folder(), overwrite = TRUE)
 
-          x_expression = read.delim(fs::path(x_param$path_to_output_dir,
-                                     paste0(x_param$output_name,
-                                           "_count_1.tsv")),
-                                    row.names = 1)
+        }
 
-          x_meta = read.delim(fs::path(x_param$path_to_output_dir,
-                              paste0(x_param$output_name,
-                                     "_meta_1.tsv"))
-                              )
+        if(create_Objects() == "Seurat" ) {
 
-          x_spatlocs = x_meta[,c("Cell", "x.loc", "y.loc")]
-          colnames(x_spatlocs) = c("cell_ID", "sdimx", "sdimy")
+          x <- sCCIgen_to_Seurat(parameter_file())
+          SeuratObject::SaveSeuratRds(
+            x,
+            file = file.path(object_folder(), "seurat_object.RDS"))
 
-          x_meta = x_meta[,c("Cell", "annotation", "region")]
-          colnames(x_meta)[1] = "cell_ID"
+        }
 
-          x = Giotto::createGiottoObject(expression = x_expression,
-                                         spatial_locs = x_spatlocs)
+        if(create_Objects() == "SpatialExperiment" ) {
 
-          x = Giotto::addCellMetadata(x,
-                                      new_metadata = x_meta[-1])
+          x <- sCCIgen_to_SpatialExperiment(parameter_file())
+          saveRDS(x, file = file.path(object_folder(), "spe_object.RDS"))
 
-          Giotto::saveGiotto(x, foldername = giotto_folder(), overwrite = TRUE)
         }
 
         shiny::stopApp()
