@@ -4,12 +4,13 @@ Version: 1.0
 Authors@R: 
     person("Xiaoyu", "Song", , "songxiaoyu152@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+Description: A high-fidelity spatially resolved transcriptomics data simulator for cell-cell interaction studies.
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 Imports: 
+    config,
     data.table,
     doParallel,
     dplyr,
