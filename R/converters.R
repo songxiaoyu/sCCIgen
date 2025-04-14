@@ -37,6 +37,10 @@ df_to_config <- function(x, parameter_file = "config.yml") {
 #' giotto_object <- sCCIgen_to_Giotto()
 sCCIgen_to_Giotto <- function(counts_file, metadata_file) {
 
+  # Check that the Giotto package is installed
+  requireNamespace("Giotto", quietly = TRUE)
+
+  # Read files
   x_expression <- read.delim(counts_file,
                              row.names = 1)
 
@@ -48,6 +52,7 @@ sCCIgen_to_Giotto <- function(counts_file, metadata_file) {
   x_meta <- x_meta[,c("Cell", "annotation", "region")]
   colnames(x_meta)[1] <- "cell_ID"
 
+  # Create Giotto object
   x <- Giotto::createGiottoObject(expression = x_expression,
                                   spatial_locs = x_spatlocs)
 
@@ -71,6 +76,10 @@ sCCIgen_to_Giotto <- function(counts_file, metadata_file) {
 #' seurat_object <- sCCIgen_to_Seurat()
 sCCIgen_to_Seurat <- function(counts_file, metadata_file) {
 
+  # Check that Seurat is installed
+  requireNamespace("Seurat", quietly = TRUE)
+
+  # Read files
   x_expression <- read.delim(counts_file,
                              row.names = 1)
 
@@ -83,6 +92,7 @@ sCCIgen_to_Seurat <- function(counts_file, metadata_file) {
   x_metadata <- x_meta[,c("annotation", "region")]
   rownames(x_metadata) <- x_meta$Cell
 
+  # Create Seurat object
   x <- Seurat::CreateSeuratObject(
     counts = Matrix::Matrix(as.matrix(x_expression), sparse = TRUE),
     assay = "Spatial")
@@ -114,6 +124,10 @@ sCCIgen_to_Seurat <- function(counts_file, metadata_file) {
 #' spe_object <- sCCIgen_to_SpatialExperiment()
 sCCIgen_to_SpatialExperiment <- function(counts_file, metadata_file) {
 
+  # Check that SpatialExperiment is installed
+  requireNamespace("SpatialExperiment", quietly = TRUE)
+
+  # Read files
   x_expression <- read.delim(counts_file,
                              row.names = 1)
 
@@ -126,6 +140,7 @@ sCCIgen_to_SpatialExperiment <- function(counts_file, metadata_file) {
   x_metadata <- x_meta[,c("annotation", "region")]
   rownames(x_metadata) <- x_meta$Cell
 
+  # Create SpatialExperiment object
   x <- SpatialExperiment::SpatialExperiment(
     assays = list(counts = Matrix::Matrix(as.matrix(x_expression), sparse = TRUE)),
     colData = x_metadata,
