@@ -4,10 +4,13 @@
 \alias{sCCIgen_to_Seurat}
 \title{Convert sCCIgen output to a Seurat object}
 \usage{
-sCCIgen_to_Seurat(parameter_file = "config.yml")
+sCCIgen_to_Seurat(counts_file, metadata_file)
 }
 \arguments{
-\item{parameter_file}{name for the config file. Default = config.yml}
+\item{counts_file}{path to .tsv file with gene x cell counts matrix.}
+
+\item{metadata_file}{path to .tsv file with metadata. The file should
+contain the following columns: Cell, annotation, x.loc, y.loc, and region.}
 }
 \value{
 a Seurat object

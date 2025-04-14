@@ -17,7 +17,6 @@ Imports:
     fs,
     foreach,
     geometry,
-    Giotto,
     here,
     htmltools,
     igraph,
@@ -38,3 +37,7 @@ Imports:
     tibble,
     tidyr,
     utils
+Suggests: 
+    Giotto,
+    Seurat,
+    SpatialExperiment
