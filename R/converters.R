@@ -26,25 +26,21 @@ df_to_config <- function(x, parameter_file = "config.yml") {
 
 #' Convert sCCIgen output to a Giotto object
 #'
-#' @param parameter_file name for the config file. Default = config.yml
+#' @param counts_file path to .tsv file with gene x cell counts matrix.
+#' @param metadata_file path to .tsv file with metadata. The file should
+#' contain the following columns: Cell, annotation, x.loc, y.loc, and region.
 #'
 #' @returns a Giotto object
 #' @export
 #'
 #' @examples
 #' giotto_object <- sCCIgen_to_Giotto()
-sCCIgen_to_Giotto <- function(parameter_file = "config.yml") {
+sCCIgen_to_Giotto <- function(counts_file, metadata_file) {
 
-  x_param <- config::get(file = parameter_file)
-
-  x_expression <- read.delim(fs::path(x_param$path_to_output_dir,
-                                      paste0(x_param$output_name,
-                                             "_count_1.tsv")),
+  x_expression <- read.delim(counts_file,
                              row.names = 1)
 
-  x_meta <- read.delim(fs::path(x_param$path_to_output_dir,
-                                paste0(x_param$output_name,
-                                       "_meta_1.tsv")))
+  x_meta <- read.delim(metadata_file)
 
   x_spatlocs <- x_meta[,c("Cell", "x.loc", "y.loc")]
   colnames(x_spatlocs) <- c("cell_ID", "sdimx", "sdimy")
@@ -64,25 +60,21 @@ sCCIgen_to_Giotto <- function(parameter_file = "config.yml") {
 
 #' Convert sCCIgen output to a Seurat object
 #'
-#' @param parameter_file name for the config file. Default = config.yml
+#' @param counts_file path to .tsv file with gene x cell counts matrix.
+#' @param metadata_file path to .tsv file with metadata. The file should
+#' contain the following columns: Cell, annotation, x.loc, y.loc, and region.
 #'
 #' @returns a Seurat object
 #' @export
 #'
 #' @examples
 #' seurat_object <- sCCIgen_to_Seurat()
-sCCIgen_to_Seurat <- function(parameter_file = "config.yml") {
+sCCIgen_to_Seurat <- function(counts_file, metadata_file) {
 
-  x_param <- config::get(file = parameter_file)
-
-  x_expression <- read.delim(fs::path(x_param$path_to_output_dir,
-                                      paste0(x_param$output_name,
-                                             "_count_1.tsv")),
+  x_expression <- read.delim(counts_file,
                              row.names = 1)
 
-  x_meta <- read.delim(fs::path(x_param$path_to_output_dir,
-                                paste0(x_param$output_name,
-                                       "_meta_1.tsv")))
+  x_meta <- read.delim(metadata_file)
 
   x_spatlocs <- x_meta[,c("x.loc", "y.loc")]
   rownames(x_spatlocs) <- x_meta$Cell
@@ -111,25 +103,21 @@ sCCIgen_to_Seurat <- function(parameter_file = "config.yml") {
 
 #' Convert sCCIgen output to a SpatialExperiment object
 #'
-#' @param parameter_file name for the config file. Default = config.yml
+#' @param counts_file path to .tsv file with gene x cell counts matrix.
+#' @param metadata_file path to .tsv file with metadata. The file should
+#' contain the following columns: Cell, annotation, x.loc, y.loc, and region.
 #'
 #' @returns a SpatialExperiment object
 #' @export
 #'
 #' @examples
 #' spe_object <- sCCIgen_to_SpatialExperiment()
-sCCIgen_to_SpatialExperiment <- function(parameter_file = "config.yml") {
+sCCIgen_to_SpatialExperiment <- function(counts_file, metadata_file) {
 
-  x_param <- config::get(file = parameter_file)
-
-  x_expression <- read.delim(fs::path(x_param$path_to_output_dir,
-                                      paste0(x_param$output_name,
-                                             "_count_1.tsv")),
+  x_expression <- read.delim(counts_file,
                              row.names = 1)
 
-  x_meta <- read.delim(fs::path(x_param$path_to_output_dir,
-                                paste0(x_param$output_name,
-                                       "_meta_1.tsv")))
+  x_meta <- read.delim(metadata_file)
 
   x_spatlocs <- x_meta[,c("x.loc", "y.loc")]
   rownames(x_spatlocs) <- x_meta$Cell

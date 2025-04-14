@@ -2032,14 +2032,38 @@ run_interactive_sCCIgen <- function() {
 
         if(create_Objects() == "Giotto" ) {
 
-          x <- sCCIgen_to_Giotto(parameter_file())
+          x_param <- config::get(file = parameter_file())
+
+          counts_file <- fs::path(x_param$path_to_output_dir,
+                                  paste0(x_param$output_name,
+                                         "_count_1.tsv"))
+
+          metadata_file <- fs::path(x_param$path_to_output_dir,
+                                    paste0(x_param$output_name,
+                                           "_meta_1.tsv"))
+
+          x <- sCCIgen_to_Giotto(counts_file = counts_file,
+                                 metadata_file = metadata_file)
+
           Giotto::saveGiotto(x, foldername = object_folder(), overwrite = TRUE)
 
         }
 
         if(create_Objects() == "Seurat" ) {
 
-          x <- sCCIgen_to_Seurat(parameter_file())
+          x_param <- config::get(file = parameter_file())
+
+          counts_file <- fs::path(x_param$path_to_output_dir,
+                                  paste0(x_param$output_name,
+                                         "_count_1.tsv"))
+
+          metadata_file <- fs::path(x_param$path_to_output_dir,
+                                    paste0(x_param$output_name,
+                                           "_meta_1.tsv"))
+
+          x <- sCCIgen_to_Seurat(counts_file = counts_file,
+                                 metadata_file = metadata_file)
+
           SeuratObject::SaveSeuratRds(
             x,
             file = file.path(object_folder(), "seurat_object.RDS"))
@@ -2048,7 +2072,19 @@ run_interactive_sCCIgen <- function() {
 
         if(create_Objects() == "SpatialExperiment" ) {
 
-          x <- sCCIgen_to_SpatialExperiment(parameter_file())
+          x_param <- config::get(file = parameter_file())
+
+          counts_file <- fs::path(x_param$path_to_output_dir,
+                                  paste0(x_param$output_name,
+                                         "_count_1.tsv"))
+
+          metadata_file <- fs::path(x_param$path_to_output_dir,
+                                    paste0(x_param$output_name,
+                                           "_meta_1.tsv"))
+
+          x <- sCCIgen_to_SpatialExperiment(counts_file = counts_file,
+                                            metadata_file)
+
           saveRDS(x, file = file.path(object_folder(), "spe_object.RDS"))
 
         }
