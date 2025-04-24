@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# `sCCIgen` for ‘de novo’ spatial patterns
+# `sCCIgen`: A high-fidelity spatially resolved transcriptomics data simulator for cell-cell interaction studies.
 
 ## 1. Introduction
 
@@ -9,9 +9,18 @@ Existing Spatially Resolved Transcriptomics (SRT) data include limited
 spatial patterns. `sCCIgen` generates de novo spatial patterns using
 snRNAseq or single-cell SRT as reference.
 
-`sCCIgen` provides both a R package for simulating SRT data and an
-interface to guide users through task selection, parameter
-specification, simulation, and documentation.
+Spatially resolved transcriptomics (SRT) provides an invaluable avenue
+for examining cell-cell interactions within native tissue environments.
+The development and evaluation of analytical tools for SRT data
+necessitate tools for generating synthetic datasets with known ground
+truth of cell-cell interaction induced features.
+
+We introduce `sCCIgen`, a novel real-data-based simulator tailored to
+generate high-fidelity SRT data with a focus on cell-cell interactions.
+`sCCIgen` preserves transcriptomic and spatial characteristics in SRT
+data, while comprehensively models various cell-cell interaction
+features, including cell colocalization, spatial dependence among gene
+expressions, and gene-gene interactions between nearby cells.
 
 Reference: XS… ““.
 
