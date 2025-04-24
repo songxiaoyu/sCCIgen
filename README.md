@@ -5,10 +5,6 @@
 
 ## 1. Introduction
 
-Existing Spatially Resolved Transcriptomics (SRT) data include limited
-spatial patterns. `sCCIgen` generates de novo spatial patterns using
-snRNAseq or single-cell SRT as reference.
-
 Spatially resolved transcriptomics (SRT) provides an invaluable avenue
 for examining cell-cell interactions within native tissue environments.
 The development and evaluation of analytical tools for SRT data
