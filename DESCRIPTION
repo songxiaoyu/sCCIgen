@@ -36,7 +36,10 @@ Imports:
     terra,
     tibble,
     tidyr,
-    utils
+    utils,
+    edgeR, 
+    fastDummies,
+    RANN
 Suggests: 
     Giotto,
     Seurat,

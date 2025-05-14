@@ -83,14 +83,14 @@ ExprLoad=function(para){
 
 # Load cell feature data
 CellFeatureLoad=function(para){
-  type=utils::tail(unlist(strsplit(cell_feature_data_file, ".", fixed=TRUE)), 1)
+  type=utils::tail(unlist(strsplit(spatial_data_file, ".", fixed=TRUE)), 1)
   if(type=="Rdata" | type=="RData" ) {
     feature=as.data.frame(loadRData(fs::path(path_to_input_dir,
-                                             cell_feature_data_file)))
+                                             spatial_data_file)))
   }
   if (type=="tsv") {
     feature=as.data.frame(data.table::fread(fs::path(path_to_input_dir,
-                                                   cell_feature_data_file)))
+                                                   spatial_data_file)))
   }
   return(feature)
 }
@@ -406,7 +406,7 @@ ParaExpr=function(para, cell_loc_list, expr, feature,
       write_tsv(as.data.frame(output$count)%>% rownames_to_column("GeneName"),
                 file=paste0(save_name, "_count_", i, ".tsv"))
     } else{
-      output2=multicell(expr=output$count, cell_feature=output$meta, NoSpot=num_spots)
+      output2=multicell(expr=output$count, spatial=output$meta, NoSpot=num_spots)
 
       write_tsv(output2$spot_feature,
                 file=paste0(save_name, "_meta_", i, ".tsv"))
