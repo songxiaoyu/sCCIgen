@@ -18,6 +18,21 @@ library(sCCIgen)
 devtools::install_github("songxiaoyu/sCCIgen_data")
 library(sCCIgen_data)
 ````
+
+### 2. Load and clean sample data 
+
+```R
+# Download sample data from https://github.com/songxiaoyu/sCCIgen_data/tree/main/input_data. 
+
+load("Github/sCCIgen_data/input_data/SeqFishPlusCortex_2025_expr.Rdata")
+load("Github/sCCIgen_data/input_data/SeqFishPlusCortex_2025_spatial.Rdata")
+anno=colnames(expr)
+
+dim(expr)
+expr[1:3,1:3]
+````
+
+
 ### 2. Develop a parameter file
 
 The sets of parameters needed for simulation depend on multiple factors such as the input data (e.g. single-cell RNAseq vs SRT), the purpose of the simulation (e.g. adding de novo patterns or not), and the output (e.g. number of simulated data sets, single-cell vs multi-cell resoultion). 

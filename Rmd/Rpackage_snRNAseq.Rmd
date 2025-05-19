@@ -25,9 +25,10 @@ library(sCCIgen_data)
 # Download sample data from https://github.com/songxiaoyu/sCCIgen_data/tree/main/input_data. 
 
 load("Github/sCCIgen_data/input_data/snRNAseq_breast_2025_expr.Rdata")
+anno=colnames(expr)
+
 dim(expr)
 expr[1:3,1:3]
-anno=colnames(expr)
 ````
 
 

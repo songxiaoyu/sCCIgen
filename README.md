@@ -32,11 +32,13 @@ Depending on preference, you can choose to use:
   is highly recommended for the first time user or researchers with
   limited programming expertise.
   - [Tutorials for using the interface to simulate SRT based on snRNAseq
-    data.](Rmd/Interface.md)
+    data.](https://github.com/songxiaoyu/sCCIgen/tree/main/Rmd/Interface_snRNAseq.md)
   - [Tutorials for using the interface to simulate SRT based on
-    single-cell SRT data.](Rmd/Interface.md)
+    single-cell SRT
+    data.](https://github.com/songxiaoyu/sCCIgen/tree/main/Rmd/Interface_SRT.md)
   - [Tutorials for using the interface to simulate SRT based on
-    single-cell expression and unpaired spatial data.](Rmd/Interface.md)
+    single-cell expression and unpaired spatial
+    data.](https://github.com/songxiaoyu/sCCIgen/tree/main/Rmd/Interface_unpaired.md)
 - **R package.** A direct use of `sCCIgen` package offers greater
   flexibility, allowing users to adjust more parameters that would
   otherwise be fixed at default values. It also enables the output of
@@ -44,8 +46,10 @@ Depending on preference, you can choose to use:
   recommended for users with goode programming experience who wish to
   perform customized simulations.
   - [Tutorials for using the R package to simulate SRT based on snRNAseq
-    data.](/Users/songxiaoyu152/NUS%20Dropbox/Xiaoyu%20Song/SpatialTranscriptomics/Paper_sCCIgen/Github/Rmd/Rpackage_snRNAseq.md)
+    data.](https://github.com/songxiaoyu/sCCIgen/tree/main/Rmd/Rpackage_snRNAseq.md)
   - [Tutorials for using the R package to simulate SRT based on
-    single-cell SRT data.](Rmd/Rpackage_SRT.md)
+    single-cell SRT
+    data.](https://github.com/songxiaoyu/sCCIgen/tree/main/Rmd/Rpackage_SRT.md)
   - [Tutorials for using the R package to simulate SRT based on
-    single-cell expression and unpaired spatial data.](Rmd/Rpackage.md)
+    single-cell expression and unpaired spatial
+    data.](https://github.com/songxiaoyu/sCCIgen/tree/main/Rmd/Rpackage_unpaired.md)
