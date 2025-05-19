@@ -1,0 +1,26 @@
+parameters	value
+path_to_input_dir	/Users/songxiaoyu152/NUS Dropbox/Xiaoyu Song/SpatialTranscriptomics/Paper_sCCIgen/Github/sCCIgen_data/input_data
+expression_data_file	fake1_expr.Rdata
+spatial_data_file	fake1_spatial.Rdata
+expression_data_file_type	Rdata
+expression_data_cell_types	CellType1,CellType2
+simulate_spatial_data	TRUE
+num_simulated_cells	10000
+cell_overlap_cutoff	0
+custom_cell_location_interactions	FALSE
+num_regions	2
+region_specific_model	NULL
+custom_cell_type_proportions	FALSE
+cell_type_proportion_1	1,CellType1,0.702
+cell_type_proportion_2	1,CellType2,0.298
+cell_type_proportion_3	2,CellType1,0.702
+cell_type_proportion_4	2,CellType2,0.298
+cell_even_distribution	0
+expr_depth_ratio	1
+gene_cor	FALSE
+num_spots	NULL
+num_simulated_datasets	1
+parent_simulation_seed	1234
+path_to_output_dir	/Users/songxiaoyu152/NUS Dropbox/Xiaoyu Song/SpatialTranscriptomics/Paper_sCCIgen/R_outputs
+output_name	decoy1_default
+parameter_file	decoy1_default.tsv
