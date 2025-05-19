@@ -4,12 +4,12 @@
 \alias{ParaExistingCellsST}
 \title{Use parameters to simulate cell location (direct output from existing spatial data)}
 \usage{
-ParaExistingCellsST(m, feature)
+ParaExistingCellsST(m, spatial)
 }
 \arguments{
 \item{m}{No. of simulated data}
 
-\item{feature}{Cell feature data}
+\item{spatial}{Cell spatial data}
 }
 \description{
 Use parameters to simulate cell location. Here directly use existing SRT data.

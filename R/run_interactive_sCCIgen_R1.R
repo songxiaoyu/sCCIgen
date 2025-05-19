@@ -47,33 +47,31 @@ run_interactive_sCCIgen_R1 <- function() {
                                           shiny::radioButtons(
                                             inputId = "inputdata",
                                             label = "sCCIgen is a real-data based simulator. It accepts a
-                                                    variety of input data types including scRNAseq, snRNAseq, or
-                                                    single-cell spatially resolved transcriptomics. The simulator
-                                                    provides users access to several publicly available datasets
+                                                    variety of input data types including scRNAseq, snRNAseq,
+                                                    single-cell spatially resolved transcriptomics, or an assembled dataset
+                                                    with expresson and spatial information from different sources.
+                                                    The simulator provides users access to several publicly available datasets
                                                     and also allows them to use their own data, offering flexibility
                                                     in the simulations.
-
                                                     What data do you want to use as the base for simulation? If the data
                                                     is not yet in your working directory, use the Download buttons
                                                     to get the files in your computer.",
-                                            choices = c("Decoy data 1: It includes (1) count matrix for 10 genes by
-                                                        1000 cells of 2 cell types, and (2) cell feature matrix for
-                                                        annotated cell type." = "fake1",
+                                            choices = c("Decoy data 1: It includes expression count matrix for 10 genes by
+                                                        1000 cells of 2 cell types." = "fake1",
                                                         "Decoy data 2: It includes (1) count matrix for 10 genes by
-                                                        1000 cells of 2 cell types, and (2) cell feature matrix for
-                                                        annotated cell type and spatial coordinate." = "fake2",
+                                                        1000 cells of 2 cell types, and (2) spatial feature matrix for the same
+                                                        data, including annotated cell type, spatial coordinate, and region." = "fake2",
                                                         "Decoy data 3: It includes (1) count matrix for 10 genes by
-                                                        1000 cells of 2 cell types, and (2) cell feature matrix for
-                                                        annotated cell type, spatial coordinate, and region." = "fake3",
-                                                        "Normal human breast snRNAseq data: It includes (1) count matrix
+                                                        1000 cells of 2 cell types, and (2) spatial feature matrix for a different 500
+                                                        cells, including their annotated cell type and spatial coordinate." = "fake3",
+                                                        "Normal human breast snRNAseq data: It includes count matrix
                                                         for 4751 genes by 5990 cells of 6 cell types (epithelial cell,
                                                         adipocyte, fibroblast, endothelial cell, immune (myeloid) and
-                                                        muscle), and (2) cell feature matrix for annotated cell type.
-                                                        PMID: 35549429" = "snRNAseq_breast_2025",
+                                                        muscle). PMID: 35549429" = "snRNAseq_breast_2025",
                                                         "Normal mouse brain SeqFISH+ data: It includes (1) count matrix
                                                         for 10,000 genes by 511 cells of 6 cell types (excitatory neuron,
                                                         interneuron, astrocyte, microglia, oligodendrocyte and
-                                                        endothelial cells), and (2)cell feature matrix including cell
+                                                        endothelial cells), and (2) cell feature matrix including cell
                                                         type annotation and spatial coordinate on 2D (x, y).
                                                         PMID: 35549429" = "SeqFishPlusCortex_2025",
                                                         "Ovarian cancer MERFISH data: It includes (1) count matrix
@@ -190,13 +188,12 @@ run_interactive_sCCIgen_R1 <- function() {
                                           shiny::uiOutput("ask_model_per_region"),
 
                                           shiny::radioButtons(inputId = "mimiccorrelation",
-                                                              label = "Do you want to mimic gene-gene correlation of
-                                                              the reference data? Select 'Yes' only if the gene-gene
-                                                              correlation is pre-estimated for each cell type.
-                                                              STsimulator provides functions/pipelines for estimating
-                                                              and saving gene-gene correlation, which can be served
-                                                              as input here.",
-                                                              choices = c("No, simulate independent genes" = FALSE,
+                                                              label = "Do you want to use a pre-estimated model parameter file
+                                                              to expedite the simulation? A selection of Yes is required if you'd
+                                                              like to model gene-gene correlations as its estimation is time consuming.
+                                                              sCCIgen provides an external function for estimating model parameters
+                                                              including gene-gene correlations to provide an input here.",
+                                                              choices = c("No, only simulate independent genes" = FALSE,
                                                                           "Yes" = TRUE),
                                                               width = "100%"),
 
@@ -989,7 +986,7 @@ run_interactive_sCCIgen_R1 <- function() {
             output$text_file_customcellproportions <- NULL
             output$button_read_file_customcellproportions <- NULL
 
-            x = spatial_data() %>%
+            x = spatial_data() %>% as.data.frame() %>%
               count(cell_type) %>%
               mutate(proportions = round(n/sum(n),3),
                      proportions2 = paste0(cell_type,",",proportions))
@@ -1221,7 +1218,8 @@ run_interactive_sCCIgen_R1 <- function() {
       if(input$mimiccorrelation == TRUE) {
         output$mimiccorrelationSelection <- shiny::renderUI({
           shiny::textInput(inputId = "genecorfile",
-                           label = "Provide a path for uploading a pre-estimated gene-gene correlation file:",
+                           label = "Provide a file path for uploading pre-estimated model parameters. The file can include gene-gene
+                           correlations or only marginal models for independent genes.",
                            width = "100%")
         })
 

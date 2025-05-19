@@ -2,6 +2,7 @@
 
 export(Add.Distance.Asso.Pattern)
 export(Add.Spatial.Expr.Pattern)
+export(EstCCI)
 export(Est_ModelPara)
 export(MergeRegion)
 export(ParaDigest)

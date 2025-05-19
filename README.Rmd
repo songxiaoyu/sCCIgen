@@ -17,8 +17,12 @@ Reference: XS... "".
 
 Users have two options to perform SRT simulations using `sCCIgen`. Depending on preference, you can choose to use:
 
-  - **An interactive interface.** The interface helps you to choose tasks, data, and parameters, and lets `sCCIgen` run to provide you simulated data, with parameters and documentations, saved in your working directory. As simulations usually involve many parameters, this option is highly recommended for first time user or researchers with limited programming expertise. 
-    - [Tutorials for running the interface.](Interface.md)
+  - **An interactive interface.** The interface helps you to choose tasks, data, and parameters, and lets `sCCIgen` run to provide you simulated data, with parameters and documentations, saved in your working directory. As simulations usually involve many parameters, this option is highly recommended for the first time user or researchers with limited programming expertise. 
+    - [Tutorials for using the interface to simulate SRT based on snRNAseq data.](Interface.md)
+    - [Tutorials for using the interface to simulate SRT based on single-cell SRT data.](Interface.md)
+    - [Tutorials for using the interface to simulate SRT based on single-cell expression and unpaired spatial data.](Interface.md)
   - **R package.** A direct use of `sCCIgen` package offers greater flexibility, allowing users to adjust more parameters that would otherwise be fixed at default values. It also enables the output of simulation byproducts, such as spatial windows. This approach is recommended for users with goode programming experience who wish to perform customized simulations.
-    - [Tutorials for running the R package.](Rpackage.md)
+    - [Tutorials for using the R package to simulate SRT based on snRNAseq data.](Rpackage_snRNAseq.md)
+    - [Tutorials for using the R package to simulate SRT based on single-cell SRT data.](Rpackage.md)
+    - [Tutorials for using the R package to simulate SRT based on single-cell expression and unpaired spatial data.](Rpackage.md)
   

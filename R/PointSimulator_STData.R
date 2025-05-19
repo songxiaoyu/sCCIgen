@@ -166,6 +166,7 @@ cell.loc.model.fc=function(n,
                            seed=NULL) {
   Rcat=unique(PointRegion)
   bb=vector("list", length(Rcat))
+  names(bb)=Rcat
   for ( i in 1:length(Rcat)) {
     idx= which(PointRegion %in% Rcat[i])
     n.sim.region=round(n*length(idx)/length(PointAnno))

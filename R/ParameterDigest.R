@@ -70,27 +70,23 @@ loadRData <- function(fileName){
 # Load expression data
 ExprLoad=function(para){
   if(expression_data_file_type=="Rdata" | expression_data_file_type=="RData") {
-    expr=as.data.frame(loadRData(fs::path(path_to_input_dir,
-                                          expression_data_file)))
+    expr=as.data.frame(loadRData(fs::path(path_to_input_dir, expression_data_file)))
   }
   if (expression_data_file_type=="tsv") {
-    expr=as.data.frame(data.table::fread(fs::path(path_to_input_dir,
-                                                  expression_data_file)))
+    expr=as.data.frame(data.table::fread(fs::path(path_to_input_dir, expression_data_file)))
   }
   expr=as.matrix(expr)
   return(expr)
 }
 
 # Load cell feature data
-CellFeatureLoad=function(para){
+SpatialLoad=function(para){
   type=utils::tail(unlist(strsplit(spatial_data_file, ".", fixed=TRUE)), 1)
   if(type=="Rdata" | type=="RData" ) {
-    feature=as.data.frame(loadRData(fs::path(path_to_input_dir,
-                                             spatial_data_file)))
+    feature=as.data.frame(loadRData(fs::path(path_to_input_dir, spatial_data_file)))
   }
   if (type=="tsv") {
-    feature=as.data.frame(data.table::fread(fs::path(path_to_input_dir,
-                                                   spatial_data_file)))
+    feature=as.data.frame(data.table::fread(fs::path(path_to_input_dir, spatial_data_file)))
   }
   return(feature)
 }
@@ -111,6 +107,7 @@ ParaCellsNoST=function(para, seed_list){
 
   # determine cell type proportion in each region
   cell_type_proportion=vector("list", num_regions);
+
   tmp=as.matrix(para[,grep("cell_type_proportion_", colnames(para))])
   tmp2=matrix(unlist(strsplit(tmp, ",")), ncol=3, byrow = T)
   for (i in 1:num_regions){
@@ -159,17 +156,17 @@ ParaCellsNoST=function(para, seed_list){
 
 #' @param para Parameters loaded and cleaned from the parameter file using function
 #' `ParaDigest`.
-#' @param feature Cell feature data
+#' @param spatial Cell spatial data (cannot unpaired with expression data).
 #' @param seed_list Seeds for all simulated data
 #' @import parallel foreach doParallel
 
-ParaCellsST=function(para, feature, seed_list) {
+ParaCellsST=function(para, spatial, seed_list) {
 
-  if (ncol(feature)==4) {R=feature[,4]} else {R=rep(1, nrow(feature))}
+  if (ncol(spatial)==4) {R=spatial[,4]} else {R=rep(1, nrow(spatial))}
   cell_loc=foreach (i = 1:num_simulated_datasets) %dopar% {
     cell.loc.model.fc(n=num_simulated_cells,
-                                    PointLoc=feature[,c(2:3)],
-                                    PointAnno=feature[,1],
+                                    PointLoc=spatial[,c(2:3)],
+                                    PointAnno=spatial[,1],
                                     PointRegion=R,
                                     window_method=window_method,
                                     seed=seed_list[[i]])
@@ -181,12 +178,12 @@ ParaCellsST=function(para, feature, seed_list) {
 #'
 #' Use parameters to simulate cell location. Here directly use existing SRT data.
 #' @param m No. of simulated data
-#' @param feature Cell feature data
+#' @param spatial Cell spatial data
 #'
-ParaExistingCellsST=function(m, feature) {
-  if (ncol(feature)==4) {R=feature[,4]} else {R=rep(1, nrow(feature))}
-  cell_loc1=cell.loc.existing.fc(PointLoc=feature[,c(2:3)],
-                                       PointAnno=feature[,1],
+ParaExistingCellsST=function(m, spatial) {
+  if (ncol(spatial)==4) {R=spatial[,4]} else {R=rep(1, nrow(spatial))}
+  cell_loc1=cell.loc.existing.fc(PointLoc=spatial[,c(2:3)],
+                                       PointAnno=spatial[,1],
                                        PointRegion=R,
                                        window_method="rectangle")
   cell_loc=rep(list(cell_loc1), times=m)
@@ -346,7 +343,7 @@ ParaPattern=function(para, sim_count, cell_loc_list_i,
 #' `ParaDigest`.
 #' @param cell_loc_list Simulated cell location data
 #' @param expr Expression data
-#' @param feature Cell feature data
+#' @param anno Annocation of cell type
 #' @param CopulaEst Estimated Gaussian Copula function for gene-gene correlation. Default=NULL.
 #' @param seed_list Seeds for all simulated data
 #' @param ncores No. of cores for simulation
@@ -355,7 +352,7 @@ ParaPattern=function(para, sim_count, cell_loc_list_i,
 #' @export
 #'
 
-ParaExpr=function(para, cell_loc_list, expr, feature,
+ParaExpr=function(para, cell_loc_list, expr, anno,
                  seed_list, model_params=NULL, ncores=1){
 
   sim_method=ifelse(gene_cor=="TRUE", "copula", "ind")
@@ -367,7 +364,7 @@ ParaExpr=function(para, cell_loc_list, expr, feature,
     sim_count=Use_scDesign2(ppp.obj=cell_loc_list[[i]],
                             model_params=model_params,
                             expr=expr,
-                            feature=feature,
+                            feature=anno,
                             depth_simu_ref_ratio=expr_depth_ratio,
                             sim_method=sim_method,
                             region_specific_model=region_specific_model,
@@ -455,8 +452,8 @@ ParaSimulation <- function(input, ModelFitFile=NULL) {
 
   # Load  data
   expr=ExprLoad(para)
-  feature=CellFeatureLoad(para)
-  colnames(expr)=feature[,1]
+  anno=colnames(expr)
+  spatial=SpatialLoad(para)
   print("Finished loading data")
 
   # Simulate cells
@@ -464,20 +461,20 @@ ParaSimulation <- function(input, ModelFitFile=NULL) {
     cell_loc_list=ParaCellsNoST(para=para, seed_list=all_seeds[[1]])
   }
   if (path==2) {
-    cell_loc_list=ParaCellsST(para=para, feature=feature, seed_list=all_seeds[[1]])
+    cell_loc_list=ParaCellsST(para=para, spatial=spatial, seed_list=all_seeds[[1]])
   }
   if (path==3) {
-    cell_loc_list=ParaExistingCellsST(m=num_simulated_datasets, feature=feature)
+    cell_loc_list=ParaExistingCellsST(m=num_simulated_datasets, spatial=spatial)
   }
   print("Finished simulating the cell spatial maps")
 
 
-  # Trim  data (no. of cells) in expr to make the expr estimation faster
-  ctype=table(feature[,1])
+  # Trim  data (no. of cells) in expr data to make the expr estimation faster
+  ctype=table(anno)
   idxc=foreach (i = 1:length(ctype), .combine = "c") %dopar% {
     if (ctype[i]>2500) {
-      sample(which(feature[,1]==names(ctype)[i]), 2500)
-    } else {which(feature[,1]==names(ctype)[i])
+      sample(which(anno==names(ctype)[i]), 2500)
+    } else {which(anno==names(ctype)[i])
     }
   }
   expr2=expr[,idxc]
@@ -490,13 +487,13 @@ ParaSimulation <- function(input, ModelFitFile=NULL) {
     if (exists("copula_input")) {model_params=readRDS(copula_input)
     }else{
       sim_method=ifelse(gene_cor=="TRUE", "copula", "ind")
-      model_params=Est_ModelPara(sim_method=sim_method, expr=expr2, anno=feature[,1], ncores=ncores)
+      model_params=Est_ModelPara(sim_method=sim_method, expr=expr2, anno=anno, ncores=ncores)
     }
   }
 
   ParaExpr(para=para,
            cell_loc_list=cell_loc_list,
-           expr=expr2, feature=feature,
+           expr=expr2, anno=anno,
            model_params=model_params, seed_list=all_seeds[[1]],
            ncores=ncores)
   print("Finished simulating the expression of cells")
