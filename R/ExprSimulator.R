@@ -220,7 +220,8 @@ Add.Spatial.Expr.Pattern= function(sim.count,
                                    delta.sd=0.01, seed) {
   set.seed(938*seed-142)
   R=length(sim.count)
-  sim.count1=sim.count[[r]]
+  idx=which(names(sim.count)==r)
+  sim.count1=sim.count[[idx]]
   G=nrow(sim.count1)
   N=ncol(sim.count1)
   GeneAll=rownames(sim.count1)
@@ -228,21 +229,23 @@ Add.Spatial.Expr.Pattern= function(sim.count,
   # key matrix
   beta.matrix=vector("list", length=R)
   for (i in 1:R) {beta.matrix[[i]]=matrix(0, nrow=G, ncol=ncol(sim.count[[i]]))}
-  colnames(beta.matrix[[r]])=colnames(sim.count1)
-  rownames(beta.matrix[[r]])=GeneAll
+  colnames(beta.matrix[[idx]])=colnames(sim.count1)
+  rownames(beta.matrix[[idx]])=GeneAll
 
   # GeneID
   if (is.null(GeneID)) {GeneID=sample(GeneAll, round(PropOfGenes * G))}
 
-  CellID=which(colnames(beta.matrix[[r]])== CellType )
+  CellID=which(colnames(beta.matrix[[idx]])== CellType )
   beta=stats::rnorm(length(GeneID), delta.mean, delta.sd)
   SignalSummary=data.frame(Type="SpatialChange", Region=r, CellType, GeneID,
                            AdjCellType="NA",
                            AdjGene="NA", beta)
-  beta.matrix[[r]][GeneID,CellID] = beta +  beta.matrix[[r]][GeneID,CellID]
+  beta.matrix[[idx]][GeneID,CellID] = beta +  beta.matrix[[idx]][GeneID,CellID]
 
   return(list(SignalSummary=SignalSummary, beta.matrix=beta.matrix))
 }
+
+
 
 MergePPP=function(points.list) {
   K=length(points.list)
@@ -255,13 +258,13 @@ MergePPP=function(points.list) {
   win1=points.list[[1]]$window
   if (K>1) {
     for (k in 2:K) {
-      win1=union.owin(win1, points.list[[k]]$window)
+      win1=spatstat.geom::union.owin(win1, points.list[[k]]$window)
     }
   }
 
 
-  points1=ppp(x.combine, y.combine, window=win1)
-  marks(points1)=annotation
+  points1=spatstat.geom::ppp(x.combine, y.combine, window=win1)
+  spatstat.geom::marks(points1)=annotation
 
   return(points1)
 }
@@ -347,12 +350,13 @@ Add.Distance.Asso.Pattern = function(ppp.obj,
       beta.matrix[[i]][GeneID, as.numeric(rownames(temp2))] =t(temp2)
     }
   } else {  # add interaction in one region
-    nbr.idx=Find.Neighbor.Pairs(ppp.obj=ppp.obj[[r]],
+    idx_r=which(names(sim.count)==r)
+    nbr.idx=Find.Neighbor.Pairs(ppp.obj=ppp.obj[[idx_r]],
                                 interacting.cell.type.pair=c(perturbed.cell.type,
                                                              adjacent.cell.type),
                                 int.dist.threshold=int.dist.threshold)
     idx1=nbr.idx[,1]
-    temp= beta +  beta.matrix[[r]][GeneID,idx1]
+    temp= beta +  beta.matrix[[idx_r]][GeneID,idx1]
     colnames(temp)=idx1
     temp2=sapply(1:nrow(temp), function(f) tapply(temp[f,], idx1, sum))
     beta.matrix[[i]][GeneID, as.numeric(rownames(temp2))] =t(temp2)
@@ -438,8 +442,8 @@ Add.Expr.Asso.Pattern = function(ppp.obj, sim.count, r,
   if (r == "NULL") { # add interaction to all regions
     # spatial info
     ppp.obj.combined=MergePPP(ppp.obj)
-    sim.count.combined=list.cbind(sim.count)
-    beta.matrix.combined=list.cbind(beta.matrix)
+    sim.count.combined=rlist::list.cbind(sim.count)
+    beta.matrix.combined=rlist::list.cbind(beta.matrix)
     nbr.idx=Find.Neighbor.Pairs(ppp.obj=ppp.obj.combined,
                                 interacting.cell.type.pair=c(perturbed.cell.type,
                                                              adjacent.cell.type),
@@ -477,9 +481,9 @@ Add.Expr.Asso.Pattern = function(ppp.obj, sim.count, r,
 
 
   } else { # add interaction to one region
-
+    idx_r=which(names(sim.count)==r)
     # spatial info
-    nbr.idx=Find.Neighbor.Pairs(ppp.obj=ppp.obj[[r]],
+    nbr.idx=Find.Neighbor.Pairs(ppp.obj=ppp.obj[[idx_r]],
                                 interacting.cell.type.pair=c(perturbed.cell.type, adjacent.cell.type),
                                 int.dist.threshold=int.dist.threshold)
 
@@ -487,11 +491,11 @@ Add.Expr.Asso.Pattern = function(ppp.obj, sim.count, r,
     idx1=nbr.idx[,1]
     idx2=nbr.idx[,2]
     # 1 --> 2
-    count2=sim.count[[r]][GenePairIDMatrix[,2], idx2]
-    temp=beta.matrix[[r]][GenePairIDMatrix[,1], idx1]+beta*log(count2+1)
+    count2=sim.count[[idx_r]][GenePairIDMatrix[,2], idx2]
+    temp=beta.matrix[[idx_r]][GenePairIDMatrix[,1], idx1]+beta*log(count2+1)
     colnames(temp)=idx1
     temp2=sapply(1:nrow(temp), function(f) tapply(temp[f,], idx1, sum))
-    beta.matrix[[r]][GeneID, as.numeric(rownames(temp2))] =t(temp2)
+    beta.matrix[[idx_r]][GeneID, as.numeric(rownames(temp2))] =t(temp2)
 
     SignalSummary=data.frame(Type="ExprAssoGenes", Region=r, CellType=perturbed.cell.type,
                              GeneID=GenePairIDMatrix[,1], AdjCellType=adjacent.cell.type,
@@ -500,11 +504,11 @@ Add.Expr.Asso.Pattern = function(ppp.obj, sim.count, r,
 
     # 2 --> 1
     if (Bidirectional==T) {
-      count1=sim.count[[r]][GenePairIDMatrix[,1], idx1]
-      temp=beta.matrix[[r]][GenePairIDMatrix[,1], idx2]+beta*log(count1+1)
+      count1=sim.count[[idx_r]][GenePairIDMatrix[,1], idx1]
+      temp=beta.matrix[[idx_r]][GenePairIDMatrix[,1], idx2]+beta*log(count1+1)
       colnames(temp)=idx2
       temp2=sapply(1:nrow(temp), function(f) tapply(temp[f,], idx2, sum))
-      beta.matrix[[r]][GeneID, as.numeric(rownames(temp2))] =t(temp2)
+      beta.matrix[[idx_r]][GeneID, as.numeric(rownames(temp2))] =t(temp2)
 
       SignalSummary=rbind(SignalSummary,
                           data.frame(Type="ExprAssoGenes", Region=r, CellType=adjacent.cell.type ,

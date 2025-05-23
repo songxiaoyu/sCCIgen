@@ -59,20 +59,23 @@ run_interactive_sCCIgen_R1 <- function() {
                                             choices = c("Decoy data 1: It includes expression count matrix for 10 genes by
                                                         1000 cells of 2 cell types." = "fake1",
                                                         "Decoy data 2: It includes (1) count matrix for 10 genes by
-                                                        1000 cells of 2 cell types, and (2) spatial feature matrix for the same
-                                                        data, including annotated cell type, spatial coordinate, and region." = "fake2",
+                                                        1000 cells of 2 cell types, and (2) paired spatial feature matrix for the same
+                                                        data, including annotated cell type and spatial coordinate." = "fake2",
                                                         "Decoy data 3: It includes (1) count matrix for 10 genes by
-                                                        1000 cells of 2 cell types, and (2) spatial feature matrix for a different 500
-                                                        cells, including their annotated cell type and spatial coordinate." = "fake3",
+                                                        1000 cells of 2 cell types, and (2) paired spatial feature matrix for the same
+                                                        data, including their annotated cell type, spatial coordinate, and region." = "fake3",
+                                                        "Decoy data 4: It includes (1) count matrix for 10 genes by
+                                                        1000 cells of 2 cell types, and (2) unpaired spatial feature matrix for a different 500
+                                                        cells, including their annotated cell type and spatial coordinate." = "fake4",
                                                         "Normal human breast snRNAseq data: It includes count matrix
                                                         for 4751 genes by 5990 cells of 6 cell types (epithelial cell,
                                                         adipocyte, fibroblast, endothelial cell, immune (myeloid) and
                                                         muscle). PMID: 35549429" = "snRNAseq_breast_2025",
                                                         "Normal mouse brain SeqFISH+ data: It includes (1) count matrix
-                                                        for 10,000 genes by 511 cells of 6 cell types (excitatory neuron,
+                                                        for 2,000 highly variable genes by 511 cells of 6 cell types (excitatory neuron,
                                                         interneuron, astrocyte, microglia, oligodendrocyte and
                                                         endothelial cells), and (2) cell feature matrix including cell
-                                                        type annotation and spatial coordinate on 2D (x, y).
+                                                        type annotation, spatial coordinate on 2D (x, y), and field of view.
                                                         PMID: 35549429" = "SeqFishPlusCortex_2025",
                                                         "Ovarian cancer MERFISH data: It includes (1) count matrix
                                                         for 550 genes by 355,633 cells of 6 cell types (tumor, adipocyte,
@@ -189,12 +192,11 @@ run_interactive_sCCIgen_R1 <- function() {
 
                                           shiny::radioButtons(inputId = "mimiccorrelation",
                                                               label = "Do you want to use a pre-estimated model parameter file
-                                                              to expedite the simulation? A selection of Yes is required if you'd
-                                                              like to model gene-gene correlations as its estimation is time consuming.
-                                                              sCCIgen provides an external function for estimating model parameters
-                                                              including gene-gene correlations to provide an input here.",
-                                                              choices = c("No, only simulate independent genes" = FALSE,
-                                                                          "Yes" = TRUE),
+                                                              to expedite the simulation? Yes is selected if you have estimated model parameters using
+                                                              'sCCIgen::Est_ModelPara'.
+                                                              Note, the pre-estimation is required for simulating gene-gene correlations .",
+                                                              choices = c("No, will only simulate independent genes" = FALSE,
+                                                                          "Yes, can be used to simulate independent or correlated genes " = TRUE),
                                                               width = "100%"),
 
                                           shiny::uiOutput("mimiccorrelationSelection"),

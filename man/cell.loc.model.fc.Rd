@@ -8,7 +8,7 @@ cell.loc.model.fc(
   n,
   PointLoc,
   PointAnno,
-  PointRegion = 1,
+  PointRegion,
   window_method,
   seed = NULL
 )

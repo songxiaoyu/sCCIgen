@@ -161,7 +161,7 @@ cell.loc.1region.model.fc=function(n,
 cell.loc.model.fc=function(n,
                            PointLoc,
                            PointAnno,
-                           PointRegion=1,
+                           PointRegion,
                            window_method,
                            seed=NULL) {
   Rcat=unique(PointRegion)
@@ -176,6 +176,7 @@ cell.loc.model.fc=function(n,
                              window_method=window_method,
                              seed=seed)
   }
+
   return(bb)
 }
 
@@ -217,6 +218,7 @@ cell.loc.existing.fc=function(PointLoc,
                          PointAnno=PointAnno[idx],
                          window_method=window_method)
   }
+  names(pp)=Rcat
 
   return(pp)
 }

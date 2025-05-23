@@ -6,8 +6,9 @@
 
 #' Process SRT data using Giotto for CCI analysis.
 #'
-#' @import Giotto
 #' This function takes input data and goes through data processing procedures for CCI analysis.
+#'
+#' #' @import Giotto
 #' @export
 
 preprocessGiotto=function(expr_data, spatial_data, run_hvg=T, run_kNN_network=T, run_Delaunay_network=T) {
@@ -88,12 +89,16 @@ cellProximityTable = function (gobject, save_folder=getwd(), abs_enrichm=0.3, p_
                                               adjust_method = "fdr",
                                               number_of_simulations = 2000)
   # create table
-  table_mean_results_dc <- cell_proximities$enrichm_res
-  table_mean_results_dc_filter <- table_mean_results_dc[ abs(enrichm) >= abs_enrichm, ]
-  table_mean_results_dc_filter <- table_mean_results_dc_filter[p.adj_higher <= p_adj | p.adj_lower <= p_adj, ]
+  dc <- cell_proximities$enrichm_res
+  dc2 <- dc[abs(dc$enrichm) >= abs_enrichm, ]
+  dc2 <- dc2[dc2$p.adj_higher <= p_adj | dc2$p.adj_lower <= p_adj, ]
+
+
 
   # format into sCCIgen input
-  CCI1_Table <- table_mean_results_dc_filter[, c(1,5)] %>%
+  # <cell_type_A>,<cell_type_B>,<value>. Separate the entries by blank space (e.g. 'cell_type_A,cell_type_B,1.2 cell_type_B,cell_type_C,-0.8').
+  # Alternatively, select a file separated by commas, where each line is an entry with the format described above.
+  CCI1_Table <- dc2[, c(1,5)] %>%
     dplyr::mutate(unified_int = as.character(unified_int)) %>%
     dplyr::mutate(enrichm=round(enrichm, 2)) %>%
     tidyr::separate(unified_int, into = c("CellTye1", "CellTye2"), sep = "--")
@@ -114,7 +119,7 @@ cellProximityTable = function (gobject, save_folder=getwd(), abs_enrichm=0.3, p_
 #                                                          #
 ##%######################################################%##
 
-#' Estimate cell attraction and inhibition patterns and save the table for simulation
+#' Estimate cell expression - distance patterns and save the table for simulation
 #'
 #' @param expr_data Input expression data.
 #' @import future
@@ -128,13 +133,13 @@ ExprDistanceTable = function(gobject, in_hvg=F, save_folder=getwd(),
   # if in_hvg ==T, select genes based on highly variable features and gene statistics, both found in feature (gene) metadata
   if (in_hvg==T) {
     gene_meta <- fDataDT(gobject)
-    heg <- gene_meta[hvf == "yes" & perc_cells > 4 & mean_expr_det > 0.5 ]$feat_ID
+    heg <- gene_meta[which(gene_meta$hvf == "yes" & gene_meta$perc_cells > 4 & gene_meta$mean_expr_det > 0.5), ]$feat_ID
     gobject <- subsetGiotto(gobject = gobject, feat_ids = heg)
   }
-
   cell_meta =pDataDT(gobject)
   # Regions specific analysis
   if (region_specific==T) {
+
     R=unique(cell_meta[,3]) %>% as.matrix()
     res=NULL
     for (r in R) {
@@ -146,7 +151,8 @@ ExprDistanceTable = function(gobject, in_hvg=F, save_folder=getwd(),
       }
     }
   if (region_specific==F) {
-    res=ExprDistanceTable_1region(gobject=dat, r="NA", cell_meta=cell_meta,
+
+    res=ExprDistanceTable_1region(gobject=gobject, r="NULL", cell_meta=cell_meta,
                                    abs_log2fc_ICG=abs_log2fc_ICG, p_adj = p_adj)
   }
   # save results in the  format that can be directly used in sCCIgen
@@ -169,7 +175,6 @@ ExprDistanceTable_1region = function (gobject, r, cell_meta, abs_log2fc_ICG=0.25
     nr_permutations = 1000,
     do_parallel = TRUE
   )
-
   df <- dplyr::as_tibble(ICFsForesHighGenes$ICFscores)
   df_table <- df %>% dplyr::filter(p.adj <= p_adj, abs(log2fc) >= abs_log2fc_ICG)
   df_table=df_table[,c("cell_type", "int_cell_type", "feats", "log2fc")]
@@ -184,8 +189,10 @@ ExprDistanceTable_1region = function (gobject, r, cell_meta, abs_log2fc_ICG=0.25
     dplyr::filter(is.na(value)==F)%>%
     dplyr::rename(cell_type = Var1, int_cell_type = Var2, threshold = value)
   df_merged <- df_table %>% dplyr::inner_join(dist_value, by = c("cell_type", "int_cell_type"))
-
-  res=data.frame(r, df_merged[,c("cell_type", "int_cell_type", "threshold","feats", "log2fc")], 0)
+  # <Region>,<Perturbed cell type>,<Adjacent cell type>,<Interaction distance threshold (default 0.1)>,
+  # <Gene ID (optional)>,<Gene proportion (optional)>,<Mean effect at log(count) scale (default = 0.5)>,
+  # <SD of effect at log(count) scale (default = 0)>
+  res=data.frame(r, df_merged[,c("cell_type", "int_cell_type", "threshold","feats")], "NULL", df_merged$log2fc, 0)
 
   return(res)
 
@@ -195,10 +202,16 @@ ExprDistanceTable_1region = function (gobject, r, cell_meta, abs_log2fc_ICG=0.25
 
 ##%######################################################%##
 #                                                          #
-####            3) Ligand-Receptor analysis             ####
+####      3) Expression-Expression (e.g. LR) analysis   ####
 #                                                          #
 ##%######################################################%##
-LRTable = function(gobject, database=c("mouse", "human", "external"), external_database_path=NULL, region_specific=F,
+#' Estimate cell expression -expression patterns and save the table for simulation
+#'
+#' @param expr_data Input expression data.
+#' @import future
+#' @export
+#'
+ExprExprTable = function(gobject, database=c("mouse", "human", "external"), external_database_path=NULL, region_specific=F,
                          p_adj=0.05, abs_log2fc_LR=0.25, save_folder=getwd()) {
   plan(future::multisession)
   # load database
@@ -218,10 +231,9 @@ LRTable = function(gobject, database=c("mouse", "human", "external"), external_d
     }
 
     ## LR expression
-    data.table::setDT(LR_data)
-    LR_data[, ligand_det := ifelse(LR_data$ligand_gene_symbol %in% dat@feat_ID$rna, TRUE, FALSE)]
-    LR_data[, receptor_det := ifelse(LR_data$receptor_gene_symbol %in% dat@feat_ID$rna, TRUE, FALSE)]
-    LR_data_det <- LR_data[ligand_det == TRUE & receptor_det == TRUE]
+    LR_data$ligand_det <- LR_data$ligand_gene_symbol %in% gobject@feat_ID$rna
+    LR_data$receptor_det <- LR_data$receptor_gene_symbol %in% gobject@feat_ID$rna
+    LR_data_det <- LR_data[LR_data$ligand_det & LR_data$receptor_det, ]
 
     select_ligands <- LR_data_det$ligand_gene_symbol
     select_receptors <- LR_data_det$receptor_gene_symbol
@@ -234,13 +246,15 @@ LRTable = function(gobject, database=c("mouse", "human", "external"), external_d
       for (r in R) {
         cell_id_r=cell_meta[which(cell_meta[,3] == r), 1] %>% as.matrix()
         dat_r <- subsetGiotto(gobject = gobject, cell_ids = cell_id_r )
-        res1=LRTable_1region(gobject=dat_r, r=r, cell_meta=cell_meta, select_ligands=select_ligands, select_receptors=select_receptors,
+        res1=ExprExprTable_1region(gobject=dat_r, r=r, cell_meta=cell_meta, select_ligands=select_ligands,
+                                   select_receptors=select_receptors,
                              abs_log2fc_LR=abs_log2fc_LR, p_adj = p_adj)
         res=rbind(res, res1)
       }
     }
     if (region_specific==F) {
-      res=LRTable_1region(gobject=dat, r="NA", cell_meta=cell_meta, select_ligands=select_ligands, select_receptors=select_receptors,
+      res=ExprExprTable_1region(gobject=gobject, r="NULL", cell_meta=cell_meta, select_ligands=select_ligands,
+                                select_receptors=select_receptors,
                           abs_log2fc_LR=abs_log2fc_LR, p_adj = p_adj)
     }
     # save results in the  format that can be directly used in sCCIgen
@@ -251,25 +265,24 @@ LRTable = function(gobject, database=c("mouse", "human", "external"), external_d
 
 }
 
-# LRTable_1region ------------
-#' Estimate cell attraction and inhibition patterns and save the table for simulation
+# ExprExprTable_1region ------------
+#' Estimate  expression-expression patterns and save the table for simulation
 #'
 #' @param expr_data Input expression data.
 #' @param spatial_data Input spatial data.
 #' @param save_folder Provide a path to a folder that saves the CCI results for use in sCCIgen.
 #' @param abs_enrichm Effect size threshold.
 #' @param p_adj Adjusted p-value threshold (Default = 0.05).
-#' @import data.table
 
 
-LRTable_1region = function(gobject, r, cell_meta, select_ligands, select_receptors,
+ExprExprTable_1region = function(gobject, r, cell_meta, select_ligands, select_receptors,
                    p_adj=0.05, abs_log2fc_LR=0.25) {
 
   plan(future::multisession)
 
 
   ## get statistical significance of gene pair expression changes upon cell-cell interaction
-  spatial_all_scores <- spatCellCellcom(gobject = gobject, spatial_network_name = "spatial_network",
+  sc <- spatCellCellcom(gobject = gobject, spatial_network_name = "spatial_network",
                                           cluster_column = "anno",
                                           random_iter = 500, feat_set_1 = select_ligands,
                                           feat_set_2 = select_receptors,
@@ -278,7 +291,7 @@ LRTable_1region = function(gobject, r, cell_meta, select_ligands, select_recepto
                                           verbose = "a little")
 
   ## select top LR table ##
-  selected_spat <- spatial_all_scores[p.adj <= p_adj & abs(log2fc) > abs_log2fc_LR & lig_nr >= 5 & rec_nr >= 5]
+  selected_spat <- sc[sc$p.adj <= p_adj & abs(sc$log2fc) > abs_log2fc_LR & sc$lig_nr >= 5 & sc$rec_nr >= 5,]
   selected_spat2= selected_spat[, c("lig_cell_type", "rec_cell_type",  "ligand", "receptor", "log2fc")]
 
 
@@ -296,22 +309,24 @@ LRTable_1region = function(gobject, r, cell_meta, select_ligands, select_recepto
 
 
 
-  # Specify the <Region><Perturbed cell type>,<Adjacent cell type>, <Interaction distance threshold (default 0.1)>,
+  # <Region><Perturbed cell type>,<Adjacent cell type>, <Interaction distance threshold (default 0.1)>,
   # <Gene ID 1 (optional)>, <Gene ID 2 (optional)>,<Gene proportion (optional)>, <Bi-directional association
   # (TRUE or FALSE, default = TRUE)>,<Mean effect at log(count) scale (default = 0.5)>,<SD of effect at log(count)
-  # scale (default = 0)>. NOTE: if you don't provide the Gene IDs, the proportion of genes with this pattern must
-  # be provided, and gene pairs will be randomly generated. If you're providing the Gene IDs, the proportion will
-  # be automatically calculated and you can set the gene proportion = NULL. Separate the entries by blank space
-  # (e.g. '1,cell_A,cell_B,0.1,NULL,NULL,0.1,TRUE,0.5,0 2,cell_B,cell_C,0.2,gene_A,gene_B,NULL,TRUE,0.5,0').
-  # NOTE: Adjacent cell type cannot be the same as peturbed cell type. Alternatively, select a file separated by
-  #commas, where each line is an entry with the format described above.
-  tb=data.frame(r=r,  df_merged[,c("lig_cell_type",  "rec_cell_type", "threshold", "ligand", "receptor")],
+  # scale (default = 0)>.
+  tb=data.frame(r=r,  df_merged[,c("lig_cell_type",  "rec_cell_type", "threshold", "ligand", "receptor")], "NULL",
                 bi_direct=F, df_merged$log2fc, 0 )
     return(tb)
 
 }
 
-
+#' SpatialTable
+#'
+#' @param gobject Giotto object.
+#' @param top_num Keep top K number of genes for each cell type
+#' @param fdr_cut Keep genes whose FDR is less than this cutoff.
+#' @param save_folder save_folder
+#' @export
+#'
 SpatialTable=function(gobject, top_num=2, fdr_cut=0.05,
                       save_folder=getwd()){
 
@@ -335,8 +350,12 @@ SpatialTable=function(gobject, top_num=2, fdr_cut=0.05,
       cluster_column =  Rname      # column name in cell metadata
     )
 
+    # Filter by FDR first
+    markers_filt <- markers[!is.na(markers$FDR) & markers$FDR < fdr_cut, ]
 
-    topgenes1 <- markers[!is.na(FDR) & FDR < fdr_cut, head(.SD, top_num), by = "cluster"] # .SD: stands for Subset of Data
+    # Split by cluster and get top N from each
+    split_markers <- split(markers_filt, markers_filt$cluster)
+    topgenes1 <- do.call(rbind, lapply(split_markers, function(df) head(df, top_num)))
 
     # plotMetaDataHeatmap(dat_c,
     #                     selected_feats = unique(topgenes),

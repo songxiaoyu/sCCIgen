@@ -21,7 +21,7 @@
 
 ParaDigest=function(input) {
   # digest parameters
-  para1=para=read_tsv(input) %>% column_to_rownames("parameters") %>%
+  para1=para=readr::read_tsv(input) %>% tibble::column_to_rownames("parameters") %>%
     t() %>% as.data.frame()
   suppressWarnings(class(para1) <-"numeric")
   para[,is.na(para1)==F]=para1[is.na(para1)==F]
@@ -43,7 +43,7 @@ ParaDigest=function(input) {
   # Path1: No ST data;
   # Path2: ST data - new cells
   # Path3: ST data - existing cells
-  feature=CellFeatureLoad(para)
+  feature=SpatialLoad(para)
   para$path=ifelse(
     ncol(feature)==1, 1,
     ifelse(simulate_spatial_data=="TRUE", 2, 3)
@@ -162,7 +162,7 @@ ParaCellsNoST=function(para, seed_list){
 
 ParaCellsST=function(para, spatial, seed_list) {
 
-  if (ncol(spatial)==4) {R=spatial[,4]} else {R=rep(1, nrow(spatial))}
+  if (ncol(spatial)==4) {R=spatial[,4]} else {R=rep(NA, nrow(spatial))}
   cell_loc=foreach (i = 1:num_simulated_datasets) %dopar% {
     cell.loc.model.fc(n=num_simulated_cells,
                                     PointLoc=spatial[,c(2:3)],
@@ -181,7 +181,7 @@ ParaCellsST=function(para, spatial, seed_list) {
 #' @param spatial Cell spatial data
 #'
 ParaExistingCellsST=function(m, spatial) {
-  if (ncol(spatial)==4) {R=spatial[,4]} else {R=rep(1, nrow(spatial))}
+  if (ncol(spatial)==4) {R=spatial[,4]} else {R=rep(NA, nrow(spatial))}
   cell_loc1=cell.loc.existing.fc(PointLoc=spatial[,c(2:3)],
                                        PointAnno=spatial[,1],
                                        PointRegion=R,
@@ -212,7 +212,7 @@ ParaPattern=function(para, sim_count, cell_loc_list_i,
     if (tt1==0) {break}
     #para[grep("spatial_pattern_", colnames(para))]
     r=eval(parse(text=paste0("spatial_pattern_",
-                             tt1, "_region")))
+                             tt1, "_region"))) %>% as.character()
     CellType=eval(parse(text=paste0("spatial_pattern_",
                                     tt1, "_cell_type")))
     GeneID1=eval(parse(text=paste0("spatial_pattern_",
@@ -244,7 +244,7 @@ ParaPattern=function(para, sim_count, cell_loc_list_i,
     if (tt1==0) {break}
     # read in parameters
     r=eval(parse(text=paste0("spatial_int_dist_",
-                             tt1, "_region")))
+                             tt1, "_region"))) %>% as.character()
     # if (r=="NULL") {r=1}
     perturbed.cell.type=eval(parse(text=paste0("spatial_int_dist_",
                                                tt1, "_cell_type_perturbed")))
@@ -284,7 +284,7 @@ ParaPattern=function(para, sim_count, cell_loc_list_i,
     if (tt1==0) {break}
 
     r=eval(parse(text=paste0("spatial_int_expr_",
-                             tt1, "_region")))
+                             tt1, "_region"))) %>% as.character()
 
     perturbed.cell.type=eval(parse(text=paste0("spatial_int_expr_",
                                                tt1, "_cell_type_perturbed")))
@@ -369,6 +369,7 @@ ParaExpr=function(para, cell_loc_list, expr, anno,
                             sim_method=sim_method,
                             region_specific_model=region_specific_model,
                             seed=seed_list[i])
+    names(sim_count)=names(cell_loc_list[[i]])
 
 
     pattern_list=ParaPattern(para=para, sim_count=sim_count,
@@ -440,7 +441,7 @@ ParaExpr=function(para, cell_loc_list, expr, anno,
 
 ParaSimulation <- function(input, ModelFitFile=NULL) {
 
-  # parallel
+  # library(parallel); library(doParallel)
   ncores=detectCores()-2; registerDoParallel(ncores)
   print(paste("No. of Cores in Use:", ncores))
   print("Start the simulation")

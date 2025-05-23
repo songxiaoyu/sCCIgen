@@ -4,8 +4,17 @@
 \alias{preprocessGiotto}
 \title{Process SRT data using Giotto for CCI analysis.}
 \usage{
-preprocessGiotto(expr_data, loc, moreMeta)
+preprocessGiotto(
+  expr_data,
+  spatial_data,
+  run_hvg = T,
+  run_kNN_network = T,
+  run_Delaunay_network = T
+)
 }
 \description{
 This function takes input data and goes through data processing procedures for CCI analysis.
+}
+\details{
+#' @import Giotto
 }

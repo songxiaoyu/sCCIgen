@@ -1,5 +1,5 @@
 
-## Tutorial for simuation with `sCCIgen` R package (without the interactive interface).
+## Tutorial for simuation with `sCCIgen` R package (without the interactive interface) based on SRT data.
 
 ### 1. Download R package
 
@@ -34,18 +34,14 @@ dim(spatial)
 
 ### 3. Analysis of the existing data to provide insights into the parameters of the simulation.
 
-Users can split the simulation into into <u> model fitting </u> and <u>
-simulation loading fitted model </u> steps to expedite the simulations,
-especially if it runs for more than one times.
+Users can split the `sCCIgen` simulation into (1) <u> model fitting </u>
+and (2) <u> simulation using fitted model and user-provided parameters
+</u> steps to expedite the simulations.
 
-Specifically, the `sCCIgen` simulation includes two steps: (1)
-estimating model parameters from the input data, and (2) simulating
-datasets using the estimated and user-provided parameters. The first
-step can be time consuming, especially when the input data is large. By
-splitting the simulation into multiple steps, users can estimate model
-parameters only once and save the results for future use. This is
-especially helpful if users may need to run simulations based on the
-same input data for multiple times.
+It is especially helpful if the number of genes and/or cells are very
+large and users want to run simulation for more than once. By splitting
+the simulation into these two steps, users can estimate model parameters
+only once and save the results for multiple use.
 
 #### Task 1: Estimate model parameters from the snRNAseq for simulation.
 
@@ -62,7 +58,7 @@ cell type before the model fitting.
 
 # model fitting 
 ModelEst=Est_ModelPara(expr=expr, anno=anno, sim_method='ind', ncores=10)
-saveRDS(ModelEst, file="Github/sCCIgen_data/SeqFISH_plus_est/SeqFishPlusCortex_2025t_2025_fit_wo_cor.RDS")
+saveRDS(ModelEst, file="Github/sCCIgen_data/real_data_est/SeqFishPlus/SeqFishPlusCortex_2025_fit_wo_cor.RDS")
 ```
 
 #### Task 2: Estimate CCIs in the input data following the existing Giotto pipeline.
@@ -70,50 +66,37 @@ saveRDS(ModelEst, file="Github/sCCIgen_data/SeqFISH_plus_est/SeqFishPlusCortex_2
 ``` r
 
 # Preprocess data with Giotto pipeline
-dat=preprocessGiotto(expr_data=expr, spatial_data=spatial, run_hvg=T, 
+db=preprocessGiotto(expr_data=expr, spatial_data=spatial, run_hvg=T, 
                       run_kNN_network=T, run_Delaunay_network=T) 
 
 # Estimate cell-cell attraction and inhibition patterns, and save in pre-defined folder
-cellProximityTable(gobject=dat, abs_enrichm=0.3, p_adj = 0.05, 
-                  save_folder="Github/sCCIgen_data/SeqFISH_plus_est")
+cellProximityTable(gobject=db, abs_enrichm=0.3, p_adj = 0.05, 
+                  save_folder="Github/sCCIgen_data/real_data_est/SeqFishPlus")
                   
 # Estimate gene expressions of cells impacted by their neighbors, and save in pre-defined folder                 
-ExprDistanceTable(gobject=dat, in_hvg=T, region_specific=F, abs_log2fc_ICG=0.25, p_adj = 0.05,
-                  save_folder="Github/sCCIgen_data/SeqFISH_plus_est")                 
+ExprDistanceTable(gobject=db, in_hvg=T, region_specific=F, abs_log2fc_ICG=0.25, p_adj = 0.05,
+                  save_folder="Github/sCCIgen_data/real_data_est/SeqFishPlus")                 
 
 # Estimate gene expressions of cells impacted by gene expressions of neighboring cells, narrow to 
 #  known pairs, such as ligand and receptor pairs, and save in pre-defined folder  
 
-LRTable(gobject=dat, database="mouse", region_specific=F, p_adj=0.05, abs_log2fc_LR=0.25,
-        save_folder="Github/sCCIgen_data/SeqFISH_plus_est")
+ExprExprTable(gobject=db, database="mouse", region_specific=F, p_adj=0.05, abs_log2fc_LR=0.25,
+        save_folder="Github/sCCIgen_data/real_data_est/SeqFishPlus")
 ```
 
 #### Task 3: Estimate spatial region specific genes.
 
 ``` r
-
-SpatialTable(gobject, top_num=2, fdr_cut=0.05,
-        save_folder="Github/sCCIgen_data/SeqFISH_plus_est")
+# Estimate spatial region specific genes.
+SpatialTable(gobject, top_num=2, fdr_cut=0.05, save_folder="Github/sCCIgen_data/real_data_est/SeqFishPlus")
 ```
 
 ### 4. Develop a parameter file
 
-The sets of parameters needed for simulation depend on multiple factors
-such as the input data (e.g. single-cell RNAseq vs SRT), the purpose of
-the simulation (e.g. adding de novo patterns or not), and the output
-(e.g. number of simulated data sets, single-cell vs multi-cell
-resoultion).
-
-It is highly recommended to use <u> the interactive interface </u> for
-at least once to get the parameter file structure based on your
-simulation situations.
-
-Alternatively, users can use the sample files
-[here](sample_parameter_file) to fill in the parameters of interest for
-their simulation.
-
-Last but not least, users can use the help manual for each function to
-construct/revise the parameter file from the scratch.
+Users need to develop a parameter file. The sample parameter file for
+snRNAseq based simulation is
+[here](https://github.com/songxiaoyu/sCCIgen_data/tree/main/sample_parameter_file/SRT)
+for downloading and filling in to perform simulations.
 
 ### 5. Perform the entire simulation and save the results.
 
@@ -121,20 +104,23 @@ Assuming you already have a parameter file, you can run the entire
 simulation using codes like this:
 
 ``` r
-input="PathToParameterFile"
-ParaSimulation(input=input)
-```
+model_param_path="Github/sCCIgen_data/real_data_est/SeqFishPlus/SeqFishPlusCortex_2025_fit_wo_cor.RDS"
 
-### 6. Run nested functions to obtain simulation byproducts.
+# Simulate default data - using existing cells but simulate expression with ground truth
+input="Github/sCCIgen_data/sample_parameter_file/SRT/SeqFishPlus_default.tsv"
+ParaSimulation(input=input, ModelFitFile=model_param_path)
 
-#### Task 1: Plot the spatial regions simulated by `sCCIgen`.
+# Simulate new cells and genes where genes have region specific expressions 
+input="Github/sCCIgen_data/sample_parameter_file/SRT/SeqFishPlus_RegionDiffGenes.tsv"
+ParaSimulation(input=input, ModelFitFile=model_param_path)
 
-If users are interested to obtain the simulated regions, a nested
-function `RandomRegionWindow` can be used as folllows:
+# Simulate new cells and genes where expression of genes are associated with distances to other cells. 
+input="Github/sCCIgen_data/sample_parameter_file/SRT/SeqFishPlus_ICGs.tsv"
+ParaSimulation(input=input, ModelFitFile=model_param_path)
 
-``` r
-win=RandomRegionWindow(nRegion=2, seed=123)
-plot(win$window[[1]], col="pink")
-plot(win$window[[2]], col="blue", add=T)
-plot(win$window[[3]], col="orange", add=T)
+
+# Simulate new cells and genes where expression of genes are associated with distances to other cells. 
+input="Github/sCCIgen_data/sample_parameter_file/SRT/SeqFishPlus_LR.tsv"
+ParaSimulation(input=input, ModelFitFile=model_param_path)
+
 ```

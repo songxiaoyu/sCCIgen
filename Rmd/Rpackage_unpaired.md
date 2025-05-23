@@ -1,0 +1,88 @@
+
+## Tutorial for simuation with `sCCIgen` R package (without the interactive interface) based on unpaired expression and spatial data.
+
+### 1. Download R package
+
+While R docker with a user interface is attractive, experienced users
+might like the flexibility of R pacakge for running specialized tasks.
+
+You can install the latest version directly from GitHub with
+[devtools](https://github.com/hadley/devtools):
+
+``` r
+install.packages("devtools")
+devtools::install_github("songxiaoyu/sCCIgen")
+library(sCCIgen)
+# If the built-in sCCIgen data is needed for your simulation, load this package as well.
+devtools::install_github("songxiaoyu/sCCIgen_data")
+library(sCCIgen_data)
+```
+
+### 2. Load and clean sample data
+
+``` r
+# Download sample data from https://github.com/songxiaoyu/sCCIgen_data/tree/main/input_data. 
+
+# This is a subset of MERFISH OV cancer dataset with 1000 cells' expression and 500 cells spatial map. 
+load("Github/sCCIgen_data/input_data/MERFISH_OV_2025_unpaired_expr.Rdata")
+load("Github/sCCIgen_data/input_data/MERFISH_OV_2025_unpaired_spatial.Rdata")
+anno=colnames(expr)
+
+dim(expr)
+expr[1:3,1:3]
+dim(spatial)
+# Note: Number of cells in expression data and spatial data are not the same, as they are used to mimic data 
+# from different experiments. 
+```
+
+### 3. Analysis of the existing data to provide insights into the parameters of the simulation.
+
+Users can split the `sCCIgen` simulation into (1) <u> model fitting </u>
+and (2) <u> simulation using fitted model and user-provided parameters
+</u> steps to expedite the simulations.
+
+It is especially helpful if the number of genes and/or cells are very
+large and users want to run simulation for more than once. By splitting
+the simulation into these two steps, users can estimate model parameters
+only once and save the results for multiple use.
+
+#### Task 1: Estimate model parameters from the snRNAseq for simulation.
+
+This is part is to fit the expression data. When sim_method==“copula”,
+it will fit both the gene marignal distribution and gene-gene
+correlation. When sim_method==“ind”, it will only fit the gene marginal
+distribution.
+
+Note: If the number of genes or cells are large, model fitting may take
+some time. It is suggested to select a reasonably large sample size per
+cell type before the model fitting.
+
+``` r
+
+# model fitting 
+ModelEst=Est_ModelPara(expr=expr, anno=anno, sim_method='ind', ncores=10)
+saveRDS(ModelEst, file="Github/sCCIgen_data/real_data_est/Unpaired/Unpaired_fit_wo_cor.RDS")
+```
+
+### 4. Develop a parameter file
+
+Users need to develop a parameter file. The sample parameter file for
+snRNAseq based simulation is
+[here](https://github.com/songxiaoyu/sCCIgen_data/tree/main/sample_parameter_file/Unpaired)
+for downloading and filling in to perform simulations.
+
+### 5. Perform the entire simulation and save the results.
+
+Assuming you already have a parameter file, you can run the entire
+simulation using codes like this:
+
+``` r
+model_param_path="Github/sCCIgen_data/real_data_est/Unpaired/Unpaired_fit_wo_cor.RDS"
+
+
+
+# Simulate default data - using existing cells but simulate expression with ground truth
+input="Github/sCCIgen_data/sample_parameter_file/Unpaired/MERFISH_default.tsv"
+ParaSimulation(input=input, ModelFitFile=model_param_path)
+
+```

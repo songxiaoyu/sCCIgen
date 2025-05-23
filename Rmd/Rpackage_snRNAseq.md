@@ -24,9 +24,10 @@ library(sCCIgen_data)
 # Download sample data from https://github.com/songxiaoyu/sCCIgen_data/tree/main/input_data. 
 
 load("Github/sCCIgen_data/input_data/snRNAseq_breast_2025_expr.Rdata")
+anno=colnames(expr)
+
 dim(expr)
 expr[1:3,1:3]
-anno=colnames(expr)
 ```
 
 ### 3. Analysis of the existing data to provide insights into the parameters of the simulation.
@@ -62,7 +63,6 @@ ModelEst=Est_ModelPara(expr=expr, anno=anno, sim_method='copula', ncores=10)
 saveRDS(ModelEst, file="Github/sCCIgen_data/real_data_est/snRNAseq_est/snRNAseq_breast_2025_fit_w_cor.RDS")
 ```
 
-
 Note: Additional tasks are available for simulations with spatial input
 (not not snRNAseq based) [here](Rpackage_SRT.md).
 
@@ -70,35 +70,35 @@ Note: Additional tasks are available for simulations with spatial input
 
 Users need to develop a parameter file. The sample parameter file for
 snRNAseq based simulation is
-[here](https://github.com/songxiaoyu/sCCIgen_data/sample_parameter_file/snRNAseq)
+[here](https://github.com/songxiaoyu/sCCIgen_data/tree/main/sample_parameter_file/snRNAseq)
 for downloading and filling in to perform simulations.
-
 
 ### 5. Run simulation.
 
 ``` r
 # load parameter file
-input="Decoy1_default.tsv"
+input="Github/sCCIgen_data/sample_parameter_file/snRNAseq/scRNAseq_default.tsv"
 
-# Run simulation without the need for refitting the expression models.
-ParaSimulation(input=input, ModelFitFile=ModelEst)
+# The default parameter file does not provide estimated model parameters. 
+# Run simulation, with model parameters added in with ModelFitFile.
+model_param_path="Github/sCCIgen_data/real_data_est/snRNAseq_est/snRNAseq_breast_2025_fit_w_cor.RDS"
+ParaSimulation(input=input, ModelFitFile=model_param_path)
 
-# If task 1 is not done, run simulation including fitting the expression models.
+# Run simulation including the estimation of the model parameters.
 ParaSimulation(input=input)
 
 ```
 
-### 6. Run nested functions to obtain simulation byproducts. 
+### 6. Run nested functions to obtain simulation byproducts.
 
-#### Task 1: Plot the spatial regions simulated by `sCCIgen`. 
+#### Task 1: Plot the spatial regions simulated by sCCIgen.
 
-If users are interested to obtain the simulated regions, a nested function `RandomRegionWindow` can be used as folllows: 
+If users are interested to obtain the simulated regions, a nested
+function RandomRegionWindow can be used as folllows:
 
-
-```R
-win=RandomRegionWindow(nRegion=2, seed=123)
+``` r
+# The parameter file specifies that nRegion=2 and seed=1234
+win=RandomRegionWindow(nRegion=2, seed=1234)
 plot(win$window[[1]], col="pink")
 plot(win$window[[2]], col="blue", add=T)
-plot(win$window[[3]], col="orange", add=T)
-
-````
+```
