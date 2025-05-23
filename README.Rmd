@@ -65,12 +65,11 @@ devtools::install_github("songxiaoyu/sCCIgen_data")
 Users have two options to perform SRT simulations using `sCCIgen`. Depending on preference, Users can choose to use:
 
   - **An interactive interface.** The interface helps users to choose tasks, data, and parameters, and lets `sCCIgen` run simulations to provide simulated data, together with parameters and documentations, saved in the working directory. As simulations usually involve many parameters, this option is highly recommended for the first time user or researchers with limited programming expertise. 
-    - [Tutorials for using the interface to simulate SRT based on snRNAseq data.](https://github.com/songxiaoyu/sCCIgen/tree/main/Rmd/Interface_snRNAseq.md)
-    - [Tutorials for using the interface to simulate SRT based on single-cell SRT data.](https://github.com/songxiaoyu/sCCIgen/tree/main/Rmd/Interface_SRT.md)
-    - [Tutorials for using the interface to simulate SRT based on single-cell expression and unpaired spatial data.](https://github.com/songxiaoyu/sCCIgen/tree/main/Rmd/Interface_unpaired.md)
+    - [Tutorials for using the interface to simulate SRT.](https://github.com/songxiaoyu/sCCIgen/tree/main/Rmd/Interface.md)
   - **R package.** A direct use of `sCCIgen` package offers greater flexibility, allowing users to adjust more parameters that would otherwise be fixed at default values. It also enables the output of simulation byproducts, such as spatial windows. This approach is recommended for users with goode programming experience who wish to perform customized simulations.
     - [Tutorials for using the R package to simulate SRT based on snRNAseq data.](https://github.com/songxiaoyu/sCCIgen/tree/main/Rmd/Rpackage_snRNAseq.md)
-    - [Tutorials for using the R package to simulate SRT based on single-cell SRT data.](https://github.com/songxiaoyu/sCCIgen/tree/main/Rmd/Rpackage_SRT.md)
+    - [Tutorials for using the R package to simulate SRT based on single-cell SRT data (single region).](https://github.com/songxiaoyu/sCCIgen/tree/main/Rmd/Rpackage_SRT.md)
+    - [Tutorials for using the R package to simulate SRT based on single-cell SRT data (multiple regions).](https://github.com/songxiaoyu/sCCIgen/tree/main/Rmd/Rpackage_SRT_region.md)
     - [Tutorials for using the R package to simulate SRT based on single-cell expression and unpaired spatial data.](https://github.com/songxiaoyu/sCCIgen/tree/main/Rmd/Rpackage_unpaired.md)
   
 ## 4. SessionInfo

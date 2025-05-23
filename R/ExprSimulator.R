@@ -28,7 +28,7 @@
 
 Est_ModelPara <- function(expr, anno, sim_method=c('ind', 'copula'), region=NULL, ncores = 1) {
   expr=as.matrix(expr)
-  colnames(expr)=anno
+
   if (is.null(region)==T) {
     ct=names(table(colnames(expr)))
     copula1=fit_model_scDesign2(data_mat=expr,
@@ -37,8 +37,9 @@ Est_ModelPara <- function(expr, anno, sim_method=c('ind', 'copula'), region=NULL
                                ncores = ncores)
     copula=list(copula1)
   } else {
-    R=unique(region)
+    R=unique(region)%>% as.character()
     copula=vector(mode = "list", length = length(R))
+    names(copula)=R
     for (r in R) {
       expr2=expr[, region==r]
       ct=names(table(colnames(expr2)))
@@ -94,7 +95,7 @@ Use_scDesign2_1region=function(ppp.obj1, Genes, model_params,
 #' @param ppp.obj Cells as points on a spatial map for all regions.
 #' @param model_params Provide model parameters including marginal distributions and copula (if not NULL).
 #' @param expr Gene expression (count) in reference data.
-#' @param feature Cell features (e.g. cell type, spatial coordinates, regions) of reference data.
+#' @param region Cell regions in reference data.
 #' @param depth_simu_ref_ratio Relative sequencing depth in comparison of reference data.
 #' @param sim_method Simulate independent genes using'ind' or correlated genes using 'copula'.
 #' @param region_specific_model Whether estimation model differ in different regions.
@@ -105,7 +106,7 @@ Use_scDesign2_1region=function(ppp.obj1, Genes, model_params,
 Use_scDesign2=function(ppp.obj,
                        model_params,
                        expr,
-                       feature,
+                       region=NULLL,
                        depth_simu_ref_ratio=1,
                        sim_method = c('copula', 'ind'),
                        region_specific_model,
@@ -146,10 +147,9 @@ Use_scDesign2=function(ppp.obj,
   #  region specific model
   if (region_specific_model=="TRUE") { #  region specific
 
-    Region=feature[,4] # input region
-    Runiq=unique(Region)
+    Runiq=unique(region)
 
-    sim.count= foreach (r = 1:R) %dopar% {
+    sim.count= foreach (r = 1:length(Runiq)) %dopar% {
 
       Use_scDesign2_1region(ppp.obj1=ppp.obj[[r]],
                                            Genes=Genes,

@@ -8,7 +8,7 @@ ParaExpr(
   para,
   cell_loc_list,
   expr,
-  anno,
+  region,
   seed_list,
   model_params = NULL,
   ncores = 1
@@ -22,7 +22,7 @@ ParaExpr(
 
 \item{expr}{Expression data}
 
-\item{anno}{Annocation of cell type}
+\item{region}{Region of cell type}
 
 \item{seed_list}{Seeds for all simulated data}
 

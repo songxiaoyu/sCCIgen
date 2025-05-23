@@ -11,7 +11,7 @@ ExprExprTable(
   region_specific = F,
   p_adj = 0.05,
   abs_log2fc_LR = 0.25,
-  save_folder = getwd()
+  output_file = file.path(getwd(), "est_CCI_expr_expr.csv")
 )
 }
 \arguments{

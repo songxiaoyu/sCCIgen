@@ -343,7 +343,7 @@ ParaPattern=function(para, sim_count, cell_loc_list_i,
 #' `ParaDigest`.
 #' @param cell_loc_list Simulated cell location data
 #' @param expr Expression data
-#' @param anno Annocation of cell type
+#' @param region Region of cell type
 #' @param CopulaEst Estimated Gaussian Copula function for gene-gene correlation. Default=NULL.
 #' @param seed_list Seeds for all simulated data
 #' @param ncores No. of cores for simulation
@@ -352,7 +352,7 @@ ParaPattern=function(para, sim_count, cell_loc_list_i,
 #' @export
 #'
 
-ParaExpr=function(para, cell_loc_list, expr, anno,
+ParaExpr=function(para, cell_loc_list, expr, region,
                  seed_list, model_params=NULL, ncores=1){
 
   sim_method=ifelse(gene_cor=="TRUE", "copula", "ind")
@@ -364,7 +364,7 @@ ParaExpr=function(para, cell_loc_list, expr, anno,
     sim_count=Use_scDesign2(ppp.obj=cell_loc_list[[i]],
                             model_params=model_params,
                             expr=expr,
-                            feature=anno,
+                            region=region,
                             depth_simu_ref_ratio=expr_depth_ratio,
                             sim_method=sim_method,
                             region_specific_model=region_specific_model,
@@ -453,9 +453,11 @@ ParaSimulation <- function(input, ModelFitFile=NULL) {
 
   # Load  data
   expr=ExprLoad(para)
-  anno=colnames(expr)
   spatial=SpatialLoad(para)
   print("Finished loading data")
+  anno=colnames(expr)
+  if (ncol(spatial)==4) {region = spatial[,4] %>% as.character()} else{region=NULL}
+
 
   # Simulate cells
   if (path==1) {
@@ -494,7 +496,7 @@ ParaSimulation <- function(input, ModelFitFile=NULL) {
 
   ParaExpr(para=para,
            cell_loc_list=cell_loc_list,
-           expr=expr2, anno=anno,
+           expr=expr2, region=region,
            model_params=model_params, seed_list=all_seeds[[1]],
            ncores=ncores)
   print("Finished simulating the expression of cells")

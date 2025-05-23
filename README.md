@@ -86,8 +86,11 @@ Depending on preference, Users can choose to use:
   - [Tutorials for using the R package to simulate SRT based on snRNAseq
     data.](https://github.com/songxiaoyu/sCCIgen/tree/main/Rmd/Rpackage_snRNAseq.md)
   - [Tutorials for using the R package to simulate SRT based on
-    single-cell SRT
-    data.](https://github.com/songxiaoyu/sCCIgen/tree/main/Rmd/Rpackage_SRT.md)
+    single-cell SRT data (single
+    region).](https://github.com/songxiaoyu/sCCIgen/tree/main/Rmd/Rpackage_SRT.md)
+  - [Tutorials for using the R package to simulate SRT based on
+    single-cell SRT data (multiple
+    regions).](https://github.com/songxiaoyu/sCCIgen/tree/main/Rmd/Rpackage_SRT_region.md)
   - [Tutorials for using the R package to simulate SRT based on
     single-cell expression and unpaired spatial
     data.](https://github.com/songxiaoyu/sCCIgen/tree/main/Rmd/Rpackage_unpaired.md)

@@ -71,7 +71,7 @@ preprocessGiotto=function(expr_data, spatial_data, run_hvg=T, run_kNN_network=T,
 #'
 #' @param expr_data Input expression data.
 #' @param spatial_data Input spatial data.
-#' @param save_folder Provide a path to a folder that saves the CCI results for use in sCCIgen.
+#' @param output_file Provide a path and file name to save the CCI results for use in sCCIgen.
 #' @param abs_enrichm Effect size threshold.
 #' @param p_adj Adjusted p-value threshold (Default = 0.05).
 
@@ -80,7 +80,7 @@ preprocessGiotto=function(expr_data, spatial_data, run_hvg=T, run_kNN_network=T,
 #' File est_CCI_expr_expr.tsv will save results of CCI through ligand and recepter expression.
 #' @export
 
-cellProximityTable = function (gobject, save_folder=getwd(), abs_enrichm=0.3, p_adj = 0.05) {
+cellProximityTable = function (gobject, output_file=file.path(getwd(), "est_CCI_dist_dist.csv"), abs_enrichm=0.3, p_adj = 0.05) {
 
   # cellProximityEnrichment analysis
   cell_proximities <- cellProximityEnrichment(gobject = gobject,
@@ -104,9 +104,9 @@ cellProximityTable = function (gobject, save_folder=getwd(), abs_enrichm=0.3, p_
     tidyr::separate(unified_int, into = c("CellTye1", "CellTye2"), sep = "--")
 
   # save results in the  format that can be directly used in sCCIgen
-  readr::write_csv(CCI1_Table, file=file.path(save_folder, "est_CCI_dist_dist.csv"), col_names = F)
+  readr::write_csv(CCI1_Table, file=output_file, col_names = F)
 
-  print(paste0("CCI co-localization analysis is saved at: ", file.path(save_folder, "est_CCI_dist_dist.csv")))
+  print(paste0("CCI co-localization analysis is saved at: ", output_file))
 
 }
 
@@ -126,7 +126,7 @@ cellProximityTable = function (gobject, save_folder=getwd(), abs_enrichm=0.3, p_
 #' @export
 
 
-ExprDistanceTable = function(gobject, in_hvg=F, save_folder=getwd(),
+ExprDistanceTable = function(gobject, in_hvg=F, output_file=file.path(getwd(), "est_CCI_dist_expr.csv"),
                               region_specific=F, abs_log2fc_ICG=0.25, p_adj = 0.05) {
   plan(future::multisession)
 
@@ -141,24 +141,27 @@ ExprDistanceTable = function(gobject, in_hvg=F, save_folder=getwd(),
   if (region_specific==T) {
 
     R=unique(cell_meta[,3]) %>% as.matrix()
+
     res=NULL
     for (r in R) {
+      print(r)
       cell_id_r=cell_meta[which(cell_meta[,3] == r), 1] %>% as.matrix()
       dat_r <- subsetGiotto(gobject = gobject, cell_ids = cell_id_r )
       res1=ExprDistanceTable_1region(gobject=dat_r, r=r, cell_meta=cell_meta,
                                      abs_log2fc_ICG=abs_log2fc_ICG, p_adj = p_adj)
       res=rbind(res, res1)
-      }
     }
+
+  }
   if (region_specific==F) {
 
     res=ExprDistanceTable_1region(gobject=gobject, r="NULL", cell_meta=cell_meta,
                                    abs_log2fc_ICG=abs_log2fc_ICG, p_adj = p_adj)
   }
   # save results in the  format that can be directly used in sCCIgen
-  readr::write_csv(res, file=file.path(save_folder, "est_CCI_dist_expr.csv"), col_names = F)
+  readr::write_csv(res, file=output_file, col_names = F)
 
-  print(paste0("CCI expression-distance association is saved at: ", file.path(save_folder, "est_CCI_dist_expr.csv")))
+  print(paste0("CCI expression-distance association is saved at: ", output_file))
 
 }
 
@@ -177,24 +180,27 @@ ExprDistanceTable_1region = function (gobject, r, cell_meta, abs_log2fc_ICG=0.25
   )
   df <- dplyr::as_tibble(ICFsForesHighGenes$ICFscores)
   df_table <- df %>% dplyr::filter(p.adj <= p_adj, abs(log2fc) >= abs_log2fc_ICG)
-  df_table=df_table[,c("cell_type", "int_cell_type", "feats", "log2fc")]
+  if (nrow(df_table) > 0) {
+    df_table=df_table[,c("cell_type", "int_cell_type", "feats", "log2fc")]
 
-  # add an approximate distance threshold by cell tyep pair
-  delaunay_net <- getSpatialNetwork(gobject = gobject, name = 'Delaunay_network')
-  dis_table=delaunay_net@networkDT
-  dis_table2 <- merge(dis_table, cell_meta, by.x = "from", by.y = "cell_ID", all.x = TRUE)
-  dis_table2 <- merge(dis_table2, cell_meta, by.x = "to", by.y = "cell_ID", all.x = TRUE)
-  tb=tapply(dis_table2$distance, list(dis_table2$anno.x, dis_table2$anno.y), median)
-  dist_value=reshape2::melt(tb) %>%
-    dplyr::filter(is.na(value)==F)%>%
-    dplyr::rename(cell_type = Var1, int_cell_type = Var2, threshold = value)
-  df_merged <- df_table %>% dplyr::inner_join(dist_value, by = c("cell_type", "int_cell_type"))
-  # <Region>,<Perturbed cell type>,<Adjacent cell type>,<Interaction distance threshold (default 0.1)>,
-  # <Gene ID (optional)>,<Gene proportion (optional)>,<Mean effect at log(count) scale (default = 0.5)>,
-  # <SD of effect at log(count) scale (default = 0)>
-  res=data.frame(r, df_merged[,c("cell_type", "int_cell_type", "threshold","feats")], "NULL", df_merged$log2fc, 0)
+    # add an approximate distance threshold by cell tyep pair
+    delaunay_net <- getSpatialNetwork(gobject = gobject, name = 'Delaunay_network')
+    dis_table=delaunay_net@networkDT
+    dis_table2 <- merge(dis_table, cell_meta, by.x = "from", by.y = "cell_ID", all.x = TRUE)
+    dis_table2 <- merge(dis_table2, cell_meta, by.x = "to", by.y = "cell_ID", all.x = TRUE)
+    tb=tapply(dis_table2$distance, list(dis_table2$anno.x, dis_table2$anno.y), median)
+    dist_value=reshape2::melt(tb) %>%
+      dplyr::filter(is.na(value)==F)%>%
+      dplyr::rename(cell_type = Var1, int_cell_type = Var2, threshold = value)
+    df_merged <- df_table %>% dplyr::inner_join(dist_value, by = c("cell_type", "int_cell_type"))
+    # <Region>,<Perturbed cell type>,<Adjacent cell type>,<Interaction distance threshold (default 0.1)>,
+    # <Gene ID (optional)>,<Gene proportion (optional)>,<Mean effect at log(count) scale (default = 0.5)>,
+    # <SD of effect at log(count) scale (default = 0)>
+    print(dim(df_merged))
+    res=data.frame(r, df_merged[,c("cell_type", "int_cell_type", "threshold","feats")], "NULL", df_merged$log2fc, 0)
 
-  return(res)
+    return(res)
+  } else {return(NULL)}
 
 }
 
@@ -212,7 +218,7 @@ ExprDistanceTable_1region = function (gobject, r, cell_meta, abs_log2fc_ICG=0.25
 #' @export
 #'
 ExprExprTable = function(gobject, database=c("mouse", "human", "external"), external_database_path=NULL, region_specific=F,
-                         p_adj=0.05, abs_log2fc_LR=0.25, save_folder=getwd()) {
+                         p_adj=0.05, abs_log2fc_LR=0.25, output_file=file.path(getwd(), "est_CCI_expr_expr.csv")) {
   plan(future::multisession)
   # load database
 
@@ -244,6 +250,7 @@ ExprExprTable = function(gobject, database=c("mouse", "human", "external"), exte
       R=unique(cell_meta[,3]) %>% as.matrix()
       res=NULL
       for (r in R) {
+        print(r)
         cell_id_r=cell_meta[which(cell_meta[,3] == r), 1] %>% as.matrix()
         dat_r <- subsetGiotto(gobject = gobject, cell_ids = cell_id_r )
         res1=ExprExprTable_1region(gobject=dat_r, r=r, cell_meta=cell_meta, select_ligands=select_ligands,
@@ -258,23 +265,14 @@ ExprExprTable = function(gobject, database=c("mouse", "human", "external"), exte
                           abs_log2fc_LR=abs_log2fc_LR, p_adj = p_adj)
     }
     # save results in the  format that can be directly used in sCCIgen
-    readr::write_csv(res, file=file.path(save_folder, "est_CCI_expr_expr.csv"), col_names = F)
+    readr::write_csv(res, file=output_file, col_names = F)
 
-    print(paste0("CCI expression-expression association is saved at: ", file.path(save_folder, "est_CCI_expr_expr.csv")))
+    print(paste0("CCI expression-expression association is saved at: ", output_file))
   }
 
 }
 
 # ExprExprTable_1region ------------
-#' Estimate  expression-expression patterns and save the table for simulation
-#'
-#' @param expr_data Input expression data.
-#' @param spatial_data Input spatial data.
-#' @param save_folder Provide a path to a folder that saves the CCI results for use in sCCIgen.
-#' @param abs_enrichm Effect size threshold.
-#' @param p_adj Adjusted p-value threshold (Default = 0.05).
-
-
 ExprExprTable_1region = function(gobject, r, cell_meta, select_ligands, select_receptors,
                    p_adj=0.05, abs_log2fc_LR=0.25) {
 
@@ -292,30 +290,33 @@ ExprExprTable_1region = function(gobject, r, cell_meta, select_ligands, select_r
 
   ## select top LR table ##
   selected_spat <- sc[sc$p.adj <= p_adj & abs(sc$log2fc) > abs_log2fc_LR & sc$lig_nr >= 5 & sc$rec_nr >= 5,]
-  selected_spat2= selected_spat[, c("lig_cell_type", "rec_cell_type",  "ligand", "receptor", "log2fc")]
+  if (nrow(selected_spat) > 0) {
+    selected_spat2= selected_spat[, c("lig_cell_type", "rec_cell_type",  "ligand", "receptor", "log2fc")]
 
 
 
-  # add an approximate distance threshold by cell tyep pair
-  spatial_net <- getSpatialNetwork(gobject = gobject, name = 'spatial_network')
-  dis_table=spatial_net@networkDT
-  dis_table2 <- merge(dis_table, cell_meta, by.x = "from", by.y = "cell_ID", all.x = TRUE)
-  dis_table2 <- merge(dis_table2, cell_meta, by.x = "to", by.y = "cell_ID", all.x = TRUE)
-  tb=tapply(dis_table2$distance, list(dis_table2$anno.x, dis_table2$anno.y), median)
-  dist_value=reshape2::melt(tb) %>%
-    dplyr::filter(is.na(value)==F)%>%
-    dplyr::rename(lig_cell_type = Var1, rec_cell_type = Var2, threshold = value)
-  df_merged <- selected_spat2 %>% dplyr::inner_join(dist_value, by = c("lig_cell_type", "rec_cell_type"))
+    # add an approximate distance threshold by cell tyep pair
+    spatial_net <- getSpatialNetwork(gobject = gobject, name = 'spatial_network')
+    dis_table=spatial_net@networkDT
+    dis_table2 <- merge(dis_table, cell_meta, by.x = "from", by.y = "cell_ID", all.x = TRUE)
+    dis_table2 <- merge(dis_table2, cell_meta, by.x = "to", by.y = "cell_ID", all.x = TRUE)
+    tb=tapply(dis_table2$distance, list(dis_table2$anno.x, dis_table2$anno.y), median)
+    dist_value=reshape2::melt(tb) %>%
+      dplyr::filter(is.na(value)==F)%>%
+      dplyr::rename(lig_cell_type = Var1, rec_cell_type = Var2, threshold = value)
+    df_merged <- selected_spat2 %>% dplyr::inner_join(dist_value, by = c("lig_cell_type", "rec_cell_type"))
 
 
 
-  # <Region><Perturbed cell type>,<Adjacent cell type>, <Interaction distance threshold (default 0.1)>,
-  # <Gene ID 1 (optional)>, <Gene ID 2 (optional)>,<Gene proportion (optional)>, <Bi-directional association
-  # (TRUE or FALSE, default = TRUE)>,<Mean effect at log(count) scale (default = 0.5)>,<SD of effect at log(count)
-  # scale (default = 0)>.
-  tb=data.frame(r=r,  df_merged[,c("lig_cell_type",  "rec_cell_type", "threshold", "ligand", "receptor")], "NULL",
-                bi_direct=F, df_merged$log2fc, 0 )
+    # <Region><Perturbed cell type>,<Adjacent cell type>, <Interaction distance threshold (default 0.1)>,
+    # <Gene ID 1 (optional)>, <Gene ID 2 (optional)>,<Gene proportion (optional)>, <Bi-directional association
+    # (TRUE or FALSE, default = TRUE)>,<Mean effect at log(count) scale (default = 0.5)>,<SD of effect at log(count)
+    # scale (default = 0)>.
+    tb=data.frame(r=r,  df_merged[,c("lig_cell_type",  "rec_cell_type", "threshold", "ligand", "receptor")], "NULL",
+                  bi_direct=F, df_merged$log2fc, 0 )
     return(tb)
+
+  } else {return(NULL)}
 
 }
 
@@ -324,11 +325,11 @@ ExprExprTable_1region = function(gobject, r, cell_meta, select_ligands, select_r
 #' @param gobject Giotto object.
 #' @param top_num Keep top K number of genes for each cell type
 #' @param fdr_cut Keep genes whose FDR is less than this cutoff.
-#' @param save_folder save_folder
+#' @param output_file output_file
 #' @export
 #'
 SpatialTable=function(gobject, top_num=2, fdr_cut=0.05,
-                      save_folder=getwd()){
+                      output_file= file.path(getwd(), "est_region_specific_genes.csv")){
 
   cell_meta=pDataDT(gobject)
   colnames(cell_meta)[3]
@@ -375,9 +376,9 @@ SpatialTable=function(gobject, top_num=2, fdr_cut=0.05,
   # (e.g. '1,cell_type_A,NULL,0.1,0.5,0 1,cell_type_A,gene_A,NULL,0.5,0') Alternatively, click the button to select a file
   # separated by commma where each line contains an entry with the format mentioned above.
   # save results in the  format that can be directly used in sCCIgen
-  readr::write_csv(tb, file=file.path(save_folder, "est_region_specific_genes.csv"), col_names = F)
+  readr::write_csv(tb, file=output_file, col_names = F)
 
-  print(paste0("The estimation of region specific genes are saved at: ", file.path(save_folder, "est_region_specific_genes.csv")))
+  print(paste0("The estimation of region specific genes are saved at: ", output_file))
 }
 
 

@@ -7,7 +7,7 @@
 ExprDistanceTable(
   gobject,
   in_hvg = F,
-  save_folder = getwd(),
+  output_file = file.path(getwd(), "est_CCI_dist_expr.csv"),
   region_specific = F,
   abs_log2fc_ICG = 0.25,
   p_adj = 0.05

@@ -6,13 +6,13 @@
 \usage{
 cellProximityTable(
   gobject,
-  save_folder = getwd(),
+  output_file = file.path(getwd(), "est_CCI_dist_dist.csv"),
   abs_enrichm = 0.3,
   p_adj = 0.05
 )
 }
 \arguments{
-\item{save_folder}{Provide a path to a folder that saves the CCI results for use in sCCIgen.}
+\item{output_file}{Provide a path and file name to save the CCI results for use in sCCIgen.}
 
 \item{abs_enrichm}{Effect size threshold.}
 

@@ -1,20 +1,22 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-Run `sCCIgen` with an Interactive Interface on Docker
+## Tutorial for simuation with `sCCIgen` interactive interface.
 
-### 3. Open the interacive interface and choose the tasks of interest.
-
-In R (or R Studio), run
+In R (or R Studio), open the Rshiny interface by running:
 
 ``` r
+# Set up to your working directory first 
+setwd("~path")
+
+# Open the interface
 library(sCCIgen)
 run_interactive_sCCIgen()
 ```
 
 It will show you three tasks to choose from:
 
-#### Task 1: I want to download a pre-simulated spatial transcriptomics dataset.
+#### Task 1: I want to download a pre-simulated SRT dataset.
 
 `sCCIgen` provides three pre-simulated datasets. You can quickly check
 the data format and explore your analyses before spending efforts on
@@ -25,18 +27,19 @@ cancer MERFISH.
 Here, select one example data and it will be downloaded to your working
 directory.
 
-#### Task 2: I want to generate a parameter file using command line prompts.
+#### Task 2: I want to create a parameter file.
 
-If you select Task 2, `sCCIgen` will first walk you through a number of
-parameter selection questions to help you generate a parameter file. The
-first question is to select the data for simulation. Playing with the
-decoy data may help you to get familiar with the simulator, while
-spending little time on waiting for the simulation results. You can also
-use our built-in real data by selection (4-6) or your input data by
-selecting “user input”.
+If you select Task 2, `sCCIgen` will first walk you through (1) the
+selection of reference dataset, and (2) the additional parameter
+determination questions to help you generate a parameter file.
+
+Playing with the decoy data may help get familiar with the simulator,
+while spending little time waiting for the simulation results. For
+simulation based on real datasets, users can also use our built-in real
+data by selection (5-7) or upload input data by selecting “user input”.
 
 #### Task 3: I have a parameter file and want to run a simulation.
 
-Finally, you have the parameter file and can conduct the simulations.
-Just tell `sCCIgen` your parameter file, and it will provide you the
-data and document you need!
+Finally, users have the parameter file and can conduct the simulations.
+Just tell `sCCIgen` the path to the parameter file, and it will provide
+the simulated data and documentation!

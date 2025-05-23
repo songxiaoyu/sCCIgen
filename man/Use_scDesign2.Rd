@@ -8,7 +8,7 @@ Use_scDesign2(
   ppp.obj,
   model_params,
   expr,
-  feature,
+  region = NULLL,
   depth_simu_ref_ratio = 1,
   sim_method = c("copula", "ind"),
   region_specific_model,
@@ -22,7 +22,7 @@ Use_scDesign2(
 
 \item{expr}{Gene expression (count) in reference data.}
 
-\item{feature}{Cell features (e.g. cell type, spatial coordinates, regions) of reference data.}
+\item{region}{Cell regions in reference data.}
 
 \item{depth_simu_ref_ratio}{Relative sequencing depth in comparison of reference data.}
 

@@ -4,7 +4,12 @@
 \alias{SpatialTable}
 \title{SpatialTable}
 \usage{
-SpatialTable(gobject, top_num = 2, fdr_cut = 0.05, save_folder = getwd())
+SpatialTable(
+  gobject,
+  top_num = 2,
+  fdr_cut = 0.05,
+  output_file = file.path(getwd(), "est_region_specific_genes.csv")
+)
 }
 \arguments{
 \item{gobject}{Giotto object.}
@@ -13,7 +18,7 @@ SpatialTable(gobject, top_num = 2, fdr_cut = 0.05, save_folder = getwd())
 
 \item{fdr_cut}{Keep genes whose FDR is less than this cutoff.}
 
-\item{save_folder}{save_folder}
+\item{output_file}{output_file}
 }
 \description{
 SpatialTable
