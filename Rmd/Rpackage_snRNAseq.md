@@ -1,5 +1,5 @@
 
-## Tutorial for simuation with `sCCIgen` R package (without the interactive interface).
+## Tutorial for simuation with `sCCIgen` R package (without the interactive interface) based on snRNAseq data.
 
 ### 1. Download R package
 
@@ -32,18 +32,14 @@ expr[1:3,1:3]
 
 ### 3. Analysis of the existing data to provide insights into the parameters of the simulation.
 
-Users can split the simulation into into <u> model fitting </u> and <u>
-simulation loading fitted model </u> steps to expedite the simulations,
-especially if it runs for more than one times.
+Users can split the `sCCIgen` simulation into (1) <u> model fitting </u>
+and (2) <u> simulation using fitted model and user-provided parameters
+</u> steps to expedite the simulations.
 
-Specifically, the `sCCIgen` simulation includes two steps: (1)
-estimating model parameters from the input data, and (2) simulating
-datasets using the estimated and user-provided parameters. The first
-step can be time consuming, especially when the input data is large. By
-splitting the simulation into multiple steps, users can estimate model
-parameters only once and save the results for future use. This is
-especially helpful if users may need to run simulations based on the
-same input data for multiple times.
+It is especially helpful if the number of genes and/or cells are very
+large and users want to run simulation for more than once. By splitting
+the simulation into these two steps, users can estimate model parameters
+only once and save the results for multiple use.
 
 #### Task 1: Estimate model parameters from the snRNAseq for simulation.
 
@@ -60,7 +56,7 @@ cell type before the model fitting.
 
 # model fitting 
 ModelEst=Est_ModelPara(expr=expr, anno=anno, sim_method='copula', ncores=10)
-saveRDS(ModelEst, file="Github/sCCIgen_data/real_data_est/snRNAseq_est/snRNAseq_breast_2025_fit_w_cor.RDS")
+saveRDS(ModelEst, file="Github/sCCIgen_data/real_data_est/snRNAseq/snRNAseq_breast_2025_fit_w_cor.RDS")
 ```
 
 Note: Additional tasks are available for simulations with spatial input
@@ -81,7 +77,8 @@ input="Github/sCCIgen_data/sample_parameter_file/snRNAseq/scRNAseq_default.tsv"
 
 # The default parameter file does not provide estimated model parameters. 
 # Run simulation, with model parameters added in with ModelFitFile.
-model_param_path="Github/sCCIgen_data/real_data_est/snRNAseq_est/snRNAseq_breast_2025_fit_w_cor.RDS"
+model_param_path="Github/sCCIgen_data/real_data_est/snRNAseq/snRNAseq_breast_2025_fit_w_cor.RDS"
+
 ParaSimulation(input=input, ModelFitFile=model_param_path)
 
 # Run simulation including the estimation of the model parameters.
