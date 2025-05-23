@@ -59,8 +59,9 @@ cell type before the model fitting.
 
 # model fitting 
 ModelEst=Est_ModelPara(expr=expr, anno=anno, sim_method='copula', ncores=10)
-saveRDS(ModelEst, file="Github/sCCIgen_data/input_data/snRNAseq_breast_2025_fit_w_cor.RDS")
+saveRDS(ModelEst, file="Github/sCCIgen_data/real_data_est/snRNAseq_est/snRNAseq_breast_2025_fit_w_cor.RDS")
 ```
+
 
 Note: Additional tasks are available for simulations with spatial input
 (not not snRNAseq based) [here](Rpackage_SRT.md).
@@ -69,8 +70,9 @@ Note: Additional tasks are available for simulations with spatial input
 
 Users need to develop a parameter file. The sample parameter file for
 snRNAseq based simulation is
-[here](https://github.com/songxiaoyu/sCCIgen/tree/main/sample_parameter_file/snRNAseq)
+[here](https://github.com/songxiaoyu/sCCIgen_data/sample_parameter_file/snRNAseq)
 for downloading and filling in to perform simulations.
+
 
 ### 5. Run simulation.
 
@@ -85,3 +87,18 @@ ParaSimulation(input=input, ModelFitFile=ModelEst)
 ParaSimulation(input=input)
 
 ```
+
+### 6. Run nested functions to obtain simulation byproducts. 
+
+#### Task 1: Plot the spatial regions simulated by `sCCIgen`. 
+
+If users are interested to obtain the simulated regions, a nested function `RandomRegionWindow` can be used as folllows: 
+
+
+```R
+win=RandomRegionWindow(nRegion=2, seed=123)
+plot(win$window[[1]], col="pink")
+plot(win$window[[2]], col="blue", add=T)
+plot(win$window[[3]], col="orange", add=T)
+
+````
