@@ -44,13 +44,16 @@ only once and save the results for multiple use.
 #### Task 1: Estimate model parameters from the snRNAseq for simulation.
 
 This is part is to fit the expression data. When sim_method==“copula”,
-it will fit both the gene marignal distribution and gene-gene
+it will fit both the gene marginal distribution and gene-gene
 correlation. When sim_method==“ind”, it will only fit the gene marginal
 distribution.
 
 Note: If the number of genes or cells are large, model fitting may take
-some time. It is suggested to selecte a reasonably large sample size per
-cell type before the model fitting.
+some time. It is suggested to select a reasonable sample size
+(e.g. \<10000 per cell type) before the model fitting, as more cells may
+not be needed improve the estimation. Similarly, if some genes are
+extremely zero-inflated, narrowing the simulation to reasonbly variable
+genes is an option.
 
 ``` r
 
@@ -59,8 +62,10 @@ ModelEst=Est_ModelPara(expr=expr, anno=anno, sim_method='copula', ncores=10)
 saveRDS(ModelEst, file="Github/sCCIgen_data/real_data_est/snRNAseq/snRNAseq_breast_2025_fit_w_cor.RDS")
 ```
 
-Note: Additional tasks are available for simulations with spatial input
-(not not snRNAseq based) [here](Rpackage_SRT.md).
+Note: When snRNAseq is used as the only input dataset, users cannot
+estimate the cells’ spatial patterns and interactions from the data.
+Users can specify parameters in simulation to build in additional
+variations.
 
 ### 4. Develop a parameter file
 
