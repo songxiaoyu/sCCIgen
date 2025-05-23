@@ -18,17 +18,13 @@ run_interactive_sCCIgen_R1 <- function() {
 
         shiny::tabPanel("Download a pre-simulated dataset",
                         shiny::radioButtons(inputId = "dataset",
-                                            label = "Select a pre-simulated spatial transcriptomics dataset to download.
-                                            These pre-simulated data include 5% spatial differential expressed genes in one cell
-                                            type, 5% interaction changed genes in one cell type that are associated with the
-                                            proximity of another cell type, and 5% interaction changed genes in cell-type pair that
-                                            are associated with each other in the neighboring cells.",
+                                            label = "Select a pre-simulated spatial transcriptomics dataset to download.",
                                             choices = c("Simulated data for 4,751 genes in 4,000 cells of 6 cell types
                                                         in two regions on a unit square, using normal breast data profiled by
                                                         snRNAseq as reference." = "example1",
-                                                        "Simulated data for 10,000 genes in 500 spots of 6 cell types, using
+                                                        "Simulated data for 2,500 genes in 500 spots of 6 cell types, using
                                                         mouse brain data profiled by SeqFISH+ as reference." = "example2",
-                                                        "<<To be revised>> Simulated data for 550 genes in 10,000 cells of 6 cell types, using
+                                                        "Simulated data for 550 genes in 10,000 cells of 6 cell types, using
                                                         human ovarian cancer data profiled by MERFISH as reference." = "example3"),
                                             width = "100%",
                                             selected = character(0)
@@ -72,7 +68,7 @@ run_interactive_sCCIgen_R1 <- function() {
                                                         adipocyte, fibroblast, endothelial cell, immune (myeloid) and
                                                         muscle). PMID: 35549429" = "snRNAseq_breast_2025",
                                                         "Normal mouse brain SeqFISH+ data: It includes (1) count matrix
-                                                        for 2,000 highly variable genes by 511 cells of 6 cell types (excitatory neuron,
+                                                        for 2,500 highly variable genes by 511 cells of 6 cell types (excitatory neuron,
                                                         interneuron, astrocyte, microglia, oligodendrocyte and
                                                         endothelial cells), and (2) cell feature matrix including cell
                                                         type annotation, spatial coordinate on 2D (x, y), and field of view.

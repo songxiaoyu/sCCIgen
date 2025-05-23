@@ -51,7 +51,7 @@ Note: If the number of genes or cells are large, model fitting may take some tim
 ModelEst=Est_ModelPara(expr=expr, anno=anno, sim_method='ind', ncores=10)
 saveRDS(ModelEst, file="Github/sCCIgen_data/real_data_est/SeqFishPlus/SeqFishPlusCortex_2025_fit_wo_cor.RDS")
 
-````
+```
 
 
 #### Task 2: Estimate CCIs in the input data following the existing Giotto pipeline.
@@ -75,7 +75,7 @@ ExprDistanceTable(gobject=db, in_hvg=T, region_specific=F, abs_log2fc_ICG=0.25, 
 
 ExprExprTable(gobject=db, database="mouse", region_specific=F, p_adj=0.05, abs_log2fc_LR=0.25,
         save_folder="Github/sCCIgen_data/real_data_est/SeqFishPlus")
-````
+```
 
 
 #### Task 3: Estimate spatial region specific genes.
@@ -83,7 +83,7 @@ ExprExprTable(gobject=db, database="mouse", region_specific=F, p_adj=0.05, abs_l
 # Estimate spatial region specific genes.
 SpatialTable(gobject, top_num=2, fdr_cut=0.05, save_folder="Github/sCCIgen_data/real_data_est/SeqFishPlus")
 
-````
+```
 
 ### 4. Develop a parameter file
 
@@ -114,7 +114,7 @@ input="Github/sCCIgen_data/sample_parameter_file/SRT/SeqFishPlus_LR.tsv"
 ParaSimulation(input=input, ModelFitFile=model_param_path)
 
 
-````
+```
 
 
 

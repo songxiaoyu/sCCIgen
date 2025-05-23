@@ -2,40 +2,10 @@
 output: github_document
 ---
 <!-- README.md is generated from README.Rmd. Please edit that file -->
+## Tutorial for simuation with `sCCIgen` interactive interface. 
 
- Run `sCCIgen` with an Interactive Interface on Docker
 
-### 1. Installation
-1. An installation of  `Docker Desktop` is highly recommended, especially for beginners. Docker can be downloaded at https://www.docker.com. 
-
-2. `sCCIgen` uses command line prompts, such as through `Terminal` in Mac. You might want to download your favorite software to run command line. My favorite is Visual Studio Code (`VSC`). If `VSC` is used, Docker needs to be installed in its Extension. I will use `VSC` for this tutorial. 
-
-<!-- 3. Clone `sCCIgen` repository to your local machine, such as on `Terminal` type
-```
-git clone https://github.com/songxiaoyu/sCCIgen
-```
--->
-
-### 2. Run Docker
-1. Open Docker Desktop. 
-
-2. On `VSC` terminal, pull image from the Docker Hub as follows: 
-```
-docker pull songxiaoyu152/st_simulator_test 
-```
-
-3. Run the Docker container directly with a working directory (WORKDIR) bound to your local machine. Note WORKDIR will be the location of all of your input data and your outputs.
-
-```
-docker run --mount type=bind,source="${WORKDIR}",target=/working_directory -it songxiaoyu152/st_simulator_test
-````
-My working directory is "/Users/songxiaoyu152/Dropbox/SpatialTranscriptomics/Paper_Simulator/UseDocker", so this is my code:
-```
-docker run --mount type=bind,source=/Users/songxiaoyu152/Dropbox/SpatialTranscriptomics/Paper_Simulator/UseDocker,target=/working_directory -it songxiaoyu152/st_simulator_test
-```
-
-### 3. Open the interacive interface and choose the tasks of interest.
-In R (or R Studio), run 
+In R (or R Studio), open the Rshiny interface by running: 
 
 ```R
 library(sCCIgen)
