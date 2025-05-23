@@ -20,7 +20,45 @@ expressions, and gene-gene interactions between nearby cells.
 
 Reference: XS… ““.
 
-## 2. Options
+## 2. Installation
+
+<!-- 
+### Installation through Docker
+1. An installation of  `Docker Desktop` is highly recommended, especially for beginners. Docker can be downloaded at https://www.docker.com. 
+&#10;2. `sCCIgen` uses command line prompts, such as through `Terminal` in Mac. You might want to download your favorite software to run command line. My favorite is Visual Studio Code (`VSC`). If `VSC` is used, Docker needs to be installed in its Extension. I will use `VSC` for this tutorial. 
+&#10;3. Clone `sCCIgen` repository to your local machine, such as on `Terminal` type
+```
+git clone https://github.com/songxiaoyu/sCCIgen
+```
+&#10;3. Open Docker Desktop. 
+&#10;4. On `VSC` terminal, pull image from the Docker Hub as follows: 
+```
+docker pull songxiaoyu152/sCCIgen
+```
+&#10;3. Run the Docker container directly with a working directory (WORKDIR) bound to your local machine. Note WORKDIR will be the location of all of your input data and your outputs.
+&#10;```
+docker run --mount type=bind,source="${WORKDIR}",target=/working_directory 
+  -it songxiaoyu152/sCCIgen
+````
+For example, my working directory is "/Users/songxiaoyu152/NUS Dropbox/Xiaoyu Song/SpatialTranscriptomics/Paper_sCCIgen/Github/sCCIgen/UseDocker", 
+so this is my code:
+```
+docker run --mount type=bind,source=/Users/songxiaoyu152/NUS Dropbox/Xiaoyu Song/SpatialTranscriptomics/Paper_sCCIgen/Github/sCCIgen/UseDocker,target=/working_directory 
+  -it songxiaoyu152/sCCIgen
+````
+&#10;
+&#10;### Installation of the R package instead 
+&#10;Alternatively, users can also install the latest version from GitHub with [devtools](https://github.com/hadley/devtools):
+-->
+
+``` r
+install.packages("devtools")
+devtools::install_github("songxiaoyu/sCCIgen")
+# If the built-in sCCIgen data is needed for your simulation, load this package as well.
+devtools::install_github("songxiaoyu/sCCIgen_data")
+```
+
+## 3. Simulation options
 
 Users have two options to perform SRT simulations using `sCCIgen`.
 Depending on preference, Users can choose to use:
@@ -53,3 +91,9 @@ Depending on preference, Users can choose to use:
   - [Tutorials for using the R package to simulate SRT based on
     single-cell expression and unpaired spatial
     data.](https://github.com/songxiaoyu/sCCIgen/tree/main/Rmd/Rpackage_unpaired.md)
+
+## 4. SessionInfo
+
+``` r
+sessionInfo("sCCIgen")
+```
