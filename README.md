@@ -23,14 +23,14 @@ Reference: XS… ““.
 ## 2. Options
 
 Users have two options to perform SRT simulations using `sCCIgen`.
-Depending on preference, you can choose to use:
+Depending on preference, Users can choose to use:
 
-- **An interactive interface.** The interface helps you to choose tasks,
-  data, and parameters, and lets `sCCIgen` run to provide you simulated
-  data, with parameters and documentations, saved in your working
-  directory. As simulations usually involve many parameters, this option
-  is highly recommended for the first time user or researchers with
-  limited programming expertise.
+- **An interactive interface.** The interface helps users to choose
+  tasks, data, and parameters, and lets `sCCIgen` run simulations to
+  provide simulated data, together with parameters and documentations,
+  saved in the working directory. As simulations usually involve many
+  parameters, this option is highly recommended for the first time user
+  or researchers with limited programming expertise.
   - [Tutorials for using the interface to simulate SRT based on snRNAseq
     data.](https://github.com/songxiaoyu/sCCIgen/tree/main/Rmd/Interface_snRNAseq.md)
   - [Tutorials for using the interface to simulate SRT based on
