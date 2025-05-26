@@ -149,7 +149,21 @@ Use_scDesign2=function(ppp.obj,
 
     Runiq=unique(region)
 
+
+    # borrow info from other regions, if a cell type does not exist in a region in the real data but generated in simulated data.
+    ct_NA=sapply(model_params, function(f) sapply(f, function(f2) is.null(f2[[1]]) ))
+    ct_error=sapply(model_params, function(f) sapply(f, function(f2) inherits(f2, "try-error") ))
+    ct_prob=rbind(which(ct_NA, arr.ind = TRUE), which(ct_error, arr.ind = TRUE))
+    for (i in seq_len(nrow(ct_prob))) {
+      col_idx <- ct_prob[i, "col"]
+      row_idx <- ct_prob[i, "row"]
+      replace_cols <- which(!ct_NA[row_idx, ])[1]
+      model_params[[col_idx]][[row_idx]]=model_params[[replace_cols]][[row_idx]]
+    }
+
     sim.count= foreach (r = 1:length(Runiq)) %dopar% {
+      print(r)
+
 
       Use_scDesign2_1region(ppp.obj1=ppp.obj[[r]],
                                            Genes=Genes,
@@ -240,7 +254,7 @@ Add.Spatial.Expr.Pattern= function(sim.count,
   SignalSummary=data.frame(Type="SpatialChange", Region=r, CellType, GeneID,
                            AdjCellType="NA",
                            AdjGene="NA", beta)
-  beta.matrix[[idx]][GeneID,CellID] = beta +  beta.matrix[[idx]][GeneID,CellID]
+  beta.matrix[[idx]][GeneID,CellID, drop=F] = beta +  beta.matrix[[idx]][GeneID,CellID, drop=F]
 
   return(list(SignalSummary=SignalSummary, beta.matrix=beta.matrix))
 }
@@ -344,10 +358,10 @@ Add.Distance.Asso.Pattern = function(ppp.obj,
       N_a=sum(N0[1:(i+1)])
       idx=seq(N_b+1, N_a)
       idx1=nbr.idx[,1][which(nbr.idx[,1] %in% idx)]-N_b
-      temp= beta +  beta.matrix[[i]][GeneID, idx1]
+      temp= beta +  beta.matrix[[i]][GeneID, idx1, drop = FALSE]
       colnames(temp)=idx1
       temp2=sapply(1:nrow(temp), function(f) tapply(temp[f,], idx1, sum))
-      beta.matrix[[i]][GeneID, as.numeric(rownames(temp2))] =t(temp2)
+      beta.matrix[[i]][GeneID, as.numeric(rownames(temp2)), drop = FALSE] =t(temp2)
     }
   } else {  # add interaction in one region
     idx_r=which(names(sim.count)==r)
@@ -356,10 +370,11 @@ Add.Distance.Asso.Pattern = function(ppp.obj,
                                                              adjacent.cell.type),
                                 int.dist.threshold=int.dist.threshold)
     idx1=nbr.idx[,1]
-    temp= beta +  beta.matrix[[idx_r]][GeneID,idx1]
+
+    temp= beta +  beta.matrix[[idx_r]][GeneID,idx1, drop = FALSE]
     colnames(temp)=idx1
-    temp2=sapply(1:nrow(temp), function(f) tapply(temp[f,], idx1, sum))
-    beta.matrix[[i]][GeneID, as.numeric(rownames(temp2))] =t(temp2)
+    temp2=sapply(1:nrow(temp), function(f) tapply(temp[f,], idx1, sum)) # sum signals from all neigbhors
+    beta.matrix[[i]][GeneID, as.numeric(rownames(temp2)), drop = FALSE] =t(temp2)
 
   }
 

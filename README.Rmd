@@ -55,9 +55,6 @@ Alternatively, users can also install the latest version from GitHub with [devto
 ```R
 install.packages("devtools")
 devtools::install_github("songxiaoyu/sCCIgen")
-# If the built-in sCCIgen data is needed for your simulation, load this package as well.
-devtools::install_github("songxiaoyu/sCCIgen_data")
-
 ````
 
 ## 3. Simulation options

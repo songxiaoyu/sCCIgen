@@ -194,15 +194,16 @@ scDesign2.revised <- function(model_params,
   new_count <- matrix(0, nrow = p, ncol = n_cell_new)
 
 
-  r <- rep(depth_simu_ref_ratio, n_cell_type)
+  ratio <- rep(depth_simu_ref_ratio, n_cell_type)
 
-  for(iter in 1:n_cell_type)
+  for(iter in 1:n_cell_type) {
+    print(iter)
     if(n_cell_each[iter] > 0){
       ulim <- sum(n_cell_each[1:iter])
       llim <- ulim - n_cell_each[iter] + 1
       params_new <- model_params[[iter]]
-      params_new$marginal_param1[, 3] <- params_new$marginal_param1[, 3] * r[iter]
-      params_new$marginal_param2[, 3] <- params_new$marginal_param2[, 3] * r[iter]
+      params_new$marginal_param1[, 3] <- params_new$marginal_param1[, 3] * ratio[iter]
+      params_new$marginal_param2[, 3] <- params_new$marginal_param2[, 3] * ratio[iter]
       if(sim_method == 'copula'){
         new_count[, llim:ulim] <- simulate_count_copula(copula_result=params_new,
                                                         n = n_cell_each[iter],
@@ -212,8 +213,9 @@ scDesign2.revised <- function(model_params,
                                                      n = n_cell_each[iter],
                                                      marginal = 'nb')
       }
-
     }
+  }
+
   if(is.null(names(model_params))){
     colnames(new_count) <- unlist(lapply(1:n_cell_type, function(x){rep(x, n_cell_each[x])}))
   }else{
