@@ -54,8 +54,6 @@ docker run --mount type=bind,source=/Users/songxiaoyu152/NUS Dropbox/Xiaoyu Song
 ``` r
 install.packages("devtools")
 devtools::install_github("songxiaoyu/sCCIgen")
-# If the built-in sCCIgen data is needed for your simulation, load this package as well.
-devtools::install_github("songxiaoyu/sCCIgen_data")
 ```
 
 ## 3. Simulation options
@@ -69,14 +67,8 @@ Depending on preference, Users can choose to use:
   saved in the working directory. As simulations usually involve many
   parameters, this option is highly recommended for the first time user
   or researchers with limited programming expertise.
-  - [Tutorials for using the interface to simulate SRT based on snRNAseq
-    data.](https://github.com/songxiaoyu/sCCIgen/tree/main/Rmd/Interface_snRNAseq.md)
-  - [Tutorials for using the interface to simulate SRT based on
-    single-cell SRT
-    data.](https://github.com/songxiaoyu/sCCIgen/tree/main/Rmd/Interface_SRT.md)
-  - [Tutorials for using the interface to simulate SRT based on
-    single-cell expression and unpaired spatial
-    data.](https://github.com/songxiaoyu/sCCIgen/tree/main/Rmd/Interface_unpaired.md)
+  - [Tutorials for using the interface to simulate
+    SRT.](https://github.com/songxiaoyu/sCCIgen/tree/main/Rmd/Interface.md)
 - **R package.** A direct use of `sCCIgen` package offers greater
   flexibility, allowing users to adjust more parameters that would
   otherwise be fixed at default values. It also enables the output of

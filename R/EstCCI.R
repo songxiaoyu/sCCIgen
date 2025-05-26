@@ -144,7 +144,6 @@ ExprDistanceTable = function(gobject, in_hvg=F, output_file=file.path(getwd(), "
 
     res=NULL
     for (r in R) {
-      print(r)
       cell_id_r=cell_meta[which(cell_meta[,3] == r), 1] %>% as.matrix()
       dat_r <- subsetGiotto(gobject = gobject, cell_ids = cell_id_r )
       res1=ExprDistanceTable_1region(gobject=dat_r, r=r, cell_meta=cell_meta,
@@ -196,7 +195,6 @@ ExprDistanceTable_1region = function (gobject, r, cell_meta, abs_log2fc_ICG=0.25
     # <Region>,<Perturbed cell type>,<Adjacent cell type>,<Interaction distance threshold (default 0.1)>,
     # <Gene ID (optional)>,<Gene proportion (optional)>,<Mean effect at log(count) scale (default = 0.5)>,
     # <SD of effect at log(count) scale (default = 0)>
-    print(dim(df_merged))
     res=data.frame(r, df_merged[,c("cell_type", "int_cell_type", "threshold","feats")], "NULL", df_merged$log2fc, 0)
 
     return(res)

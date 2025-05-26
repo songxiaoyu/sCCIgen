@@ -5,7 +5,6 @@
 
 ``` r
 library(sCCIgen)
-library(sCCIgen_data)
 ```
 
 ### 2. Load and clean sample data
@@ -59,7 +58,7 @@ saveRDS(ModelEst, file="Github/sCCIgen_data/real_data_est/SeqFishPlus/SeqFishPlu
 #### Task 2: Estimate CCIs in the input data following the existing Giotto pipeline.
 
 ``` r
-
+library(Giotto)
 # Preprocess data with Giotto pipeline
 db=preprocessGiotto(expr_data=expr, spatial_data=spatial, run_hvg=T, 
                       run_kNN_network=T, run_Delaunay_network=T) 
@@ -69,13 +68,13 @@ cellProximityTable(gobject=db, abs_enrichm=0.3, p_adj = 0.05,
                   output_file="Github/sCCIgen_data/real_data_est/SeqFishPlus/est_CCI_dist_dist_region.csv")
                   
 # Estimate gene expressions of cells impacted by their neighbors, and save in pre-defined folder                 
-ExprDistanceTable(gobject=db, in_hvg=T, region_specific=T, abs_log2fc_ICG=1, p_adj = 0.05,
+ExprDistanceTable(gobject=db, in_hvg=T, region_specific=T, abs_log2fc_ICG=0.3, p_adj = 0.05,
                   output_file="Github/sCCIgen_data/real_data_est/SeqFishPlus/est_CCI_dist_expr_region.csv")                 
 
 # Estimate gene expressions of cells impacted by gene expressions of neighboring cells, narrow to 
 #  known pairs, such as ligand and receptor pairs, and save in pre-defined folder  
 
-ExprExprTable(gobject=db, database="mouse", region_specific=T, p_adj=0.05, abs_log2fc_LR=1,
+ExprExprTable(gobject=db, database="mouse", region_specific=T, p_adj=0.05, abs_log2fc_LR=0.3,
         output_file="Github/sCCIgen_data/real_data_est/SeqFishPlus/est_CCI_expr_expr_region.csv")
 ```
 
@@ -83,7 +82,7 @@ ExprExprTable(gobject=db, database="mouse", region_specific=T, p_adj=0.05, abs_l
 
 ``` r
 # Estimate spatial region specific genes.
-SpatialTable(gobject, top_num=2, fdr_cut=0.05, output_file="Github/sCCIgen_data/real_data_est/SeqFishPlus/est_CCI_expr_expr_region.csv")
+SpatialTable(gobject=db, top_num=2, fdr_cut=0.05, output_file="Github/sCCIgen_data/real_data_est/SeqFishPlus/est_CCI_expr_expr_region.csv")
 ```
 
 ### 4. Develop a parameter file
@@ -101,21 +100,7 @@ simulation using codes like this:
 ``` r
 model_param_path="Github/sCCIgen_data/real_data_est/SeqFishPlus/SeqFishPlusCortex_fit_wo_cor_region.RDS"
 
-# Simulate default data - using existing cells but simulate expression with ground truth
-input="Github/sCCIgen_data/sample_parameter_file/SRT/SeqFishPlus_default.tsv"
-ParaSimulation(input=input, ModelFitFile=model_param_path)
-
-# Simulate new cells and genes where genes have region specific expressions 
-input="Github/sCCIgen_data/sample_parameter_file/SRT/SeqFishPlus_RegionDiffGenes.tsv"
-ParaSimulation(input=input, ModelFitFile=model_param_path)
-
-# Simulate new cells and genes where expression of genes are associated with distances to other cells. 
-input="Github/sCCIgen_data/sample_parameter_file/SRT/SeqFishPlus_ICGs.tsv"
-ParaSimulation(input=input, ModelFitFile=model_param_path)
-
-
-# Simulate new cells and genes where expression of genes are associated with distances to other cells. 
-input="Github/sCCIgen_data/sample_parameter_file/SRT/SeqFishPlus_LR.tsv"
+input="Github/sCCIgen_data/sample_parameter_file/SRT/SeqFishPlus_Region_AllPattern.tsv"
 ParaSimulation(input=input, ModelFitFile=model_param_path)
 
 ```

@@ -190,9 +190,7 @@ Find.Neighbor.Pairs=function(ppp.obj,
   m=spatstat.geom::crossdist(cell.loc[cell1.idx,1], cell.loc[cell1.idx,2],
                              cell.loc[cell2.idx,1],cell.loc[cell2.idx,2])
   # in neighbor or not?
-  dmax=max( max(ppp.obj$x)-min(ppp.obj$x), max(ppp.obj$y)-min(ppp.obj$y))
-
-  neighbo.loc.idx=which(m< (int.dist.threshold*dmax), arr.ind = TRUE)
+  neighbo.loc.idx=which(m< (int.dist.threshold), arr.ind = TRUE)
 
   # index in original data
   nbr.idx=cbind(cell1.idx[neighbo.loc.idx[,1]],   cell2.idx[neighbo.loc.idx[,2]])
@@ -249,12 +247,12 @@ Add.Spatial.Expr.Pattern= function(sim.count,
   # GeneID
   if (is.null(GeneID)) {GeneID=sample(GeneAll, round(PropOfGenes * G))}
 
-  CellID=which(colnames(beta.matrix[[idx]])== CellType )
+  CellID=grep(CellType, colnames(beta.matrix[[idx]]))
   beta=stats::rnorm(length(GeneID), delta.mean, delta.sd)
   SignalSummary=data.frame(Type="SpatialChange", Region=r, CellType, GeneID,
                            AdjCellType="NA",
                            AdjGene="NA", beta)
-  beta.matrix[[idx]][GeneID,CellID, drop=F] = beta +  beta.matrix[[idx]][GeneID,CellID, drop=F]
+  beta.matrix[[idx]][GeneID, CellID] = beta
 
   return(list(SignalSummary=SignalSummary, beta.matrix=beta.matrix))
 }
@@ -361,7 +359,7 @@ Add.Distance.Asso.Pattern = function(ppp.obj,
       temp= beta +  beta.matrix[[i]][GeneID, idx1, drop = FALSE]
       colnames(temp)=idx1
       temp2=sapply(1:nrow(temp), function(f) tapply(temp[f,], idx1, sum))
-      beta.matrix[[i]][GeneID, as.numeric(rownames(temp2)), drop = FALSE] =t(temp2)
+      beta.matrix[[i]][GeneID, as.numeric(rownames(temp2))] =t(temp2)
     }
   } else {  # add interaction in one region
     idx_r=which(names(sim.count)==r)
@@ -374,7 +372,7 @@ Add.Distance.Asso.Pattern = function(ppp.obj,
     temp= beta +  beta.matrix[[idx_r]][GeneID,idx1, drop = FALSE]
     colnames(temp)=idx1
     temp2=sapply(1:nrow(temp), function(f) tapply(temp[f,], idx1, sum)) # sum signals from all neigbhors
-    beta.matrix[[i]][GeneID, as.numeric(rownames(temp2)), drop = FALSE] =t(temp2)
+    beta.matrix[[idx_r]][GeneID,as.numeric(rownames(temp2))] = t(temp2)
 
   }
 
