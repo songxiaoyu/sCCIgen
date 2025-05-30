@@ -1,0 +1,78 @@
+---
+title: "Running a simulation based on unpaired expression and spatial data"
+output: 
+  html_document:
+    number_sections: true
+    toc: true
+pkgdown:
+  as_is: true
+vignette: >
+  %\VignetteIndexEntry{Running a simulation based on unpaired expression and spatial data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+This tutorial will run a simulation with `sCCIgen` without the interactive interface based on unpaired expression and spatial data. 
+
+# Load R package 
+
+```{r, eval=FALSE}
+library(sCCIgen)
+```
+
+
+# Load and clean sample data 
+
+Download sample data from https://github.com/songxiaoyu/sCCIgen_data/tree/main/input_data. 
+
+```{r, eval=FALSE}
+# This is a subset of MERFISH OV cancer dataset with 1000 cells' expression and 500 cells spatial map.
+load("Github/sCCIgen_data/input_data/MERFISH_OV_2025_unpaired_expr.Rdata")
+load("Github/sCCIgen_data/input_data/MERFISH_OV_2025_unpaired_spatial.Rdata")
+anno <- colnames(expr)
+
+dim(expr)
+expr[1:3, 1:3]
+dim(spatial)
+# Note: Number of cells in expression data and spatial data are not the same, 
+# as they are used to mimic data from different experiments.
+```
+
+# Analysis of the existing data to provide insights into the parameters of the simulation
+
+
+This is part is to fit the expression data. When sim_method=="copula", it will fit both the gene marginal distribution and gene-gene correlation. When sim_method=="ind", it will only fit the gene marginal distribution. 
+
+Note: If the number of genes or cells are large, model fitting may take some time. It is suggested to select a reasonable sample size (e.g. <10000 per cell type) before the model fitting, as more cells may not be needed improve the estimation. Similarly, if some genes are extremely zero-inflated, narrowing the simulation to reasonbly variable genes is an option. 
+
+## Task 1: Estimate model parameters from the snRNAseq for simulation
+
+This is part is to fit the expression data. When sim_method=="copula", it will fit both the gene marignal distribution and gene-gene correlation. When sim_method=="ind", it will only fit the gene marginal distribution. 
+
+Note: If the number of genes or cells are large, model fitting may take some time. It is suggested to select a reasonably large sample size per cell type before the model fitting. 
+
+```{r, eval=FALSE}
+# model fitting
+ModelEst <- Est_ModelPara(expr = expr, 
+                          anno = anno, 
+                          sim_method = "ind", 
+                          ncores = 10)
+
+saveRDS(ModelEst, file = "Unpaired_fit_wo_cor.RDS")
+```
+
+# Create a parameter file
+
+Users need to create a parameter file. The sample parameter file for snRNAseq based simulation is [here](https://github.com/songxiaoyu/sCCIgen_data/tree/main/sample_parameter_file/Unpaired) for downloading and filling in to perform simulations. 
+ 
+# Perform the entire simulation and save the results
+Assuming you already have a parameter file, you can run the entire simulation using codes like this:
+
+```{r, eval=FALSE}
+model_param_path <- "Unpaired_fit_wo_cor.RDS"
+
+# Simulate default data - using existing cells but simulate expression with ground truth
+input <- "MERFISH_default.tsv"
+
+ParaSimulation(input = input, ModelFitFile = model_param_path)
+```

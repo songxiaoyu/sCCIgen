@@ -1,0 +1,70 @@
+url: https://songxiaoyu.github.io/sCCIgen/
+
+authors:
+  Xiaoyu Song:
+    href: https://github.com/songxiaoyu/sCCIgen
+  Joselyn C. Chávez-Fuentes:
+    href: https://josschavezf.github.io
+
+
+template:
+  bootstrap: 5
+
+navbar:
+  bg: light
+  structure:
+    left:
+    - get_started
+    - reference
+    - articles
+    - news
+    right:
+    - search
+    - github
+  components:
+    get_started:
+      text: Get started
+      menu:
+      - text: Installation
+        href: articles/installation.html
+    reference:
+      text: Documentation
+      href: reference/index.html
+    articles:
+      text: Tutorials
+      menu:
+      - text: Running a simulation using the interactive interface
+        href: articles/Interface.html
+      - text: Running a simulation based on snRNAseq data
+        href: articles/Rpackage_snRNAseq.html
+      - text: Running a simulation based on SRT data
+        href: articles/Rpackage_SRT.html
+      - text: Running a simulation based on SRT data region
+        href: articles/Rpackage_SRT_region.html
+      - text: Running a simulation based on unpaired expression and spatial data
+        href: articles/Rpackage_unpaired.html
+    news:
+      text: News
+      href: news/index.html
+    github:
+      icon: fab fa-github fa-lg
+      href: https://github.com/songxiaoyu/sCCIgen/
+      aria-label: github
+
+articles:
+- title: Get started
+  navbar: ~
+  contents:
+  - installation
+- title: Tutorials
+  navbar: ~
+  contents:
+  - Interface
+  - Rpackage_snRNAseq
+  - Rpackage_SRT
+  - Rpackage_SRT_region
+  - Rpackage_unpaired
+
+home:
+  sidebar:
+    structure: [links, license, citation, authors]

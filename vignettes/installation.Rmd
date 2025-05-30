@@ -1,0 +1,34 @@
+---
+title: "Installation"
+output: 
+  html_document:
+    number_sections: false
+    toc: true
+pkgdown:
+  as_is: true
+vignette: >
+  %\VignetteIndexEntry{Installation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# Installation of sCCIgen
+
+```{r, eval=FALSE}
+install.packages("devtools")
+
+devtools::install_github("songxiaoyu/sCCIgen")
+```
+
+or
+
+```{r, eval=FALSE}
+install.packages("remotes")
+
+remotes::install_github("songxiaoyu/sCCIgen")
+```
+
+# Help
+
+Encountering errors? Post to an issue to the Giotto GitHub page [here](https://github.com/songxiaoyu/sCCIgen). Please include the version numbers of R, sCCIgen, and the OS in use at the time of the issue.
+
