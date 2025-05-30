@@ -1,14 +1,18 @@
 Package: sCCIgen
 Title: sCCIgen: A high-fidelity spatially resolved transcriptomics data simulator for cell-cell interaction studies.
 Version: 1.0
-Authors@R: 
-    person("Xiaoyu", "Song", , "songxiaoyu152@gmail.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
+Authors@R: c(
+    person("Xiaoyu", "Song", email = "songxiaoyu152@gmail.com", role = c("aut", "cre")),
+	person("Joselyn C.", "Chávez-Fuentes", email = "joselynchavezf@gmail.com",
+		 role = c("aut"), comment = c(ORCID = "0000-0002-4974-4591")))
 Description: A high-fidelity spatially resolved transcriptomics data simulator for cell-cell interaction studies.
 License: GPL (>= 3)
 Encoding: UTF-8
+URL: https://songxiaoyu.github.io/sCCIgen/, https://github.com/songxiaoyu/sCCIgen/
+BugReports: https://github.com/songxiaoyu/sCCIgen/issues
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
+VignetteBuilder: knitr
 Imports: 
     config,
     data.table,
