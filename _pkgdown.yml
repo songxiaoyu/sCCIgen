@@ -27,6 +27,8 @@ navbar:
       menu:
       - text: Installation
         href: articles/installation.html
+      - text: Using sCCIgen Docker image
+        href: articles/docker.html
     reference:
       text: Documentation
       href: reference/index.html
@@ -56,6 +58,7 @@ articles:
   navbar: ~
   contents:
   - installation
+  - docker
 - title: Tutorials
   navbar: ~
   contents:

@@ -1,0 +1,66 @@
+---
+title: "Using sCCIgen Docker image"
+output: 
+  html_document:
+    number_sections: false
+    toc: true
+pkgdown:
+  as_is: true
+vignette: >
+  %\VignetteIndexEntry{Using sCCIgen Docker image}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+We have created a Docker image that will display an RStudio window on your local browser where you can run the sCCIgen commands and use the interactive Shiny app.
+
+# Clone the Docker image
+
+Run the following command in your bash terminal:
+
+```{bash, eval=FALSE}
+docker pull sccigenpackage/sccigen:latest 
+```
+
+# Place the files that you will use for the simulation into a known folder
+
+We need to create a directory to place the expression data and other files used while working with sCCIgen.
+
+You can use terminal command or your preferred method to create a new directory. If you already have a previous data directory, skip this step.
+
+```{bash, eval=FALSE}
+mkdir Documents/my_wd
+```
+
+# Start the image
+
+Run the following command to start the interactive sCCIgen image, the -v option will connect your data folder with the docker working directory to read files while running RStudio.
+
+```{bash, eval=FALSE}
+docker run -e PASSWORD=mypassword -p 8787:8787 -v /path/on/host:/home/rstudio/ sccigenpackage/sccigen
+```
+
+Note that you need to replace the "/path/on/host" with the absolute path to your data directory that contains the files you want the docker image to have access to (e.g. Users/joselynchavez/Documents/my_wd/:/home/rstudio/).
+
+# Open your preferred browser
+
+Once the image starts running, open your preferred browser and look for this address:
+
+```{bash, eval=FALSE}
+localhost:8787
+```
+
+Use the following credentials to sign in:
+
+user: rstudio
+password: mypassword
+
+# Load sCCIgen
+
+Use the R commands to start running simulations with sCCIgen.
+
+```{r, eval=FALSE}
+library(sCCIgen)
+```
+
+
