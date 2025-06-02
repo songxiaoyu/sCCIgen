@@ -680,7 +680,7 @@ run_interactive_sCCIgen_R1 <- function() {
                                <cell_type_A>,<cell_type_B>,<value>. Separate the entries by blank space
                                (e.g. 'cell_type_A,cell_type_B,1.2 cell_type_B,cell_type_C,-0.8').
 
-                               Alternatively, select a file separated by commas, where each line is an
+                               Alternatively, select a file separated by commas, without header, where each line is an
                                entry with the format described above.",
                                    width = "100%")
                 })
@@ -756,9 +756,10 @@ run_interactive_sCCIgen_R1 <- function() {
                                                 gsub("/wd", "",
                                                      paste(unlist(input$file_custom_interaction_file),
                                                            collapse = "/"))),
-                                         header = TRUE, sep = ",")
+                                         header = FALSE, sep = ",")
 
                       if(ncol(x_df) == 3) {
+                        colnames(x_df) <- c("cell_type_A", "cell_type_B", "value")
                         x_df$join <- paste(x_df$cell_type_A, x_df$cell_type_B, x_df$value,
                                            sep = ",")
 
@@ -945,7 +946,7 @@ run_interactive_sCCIgen_R1 <- function() {
                 shiny::observeEvent(input$read_file_customcellproportions,{
                   x_df <- read.delim(paste0(getwd(),
                                             gsub("/wd", "", paste(unlist(input$file_customcellproportions), collapse = "/"))),
-                                     header = TRUE, sep = ",")
+                                     header = FALSE, sep = ",")
 
                   if(ncol(x_df) == 3) {
                     colnames(x_df) <- c("region", "annotation", "proportion")
@@ -1103,7 +1104,7 @@ run_interactive_sCCIgen_R1 <- function() {
                                             gsub("/wd", "",
                                                  paste(unlist(input$file_custom_interaction_file),
                                                        collapse = "/"))),
-                                     header = TRUE, sep = ",")
+                                     header = FALSE, sep = ",")
 
                   if(ncol(x_df) == 3) {
                     colnames(x_df) <- c("cell_type_A", "cell_type_B", "value")
@@ -1341,7 +1342,7 @@ run_interactive_sCCIgen_R1 <- function() {
                                                     paste(unlist(input$file_spatialpatterns),
                                                           collapse = "/"))),
                                  sep = ",",
-                                 header = TRUE)
+                                 header = FALSE)
 
               if(ncol(x_df) == 6) {
                 colnames(x_df) <- c("region", "annotation", "gene_id",
@@ -1532,7 +1533,7 @@ run_interactive_sCCIgen_R1 <- function() {
                                                     paste(unlist(input$file_cellcellinteractionexpression),
                                                           collapse = "/"))),
                                  sep = ",",
-                                 header = TRUE)
+                                 header = FALSE)
 
               if(ncol(x_df) == 7) {
                 x_df$region <- rep("NULL", nrow(x_df))
@@ -1746,7 +1747,7 @@ run_interactive_sCCIgen_R1 <- function() {
                                         gsub("/wd", "",
                                              paste(unlist(input$file_cellcellinteraction_neighborhood),
                                                    collapse = "/"))),
-                                 header = TRUE, sep = ",")
+                                 header = FALSE, sep = ",")
 
               if(ncol(x_df) == 9) {
                 x_df$region <- rep("NULL", nrow(x_df))
