@@ -163,13 +163,29 @@ ParaCellsNoST=function(para, seed_list){
 ParaCellsST=function(para, spatial, seed_list) {
 
   if (ncol(spatial)==4) {R=spatial[,4]} else {R=rep(NA, nrow(spatial))}
+
+
+  # determine cell cell attraction/inhibition
+
+  if (custom_cell_location_interactions=="TRUE") {
+    tmp1=para[,grep("cell_interaction_", names(para))]%>%
+      as.matrix() %>% t()
+
+    tmp2=apply(tmp1, 1, function(f) strsplit(f, split = ","))
+    tmp3=as.data.frame(matrix(unlist(tmp2),ncol=3,byrow=T))
+    class(tmp3$V3)="numeric"
+    cell.inh.attr.input1=tmp3
+  } else {cell.inh.attr.input1=NULL}
+
+
   cell_loc=foreach (i = 1:num_simulated_datasets) %dopar% {
     cell.loc.model.fc(n=num_simulated_cells,
                                     PointLoc=spatial[,c(2:3)],
                                     PointAnno=spatial[,1],
                                     PointRegion=R,
                                     window_method=window_method,
-                                    seed=seed_list[[i]])
+                                    seed=seed_list[[i]],
+                      cell.inh.attr.input1=cell.inh.attr.input1)
   }
   return(cell_loc)
 }
@@ -411,7 +427,6 @@ ParaExpr=function(para, cell_loc_list, expr, region,
       write_tsv(as.data.frame(output2$count)%>% rownames_to_column("GeneName"),
                 file=paste0(save_name, "_count_", i, ".tsv"))
     }
-
 
     print(paste("Finished saving data", i))
 

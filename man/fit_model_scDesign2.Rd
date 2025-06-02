@@ -10,7 +10,7 @@ fit_model_scDesign2(
   sim_method = c("copula", "ind"),
   marginal = c("auto_choose", "zinb", "nb", "poisson"),
   jitter = TRUE,
-  zp_cutoff = 0.8,
+  zp_cutoff = 0.9,
   min_nonzero_num = 3,
   ncores = 1
 )

@@ -9,7 +9,8 @@ Est_ModelPara(
   anno,
   sim_method = c("ind", "copula"),
   region = NULL,
-  ncores = 1
+  ncores = 1,
+  subsetN = NULL
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ Est_ModelPara(
 \item{region}{description}
 
 \item{ncores}{No of cores for parallel computing.}
+
+\item{subsetN}{If the number of cells is large, one can use it to estimate expression distribuitons from subset of cells (e.g. subsetN=2500) per cell type.}
 }
 \value{
 Estimated Gaussian Copula

@@ -10,7 +10,8 @@ cell.loc.model.fc(
   PointAnno,
   PointRegion,
   window_method,
-  seed = NULL
+  seed = NULL,
+  cell.inh.attr.input1 = NULL
 )
 }
 \arguments{

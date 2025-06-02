@@ -23,11 +23,26 @@
 #' @param ncores No of cores for parallel computing.
 #' @param region description
 #' @param sim_method c('ind', 'copula')
+#' @param subsetN If the number of cells is large, one can use it to estimate expression distribuitons from subset of cells (e.g. subsetN=2500) per cell type.
 #' @return Estimated Gaussian Copula
 #' @export
 
-Est_ModelPara <- function(expr, anno, sim_method=c('ind', 'copula'), region=NULL, ncores = 1) {
+Est_ModelPara <- function(expr, anno, sim_method=c('ind', 'copula'), region=NULL, ncores = 1, subsetN=NULL) {
   expr=as.matrix(expr)
+
+  if (is.null(subsetN)==F) {
+    set.seed(123)
+    anno_sub <- unlist(lapply(split(seq_along(anno), anno), function(idx) {
+      if (length(idx) >= subsetN) {
+        sample(idx, subsetN)
+      } else {
+        idx  # retain all if fewer than subsetN
+      }
+    }))
+    expr <- expr[, anno_sub]  # replace 'your_data' with your actual data object
+    anno <- anno[anno_sub]
+  }
+
 
   if (is.null(region)==T) {
     ct=names(table(colnames(expr)))

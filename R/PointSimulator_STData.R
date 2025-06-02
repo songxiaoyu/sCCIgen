@@ -106,43 +106,68 @@ cell.loc.1region.model.fc=function(n,
                            PointLoc,
                            PointAnno,
                            window_method,
-                           seed=NULL) {
+                           seed=NULL,
+                           cell.inh.attr.input1=NULL,
+                           same.dis.cutoff=0.01) {
 
   #
   if(is.null(seed)==F) {set.seed(seed)}
-  cell_win=simu.window(PointLoc=PointLoc, method=window_method)
-  p=spatstat.geom::as.ppp(PointLoc, W=cell_win)
-  spatstat.geom::marks(p)=as.factor(PointAnno)
-  # if too many cells
-  if (p$n>10000) {
-    idx=rbinom(p$n, 1, prob=10000/p$n)
-    p2=subset(p, idx==1)
-    p=p2
-  }
 
-  x=p$x
-  y=p$y
-  fit=spatstat.model::ppm(p, ~marks+ marks:polynom(x,y,2),
-                          spatstat.model::Poisson())
-  nsim=ceiling(n/p$n)
-  if (nsim>1) {
-    a=spatstat.random::rmh(model=fit, nsim=nsim)
-    b=spatstat.geom::superimpose(a)
-    spatstat.geom::marks(b)=spatstat.geom::marks(b)[,1]
-  } else{b=spatstat.random::rmh(model=fit, nsim=nsim)}
+  cell_win=simu.window(PointLoc=PointLoc, method=window_method)
+
+  cell.num=as.matrix(table(PointAnno))%>% t()
+  cell.type=colnames(cell.num)
+  cell.prop=cell.num/length(PointAnno)
+
+
+  # inflate cell number to accomendate CCI in cell attraction and inhibition
+  n.inflation=get.n.vec.raw(n=n,
+                            cell.prop=cell.prop.region,
+                            cell.inh.attr.input=cell.inh.attr.input1,
+                            same.dis.cutoff =same.dis.cutoff)
+
+  # Cell type stratified models
+  sim_ppp <- list()
+ for (ct in 1:ncol(cell.num)) {
+
+   p=spatstat.geom::as.ppp(PointLoc[which(PointAnno==cell.type[ct]),], W=cell_win)
+   # if too many cells
+   n1=cell.num[ct]
+   if (p$n>5000) {
+     idx=rbinom(p$n, 1, prob=5000/p$n)
+     p=subset(p, idx==1)
+   }
+
+   fit=spatstat.model::ppm(p, ~polynom(x,y,2),spatstat.model::Poisson())
+
+
+   nsim=ceiling(n.inflation$n.vec.raw[ct]/p$n)
+
+   if (nsim>1) {
+     b=spatstat.geom::superimpose(spatstat.random::rmh(model=fit, nsim=nsim))
+   } else{b=spatstat.random::rmh(model=fit, nsim=nsim)}
+
+   spatstat.geom::marks(b)=cell.type[ct]
+   sim_ppp[[ct]] <- b
+ }
+  merged_ppp <- do.call(spatstat.geom::superimpose, sim_ppp)
+
 
   # get rid of cells on the same location
-  while(b$n-n>10) {
-    delete.n=(b$n-n)
-    dis=spatstat.geom::pairdist(b)
+  if(merged_ppp$n-n>10) {
+    dis=spatstat.geom::pairdist(merged_ppp)
     dis[lower.tri(dis, diag=T)]=NA
-    r= quantile(dis, probs=delete.n*2/b$n/(b$n-1), na.rm=T)
-    dis2=dis< r
+    ratio= sqrt(spatstat.geom::area.owin(cell_win)/sum(n))
+    dis2=dis< same.dis.cutoff* ratio
     same.loc.idx=which(dis2 == T, arr.ind = TRUE)
-    b=b[setdiff(1:b$n, same.loc.idx[,1]), ]
+    merged_ppp=merged_ppp[setdiff(1:merged_ppp$n, same.loc.idx[,1]), ]
+
   }
 
-  return(b)
+  # Add CCI
+
+
+  return(merged_ppp)
 }
 
 
@@ -163,18 +188,24 @@ cell.loc.model.fc=function(n,
                            PointAnno,
                            PointRegion,
                            window_method,
-                           seed=NULL) {
+                           seed=NULL,
+                           cell.inh.attr.input1=NULL) {
   Rcat=unique(PointRegion)
   bb=vector("list", length(Rcat))
   names(bb)=Rcat
+
+
+
   for ( i in 1:length(Rcat)) {
     idx= which(PointRegion %in% Rcat[i])
     n.sim.region=round(n*length(idx)/length(PointAnno))
+
     bb[[i]]=cell.loc.1region.model.fc(n=n.sim.region,
                               PointLoc=PointLoc[idx,],
                               PointAnno=PointAnno[idx],
                              window_method=window_method,
-                             seed=seed)
+                             seed=seed,
+                             cell.inh.attr.input1=cell.inh.attr.input1)
   }
 
   return(bb)

@@ -48,7 +48,7 @@ fit_marginals <- function(x, marginal = c('auto_choose', 'zinb', 'nb', 'poisson'
       if(m >= v){
         mle_Poisson <- glm(gene ~ 1, family = poisson)
         tryCatch({
-          mle_ZIP <- zeroinfl(gene ~ 1|1, dist = 'poisson')
+          mle_ZIP <- pscl::zeroinfl(gene ~ 1|1, dist = 'poisson')
           chisq_val <- 2 * (logLik(mle_ZIP) - logLik(mle_Poisson))
           pvalue <- as.numeric(1 - pchisq(chisq_val, 1))
           if(pvalue < pval_cutoff)
@@ -64,7 +64,7 @@ fit_marginals <- function(x, marginal = c('auto_choose', 'zinb', 'nb', 'poisson'
           c(0.0, mle_NB$theta, exp(mle_NB$coefficients))
         else
           tryCatch({
-            mle_ZINB <- zeroinfl(gene ~ 1|1, dist = 'negbin')
+            mle_ZINB <- pscl::zeroinfl(gene ~ 1|1, dist = 'negbin')
             chisq_val <- 2 * (logLik(mle_ZINB) - logLik(mle_NB))
             pvalue <- as.numeric(1 - pchisq(chisq_val, 1))
             if(pvalue < pval_cutoff)
@@ -85,7 +85,7 @@ fit_marginals <- function(x, marginal = c('auto_choose', 'zinb', 'nb', 'poisson'
       {
         mle_Poisson <- glm(gene ~ 1, family = poisson)
         tryCatch({
-          mle_ZIP <- zeroinfl(gene ~ 1|1, dist = 'poisson')
+          mle_ZIP <- pscl::zeroinfl(gene ~ 1|1, dist = 'poisson')
           chisq_val <- 2 * (logLik(mle_ZIP) - logLik(mle_Poisson))
           pvalue <- as.numeric(1 - pchisq(chisq_val, 1))
           if(pvalue < pval_cutoff)
@@ -105,7 +105,7 @@ fit_marginals <- function(x, marginal = c('auto_choose', 'zinb', 'nb', 'poisson'
         }
         else
           tryCatch({
-            mle_ZINB <- zeroinfl(gene ~ 1|1, dist = 'negbin')
+            mle_ZINB <- pscl::zeroinfl(gene ~ 1|1, dist = 'negbin')
             c(plogis(mle_ZINB$coefficients$zero), mle_ZINB$theta, exp(mle_ZINB$coefficients$count))
           },
           error = function(cond){
@@ -196,7 +196,7 @@ fit_marginals <- function(x, marginal = c('auto_choose', 'zinb', 'nb', 'poisson'
 #'
 
 fit_Gaussian_copula <- function(x, marginal = c('auto_choose', 'zinb', 'nb', 'poisson'),
-                                jitter = TRUE, zp_cutoff = 0.8,
+                                jitter = TRUE, zp_cutoff = 0.9,
                                 min_nonzero_num = 2){
   marginal <- match.arg(marginal)
   n <- ncol(x)
@@ -307,7 +307,7 @@ fit_wo_copula <- function(x, marginal = c('auto_choose', 'zinb', 'nb', 'poisson'
 fit_model_scDesign2 <- function(data_mat, cell_type_sel,
                                 sim_method = c('copula', 'ind'),
                                 marginal = c('auto_choose', 'zinb', 'nb', 'poisson'),
-                                jitter = TRUE, zp_cutoff = 0.8,
+                                jitter = TRUE, zp_cutoff = 0.9,
                                 min_nonzero_num = 3, ncores = 1){
   sim_method <- match.arg(sim_method)
   marginal <- match.arg(marginal)
