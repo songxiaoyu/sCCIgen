@@ -1,8 +1,8 @@
 #' Run interactive sCCIgen
 #'
 #' @import dplyr shiny
-#' @returns Either a .csv parameter file or a simulated dataset. If running the
-#' simulation, individual csv files with counts and cell features are locally
+#' @returns Either a .yml parameter file or a simulated dataset. If running the
+#' simulation, individual .csv files with counts and cell features are locally
 #' saved. Optionally, a Giotto, Seurat, or SpatialExperiment object is created
 #' and saved locally as an .RDS file.
 #'
@@ -41,7 +41,7 @@ run_interactive_sCCIgen_R1 <- function() {
                           type = "tabs",
                           shiny::tabPanel("Step 1: Select your dataset",
                                           shiny::radioButtons(
-                                            inputId = "inputdata",
+                                            inputId = "input_data",
                                             label = "sCCIgen is a real-data based simulator. It accepts a
                                                     variety of input data types including scRNAseq, snRNAseq,
                                                     single-cell spatially resolved transcriptomics, or an assembled dataset
@@ -81,7 +81,7 @@ run_interactive_sCCIgen_R1 <- function() {
                                                         "I want to use my own dataset" = "user_input"),
                                             width = "100%",
                                             selected = character(0)
-                                          ), # ends radioButtons for inputdata
+                                          ), # ends radioButtons for input_data
 
                                           shiny::uiOutput("downloadExpression"),
 
@@ -269,8 +269,8 @@ run_interactive_sCCIgen_R1 <- function() {
                                                            width = "100%"),
 
                                           shiny::textInput(inputId = "parameter_filename",
-                                                           label = "Type the name of the parameter file.",
-                                                           value = "parameter_file.tsv",
+                                                           label = "Type the name of the parameter file. It must have the extension .yml",
+                                                           value = "parameter_file.yml",
                                                            width = "100%"),
 
 
@@ -286,9 +286,9 @@ run_interactive_sCCIgen_R1 <- function() {
         ), # ends Create parameter file
         shiny::tabPanel("Run a simulation",
                         shiny::textInput(inputId = "inputparamfile",
-                                         label = "By default, we will look for a parameter_file.tsv file. If your file has a different name, type it here:",
+                                         label = "By default, we will look for a parameter_file.yml file. If your file has a different name, type it here. Make sure your file has a .yml extension:",
                                          width = "100%",
-                                         value = "parameter_file.tsv"),
+                                         value = "parameter_file.yml"),
 
                         shiny::radioButtons(inputId = "createObjects",
                                             label = "By the default, the simulation will create the expression, metadata, and pattern output files. Optionally, you can also create additional objects.",
@@ -360,9 +360,9 @@ run_interactive_sCCIgen_R1 <- function() {
     spatial_data_file <- shiny::reactiveVal()
     path_to_input_dir <- shiny::reactiveVal()
 
-    shiny::observeEvent(input$inputdata, {
+    shiny::observeEvent(input$input_data, {
 
-      if(input$inputdata == "user_input") {
+      if(input$input_data == "user_input") {
 
         output$userinputexpression_text <- renderUI({
 
@@ -474,21 +474,21 @@ run_interactive_sCCIgen_R1 <- function() {
         })
 
         output$downloadselectedexpression <- shiny::downloadHandler(
-          filename = paste0(input$inputdata,"_expr.Rdata"),
+          filename = paste0(input$input_data,"_expr.Rdata"),
           content = function(con) {
-            download.file(url = paste0("https://github.com/songxiaoyu/sCCIgen_data/raw/main/input_data/",input$inputdata,"_expr.Rdata"),
+            download.file(url = paste0("https://github.com/songxiaoyu/sCCIgen_data/raw/main/input_data/",input$input_data,"_expr.Rdata"),
                           destfile = con)
           })
 
         output$downloadselectedspatial <- shiny::downloadHandler(
-          filename = paste0(input$inputdata,"_spatial.Rdata"),
+          filename = paste0(input$input_data,"_spatial.Rdata"),
           content = function(con) {
-            download.file(url = paste0("https://github.com/songxiaoyu/sCCIgen_data/raw/main/input_data/",input$inputdata,"_spatial.Rdata"),
+            download.file(url = paste0("https://github.com/songxiaoyu/sCCIgen_data/raw/main/input_data/",input$input_data,"_spatial.Rdata"),
                           destfile = con)
           })
 
-        expression_data_file(paste0(input$inputdata,"_expr.Rdata"))
-        spatial_data_file(paste0(input$inputdata,"_spatial.Rdata"))
+        expression_data_file(paste0(input$input_data,"_expr.Rdata"))
+        spatial_data_file(paste0(input$input_data,"_spatial.Rdata"))
 
         output$text_ask_data_directory <- renderUI({
           shiny::strong("Where is your input data located? Click the button to select your data directory.")
@@ -527,7 +527,7 @@ run_interactive_sCCIgen_R1 <- function() {
     shiny::observeEvent(path_to_input_dir(), {
       if (!is.null(path_to_input_dir())) {
         output$button_read_data <- shiny::renderUI({
-          shiny::actionButton(inputId = "use_inputdata",
+          shiny::actionButton(inputId = "use_input_data",
                               label = "Use this directory and read my data")
         })
       }
@@ -541,7 +541,7 @@ run_interactive_sCCIgen_R1 <- function() {
     spatial_data <- shiny::reactiveVal()
     ncol_feature_data <- shiny::reactiveVal()
 
-    shiny::observeEvent(input$use_inputdata, {
+    shiny::observeEvent(input$use_input_data, {
 
       if(file.exists(fs::path(path_to_input_dir(), expression_data_file())) &
          file.exists(fs::path(path_to_input_dir(), spatial_data_file())) ) {
@@ -1982,16 +1982,9 @@ run_interactive_sCCIgen_R1 <- function() {
         param_df = rbind(param_df, c("output_name",
                                      output_name()))
 
-        param_df = rbind(param_df, c("parameter_file",
-                                     parameter_file_name()))
+        df_to_config(x = param_df,
+                     parameter_file = con)
 
-
-
-        write.table(param_df,
-                    file = con,
-                    quote = FALSE,
-                    row.names = FALSE,
-                    sep = "\t")
       }
     ) # ends export parameters file
 
