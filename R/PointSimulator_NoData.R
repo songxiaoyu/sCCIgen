@@ -114,25 +114,18 @@ get.n.vec.raw=function(n, cell.prop,
 # cell.loc.1region.fc ------------
 # Generate cell location in one region
 
-cell.loc.1region.fc=function(n1, window1, cell.prop1, cell.inh.attr.input1,
-                     same.dis.cutoff =0.05,
-                     even.distribution.coef=0.1,
-                     grid.size.small=19, grid.size.large=45,
-                     seed) {
+cell.loc.1region.initiate <- function(n.inflation, window1,
+                                     same.dis.cutoff = 0.05, seed) {
+
   set.seed(seed)
-  n.inflation=get.n.vec.raw(n=n1,
-                          cell.prop=cell.prop1,
-                          cell.inh.attr.input=cell.inh.attr.input1,
-                          same.dis.cutoff =same.dis.cutoff)
+  # inflate cell numbers for deleting
   n.vec.raw=n.inflation$n.vec.raw;
   n.vec.target=n.inflation$n.vec.target
   n.vec.target.nonzero=n.vec.target
-
-
   K=length(n.vec.target)
   KP=colnames(n.vec.target)
 
-
+  # random generation
   gen1=spatstat.random::rmpoint(n.vec.raw, win=window1, types=KP)
 
   # calculate cell-cell distance for deletion of same loc
@@ -153,13 +146,23 @@ cell.loc.1region.fc=function(n1, window1, cell.prop1, cell.inh.attr.input1,
                same.loc.idx[delete.cell1==0,2])
 
   gen2=gen1[setdiff(1:gen1$n, delete.idx), ]
-  n2.vec=summary(gen2)$marks$frequency
-  # three factors that affect mu (logit prob changes from population average):
-  # (1) inhibitory/attraction cells of the same cell type
-  # (2) inhibitory/attraction cells of different cell type
-  # (3) even distribution
 
-  delete.idx=rep(0, gen2$n) # fill in this index to tell if each cell should be deleted or not
+  return(gen2)
+}
+
+# three factors that affect mu (logit prob changes from population average):
+# (1) inhibitory/attraction cells of the same cell type
+# (2) inhibitory/attraction cells of different cell type
+# (3) even distribution
+cell.loc.1region.refine <- function(pt.initial, n.inflation,
+                                   cell.inh.attr.input1,
+                                   even.distribution.coef = 0.1,
+                                   grid.size.small = 19, grid.size.large = 45, seed) {
+  set.seed(seed)
+
+  KP=names(table(pt.initial$marks) )
+  n2.vec=summary(pt.initial)$marks$frequency
+  delete.idx=rep(0, pt.initial$n) # fill in this index to tell if each cell should be deleted or not
   mean.delete.prop=(n2.vec-n.vec.target)/n2.vec # average deletion prop.
   mean.delete.logit=mean.delete.prop/(1-mean.delete.prop) # logit
   # two resolutions
@@ -168,11 +171,11 @@ cell.loc.1region.fc=function(n1, window1, cell.prop1, cell.inh.attr.input1,
   r2 <- raster::raster(ncols=grid.size.large, nrows=grid.size.large,
                xmn=0, xmx=1, ymn=0, ymx=1)
   # in total - for even distribution
-  pt.den=raster::rasterize(cbind(gen2$x, gen2$y), r2, fun=function(x,...)length(x))
+  pt.den=raster::rasterize(cbind(pt.initial$x, pt.initial$y), r2, fun=function(x,...)length(x))
   value=raster::values(pt.den)
   value[is.na(value)]=0
   pixel.density=value/mean(value)
-  pixel.idx=raster::cellFromXY(pt.den, cbind(gen2$x, gen2$y))
+  pixel.idx=raster::cellFromXY(pt.den, cbind(pt.initial$x, pt.initial$y))
   den.total=pixel.density[pixel.idx]
   mu1=den.total*even.distribution.coef
 
@@ -183,8 +186,8 @@ cell.loc.1region.fc=function(n1, window1, cell.prop1, cell.inh.attr.input1,
     }
   # local density by cell type 1
   pt.cell.den1=lapply(KP, function(k)
-    raster::rasterize(cbind(gen2[which(gen2$marks==k),]$x,
-                    gen2[which(gen2$marks==k),]$y),
+    raster::rasterize(cbind(pt.initial[which(pt.initial$marks==k),]$x,
+                            pt.initial[which(pt.initial$marks==k),]$y),
               r1, fun=function(x,...) length(x)))
 
   value.cell.r1=lapply(1:K, function(f) raster::values(pt.cell.den1[[f]]))
@@ -193,8 +196,8 @@ cell.loc.1region.fc=function(n1, window1, cell.prop1, cell.inh.attr.input1,
     value.cell.r1[[f]]/mean(value.cell.r1[[f]]))
 
   # local density by cell type 2
-  pt.cell.den2=lapply(KP, function(k) raster::rasterize(cbind(gen2[which(gen2$marks==k),]$x,
-                      gen2[which(gen2$marks==k),]$y), r2, fun=function(x,...)length(x)))
+  pt.cell.den2=lapply(KP, function(k) raster::rasterize(cbind(pt.initial[which(pt.initial$marks==k),]$x,
+                                                              pt.initial[which(pt.initial$marks==k),]$y), r2, fun=function(x,...)length(x)))
   value.cell.r2=lapply(1:K, function(f) raster::values(pt.cell.den2[[f]]))
 
   for (k in 1:K) {value.cell.r2[[k]][is.na(value.cell.r2[[k]])]=0}
@@ -203,11 +206,11 @@ cell.loc.1region.fc=function(n1, window1, cell.prop1, cell.inh.attr.input1,
     names(pt.cell.den2)=names(pixel.density.cell2)=KP
 
   # by cell type
-  gen2.cell=split(gen2)
+  pt.initial.cell=split(pt.initial)
   for (k in which(mean.delete.prop>0)) { # these are the cell types that need deletion; do 1 by 1
 
-    gen2.cell.loc=cbind(gen2.cell[[k]]$x, gen2.cell[[k]]$y)
-    n0.k=nrow(gen2.cell.loc)
+    pt.initial.cell.loc=cbind(pt.initial.cell[[k]]$x, pt.initial.cell[[k]]$y)
+    n0.k=nrow(pt.initial.cell.loc)
 
     # find cell types that impact the deletion probability of cell type k
     row.idx= apply(cell.inh.attr.input1, 1, function(f) KP[k] %in%f[1:2] ) # any
@@ -217,10 +220,10 @@ cell.loc.1region.fc=function(n1, window1, cell.prop1, cell.inh.attr.input1,
     row.diff.idx= row.idx ==T &  row.same.idx ==F
     # calculate mu2 the contribution of same cell inhibition/attraction
     if (sum(row.same.idx)==0) {mu2=matrix(rep(0, n0.k))} else {
-       pixel.idx.cell1=raster::cellFromXY(pt.cell.den1[[k]], gen2.cell.loc)
+       pixel.idx.cell1=raster::cellFromXY(pt.cell.den1[[k]], pt.initial.cell.loc)
        den.same1=pixel.density.cell1[[k]][pixel.idx.cell1]
 
-       pixel.idx.cell2=raster::cellFromXY(pt.cell.den2[[k]], gen2.cell.loc)
+       pixel.idx.cell2=raster::cellFromXY(pt.cell.den2[[k]], pt.initial.cell.loc)
        den.same2=pixel.density.cell2[[k]][pixel.idx.cell2]
 
        den.same=(den.same1+den.same2)/2
@@ -233,10 +236,10 @@ cell.loc.1region.fc=function(n1, window1, cell.prop1, cell.inh.attr.input1,
        pair.idx=unlist(apply(as.matrix(cell.inh.attr.input1[row.diff.idx, 1:2]),1,
                              function(f) setdiff(f, KP[k])))
        for (pk in pair.idx) {
-          pixel.idx.cell1=raster::cellFromXY(pt.cell.den1[[pk]], gen2.cell.loc)
+          pixel.idx.cell1=raster::cellFromXY(pt.cell.den1[[pk]], pt.initial.cell.loc)
           den.diff1=pixel.density.cell1[[pk]][pixel.idx.cell1]
 
-          pixel.idx.cell2=raster::cellFromXY(pt.cell.den2[[pk]], gen2.cell.loc)
+          pixel.idx.cell2=raster::cellFromXY(pt.cell.den2[[pk]], pt.initial.cell.loc)
           den.diff2=pixel.density.cell2[[pk]][pixel.idx.cell2]
 
           diff.cell.density=cbind(diff.cell.density,(den.diff1+den.diff2)/2)
@@ -244,7 +247,7 @@ cell.loc.1region.fc=function(n1, window1, cell.prop1, cell.inh.attr.input1,
        mu3=diff.cell.density%*% matrix(cell.inh.attr.input1[row.diff.idx, 3])
      }
 
-    mu=  mu1[which(gen2$marks==KP[k])]-mu2-mu3
+    mu=  mu1[which(pt.initial$marks==KP[k])]-mu2-mu3
 
     est.mean.delete.prop=1
     c=10
@@ -260,13 +263,15 @@ cell.loc.1region.fc=function(n1, window1, cell.prop1, cell.inh.attr.input1,
 
     delete.idx.k=  rbinom(n0.k, 1, delete.prop)
 
-    delete.idx[gen2$marks==KP[k]]=delete.idx.k
+    delete.idx[pt.initial$marks==KP[k]]=delete.idx.k
   }
 
-  gen3=gen2[setdiff(1:gen2$n, which(delete.idx==1)), ]
+  gen3=pt.initial[setdiff(1:pt.initial$n, which(delete.idx==1)), ]
 
   return(final.ppp=gen3)
 }
+
+
 
 # cell.loc.fc ------------
 #' Generate cell location data from parameters.
@@ -305,16 +310,22 @@ cell.loc.fc=function(N, win, cell.prop, cell.inh.attr.input=NULL,
   cell.loc=vector("list", R);
 
   for(r in 1:R) {
-    # print(paste("Simulate Cells for Region", r))
-    cell.loc[[r]]=cell.loc.1region.fc(n1=round(win$area[r]*N),
-                                      window1=win$window[[r]],
-                                     cell.prop1=cell.prop[[r]],
-                                     cell.inh.attr.input1=cell.inh.attr.input[[r]],
-                                     same.dis.cutoff =same.dis.cutoff,
-                                     even.distribution.coef=even.distribution.coef,
-                                     grid.size.small=grid.size.small, grid.size.large=grid.size.large,
-                                     seed=seed*11+r*141)
+    # inflate cell numbers for deleting
+    n.inflation=get.n.vec.raw(n=round(win$area[r]*N),
+                              cell.prop=cell.prop[[r]],
+                              cell.inh.attr.input=cell.inh.attr.input[[r]],
+                              same.dis.cutoff =same.dis.cutoff)
+    # Simulate initial cell locations for an inflated number of cells
+    pt1=cell.loc.1region.initiate(n.inflation=n.inflation,
+                              window1=win$window[[r]],
+                              same.dis.cutoff = same.dis.cutoff, seed=seed*11+r*141)
 
+   # Delete the inflation from cell-cell interactions
+    cell.loc[[r]]=cell.loc.1region.refine(pt.initial=pt1, n.inflation=n.inflation,
+                                        cell.inh.attr.input1=cell.inh.attr.input[[r]],
+                                        even.distribution.coef=even.distribution.coef,
+                                        grid.size.small=grid.size.small, grid.size.large=grid.size.large,
+                                        seed=seed*11+r*141)
   }
   names(cell.loc)=paste0("Region", 1:R)
 
