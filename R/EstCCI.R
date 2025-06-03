@@ -11,7 +11,7 @@
 #' #' @import Giotto
 #' @export
 
-preprocessGiotto=function(expr_data, spatial_data, run_hvg=T, run_kNN_network=T, run_Delaunay_network=T) {
+preprocessGiotto=function(expr_data, spatial_data, run_hvg=T, run_kNN_network=F, run_Delaunay_network=F, run_Dist_network=F, dis.cut=NULL) {
   # harmonize input with Giotto requirement
   anno=colnames(expr_data)
   colnames(expr_data) = paste0("cell_", 1:ncol(expr_data))
@@ -52,9 +52,14 @@ preprocessGiotto=function(expr_data, spatial_data, run_hvg=T, run_kNN_network=T,
   ## highly variable features (HVF)
   if(run_hvg==T) {dat <- calculateHVF(gobject = dat)}
 
+
   # networks
+  if (run_Dist_network==T) {
+    if(is.null(dis.cut)) message("Acutal cell-cell distance is used to construct neighborhood network; An acutal distance should be given.")
+    dat =createSpatialNetwork(gobject= dat, method = "kNN", maximum_distance_knn = dis.cut, k=100, name = "distance_based_network")
+  }
   if (run_Delaunay_network==T) {dat <- createSpatialNetwork(gobject = dat,minimum_k = 2,maximum_distance_delaunay = 400)}
-  if (run_kNN_network==T) {dat <- createSpatialNetwork(gobject = dat, method = "kNN", k = 5, name = "spatial_network")}
+  if (run_kNN_network==T) {dat <- createSpatialNetwork(gobject = dat, method = "kNN", k = 5, name = "knn_network")}
 
   return(dat)
 }
@@ -80,19 +85,20 @@ preprocessGiotto=function(expr_data, spatial_data, run_hvg=T, run_kNN_network=T,
 #' File est_CCI_expr_expr.tsv will save results of CCI through ligand and recepter expression.
 #' @export
 
-cellProximityTable = function (gobject, output_file=file.path(getwd(), "est_CCI_dist_dist.csv"), abs_enrichm=0.3, p_adj = 0.05) {
-
+cellProximityTable = function (gobject, output_file=file.path(getwd(), "est_CCI_dist_dist.csv"), abs_enrichm=0.3, p_adj = 0.05,
+                               spatial_network_name = "Delaunay_network",
+                               save.unfiltered=T, seed=NULL) {
+  set.seed(seed)
   # cellProximityEnrichment analysis
   cell_proximities <- cellProximityEnrichment(gobject = gobject,
                                               cluster_column = "anno",
-                                              spatial_network_name = "Delaunay_network",
+                                              spatial_network_name = spatial_network_name,
                                               adjust_method = "fdr",
                                               number_of_simulations = 2000)
   # create table
   dc <- cell_proximities$enrichm_res
   dc2 <- dc[abs(dc$enrichm) >= abs_enrichm, ]
   dc2 <- dc2[dc2$p.adj_higher <= p_adj | dc2$p.adj_lower <= p_adj, ]
-
 
 
   # format into sCCIgen input
@@ -108,7 +114,14 @@ cellProximityTable = function (gobject, output_file=file.path(getwd(), "est_CCI_
 
   print(paste0("CCI co-localization analysis is saved at: ", output_file))
 
+  if (save.unfiltered==T) {
+    output_file2 <- sub("\\.csv$", "_unfiltered.csv", output_file)
+    readr::write_csv(dc, file=output_file2, col_names = T)
+    print(paste0("Its unfiltered data is saved at: ", output_file2))
+  }
+
 }
+
 
 
 
@@ -127,12 +140,16 @@ cellProximityTable = function (gobject, output_file=file.path(getwd(), "est_CCI_
 
 
 ExprDistanceTable = function(gobject, in_hvg=F, output_file=file.path(getwd(), "est_CCI_dist_expr.csv"),
-                              region_specific=F, abs_log2fc_ICG=0.25, p_adj = 0.05) {
+                              region_specific=F, abs_log2fc_ICG=0.25, p_adj = 0.05, spatial_network_name = "distance_based_network",
+                             seed=NULL) {
+  set.seed(seed)
   plan(future::multisession)
 
   # if in_hvg ==T, select genes based on highly variable features and gene statistics, both found in feature (gene) metadata
   if (in_hvg==T) {
     gene_meta <- fDataDT(gobject)
+    if (is.null(gene_meta$hvf)) {stop("Highly variable genes need to be estimated first in `preprocessGiotto`.")}
+
     heg <- gene_meta[which(gene_meta$hvf == "yes" & gene_meta$perc_cells > 4 & gene_meta$mean_expr_det > 0.5), ]$feat_ID
     gobject <- subsetGiotto(gobject = gobject, feat_ids = heg)
   }
@@ -147,7 +164,7 @@ ExprDistanceTable = function(gobject, in_hvg=F, output_file=file.path(getwd(), "
       cell_id_r=cell_meta[which(cell_meta[,3] == r), 1] %>% as.matrix()
       dat_r <- subsetGiotto(gobject = gobject, cell_ids = cell_id_r )
       res1=ExprDistanceTable_1region(gobject=dat_r, r=r, cell_meta=cell_meta,
-                                     abs_log2fc_ICG=abs_log2fc_ICG, p_adj = p_adj)
+                                     abs_log2fc_ICG=abs_log2fc_ICG, p_adj = p_adj, spatial_network_name=spatial_network_name)
       res=rbind(res, res1)
     }
 
@@ -155,7 +172,7 @@ ExprDistanceTable = function(gobject, in_hvg=F, output_file=file.path(getwd(), "
   if (region_specific==F) {
 
     res=ExprDistanceTable_1region(gobject=gobject, r="NULL", cell_meta=cell_meta,
-                                   abs_log2fc_ICG=abs_log2fc_ICG, p_adj = p_adj)
+                                   abs_log2fc_ICG=abs_log2fc_ICG, p_adj = p_adj, spatial_network_name=spatial_network_name)
   }
   # save results in the  format that can be directly used in sCCIgen
   readr::write_csv(res, file=output_file, col_names = F)
@@ -165,12 +182,13 @@ ExprDistanceTable = function(gobject, in_hvg=F, output_file=file.path(getwd(), "
 }
 
 
-ExprDistanceTable_1region = function (gobject, r, cell_meta, abs_log2fc_ICG=0.25, p_adj = 0.05) {
+ExprDistanceTable_1region = function (gobject, r, cell_meta, abs_log2fc_ICG=0.25, p_adj = 0.05,
+                                      spatial_network_name = "distance_based_network") {
 
   ## identify genes that are associated with proximity to other cell types
   ICFsForesHighGenes <- findInteractionChangedFeats(
     gobject = gobject,
-    spatial_network_name = "Delaunay_network",
+    spatial_network_name = spatial_network_name,
     cluster_column = "anno",
     diff_test = "permutation",
     adjust_method = "fdr",
@@ -179,15 +197,16 @@ ExprDistanceTable_1region = function (gobject, r, cell_meta, abs_log2fc_ICG=0.25
   )
   df <- dplyr::as_tibble(ICFsForesHighGenes$ICFscores)
   df_table <- df %>% dplyr::filter(p.adj <= p_adj, abs(log2fc) >= abs_log2fc_ICG)
+
   if (nrow(df_table) > 0) {
     df_table=df_table[,c("cell_type", "int_cell_type", "feats", "log2fc")]
 
     # add an approximate distance threshold by cell tyep pair
-    delaunay_net <- getSpatialNetwork(gobject = gobject, name = 'Delaunay_network')
-    dis_table=delaunay_net@networkDT
+    net <- getSpatialNetwork(gobject = gobject, name = spatial_network_name)
+    dis_table=net@networkDT
     dis_table2 <- merge(dis_table, cell_meta, by.x = "from", by.y = "cell_ID", all.x = TRUE)
     dis_table2 <- merge(dis_table2, cell_meta, by.x = "to", by.y = "cell_ID", all.x = TRUE)
-    tb=tapply(dis_table2$distance, list(dis_table2$anno.x, dis_table2$anno.y), median)
+    tb=tapply(dis_table2$distance, list(dis_table2$anno.x, dis_table2$anno.y), function(f) quantile(f, probs=0.95))
     dist_value=reshape2::melt(tb) %>%
       dplyr::filter(is.na(value)==F)%>%
       dplyr::rename(cell_type = Var1, int_cell_type = Var2, threshold = value)
@@ -215,8 +234,10 @@ ExprDistanceTable_1region = function (gobject, r, cell_meta, abs_log2fc_ICG=0.25
 #' @import future
 #' @export
 #'
-ExprExprTable = function(gobject, database=c("mouse", "human", "external"), external_database_path=NULL, region_specific=F,
-                         p_adj=0.05, abs_log2fc_LR=0.25, output_file=file.path(getwd(), "est_CCI_expr_expr.csv")) {
+ExprExprTable = function(gobject, database=c("mouse", "human", "external"), external_database_path=NULL,
+                         region_specific=F, spatial_network_name,
+                         p_adj=0.05, abs_log2fc_LR=0.25, output_file=file.path(getwd(), "est_CCI_expr_expr.csv"), seed=NULL) {
+  set.seed(seed)
   plan(future::multisession)
   # load database
 
@@ -242,7 +263,8 @@ ExprExprTable = function(gobject, database=c("mouse", "human", "external"), exte
     select_ligands <- LR_data_det$ligand_gene_symbol
     select_receptors <- LR_data_det$receptor_gene_symbol
 
-    cell_meta =pDataDT(gobject)
+    cell_meta=LR_data =pDataDT(gobject)
+
     # Regions specific analysis
     if (region_specific==T) {
       R=unique(cell_meta[,3]) %>% as.matrix()
@@ -252,14 +274,14 @@ ExprExprTable = function(gobject, database=c("mouse", "human", "external"), exte
         cell_id_r=cell_meta[which(cell_meta[,3] == r), 1] %>% as.matrix()
         dat_r <- subsetGiotto(gobject = gobject, cell_ids = cell_id_r )
         res1=ExprExprTable_1region(gobject=dat_r, r=r, cell_meta=cell_meta, select_ligands=select_ligands,
-                                   select_receptors=select_receptors,
+                                   select_receptors=select_receptors,spatial_network_name=spatial_network_name,
                              abs_log2fc_LR=abs_log2fc_LR, p_adj = p_adj)
         res=rbind(res, res1)
       }
     }
     if (region_specific==F) {
       res=ExprExprTable_1region(gobject=gobject, r="NULL", cell_meta=cell_meta, select_ligands=select_ligands,
-                                select_receptors=select_receptors,
+                                select_receptors=select_receptors, spatial_network_name=spatial_network_name,
                           abs_log2fc_LR=abs_log2fc_LR, p_adj = p_adj)
     }
     # save results in the  format that can be directly used in sCCIgen
@@ -271,14 +293,14 @@ ExprExprTable = function(gobject, database=c("mouse", "human", "external"), exte
 }
 
 # ExprExprTable_1region ------------
-ExprExprTable_1region = function(gobject, r, cell_meta, select_ligands, select_receptors,
+ExprExprTable_1region = function(gobject, r, cell_meta, select_ligands, select_receptors, spatial_network_name,
                    p_adj=0.05, abs_log2fc_LR=0.25) {
 
   plan(future::multisession)
 
 
   ## get statistical significance of gene pair expression changes upon cell-cell interaction
-  sc <- spatCellCellcom(gobject = gobject, spatial_network_name = "spatial_network",
+  sc <- spatCellCellcom(gobject = gobject, spatial_network_name = spatial_network_name,
                                           cluster_column = "anno",
                                           random_iter = 500, feat_set_1 = select_ligands,
                                           feat_set_2 = select_receptors,
@@ -293,12 +315,12 @@ ExprExprTable_1region = function(gobject, r, cell_meta, select_ligands, select_r
 
 
 
-    # add an approximate distance threshold by cell tyep pair
-    spatial_net <- getSpatialNetwork(gobject = gobject, name = 'spatial_network')
-    dis_table=spatial_net@networkDT
+    # add an approximate distance threshold by cell type pair
+    net <- getSpatialNetwork(gobject = gobject, name = spatial_network_name)
+    dis_table=net@networkDT
     dis_table2 <- merge(dis_table, cell_meta, by.x = "from", by.y = "cell_ID", all.x = TRUE)
     dis_table2 <- merge(dis_table2, cell_meta, by.x = "to", by.y = "cell_ID", all.x = TRUE)
-    tb=tapply(dis_table2$distance, list(dis_table2$anno.x, dis_table2$anno.y), median)
+    tb=tapply(dis_table2$distance, list(dis_table2$anno.x, dis_table2$anno.y), function(f) quantile(f, probs=0.95))
     dist_value=reshape2::melt(tb) %>%
       dplyr::filter(is.na(value)==F)%>%
       dplyr::rename(lig_cell_type = Var1, rec_cell_type = Var2, threshold = value)
@@ -311,7 +333,7 @@ ExprExprTable_1region = function(gobject, r, cell_meta, select_ligands, select_r
     # (TRUE or FALSE, default = TRUE)>,<Mean effect at log(count) scale (default = 0.5)>,<SD of effect at log(count)
     # scale (default = 0)>.
     tb=data.frame(r=r,  df_merged[,c("lig_cell_type",  "rec_cell_type", "threshold", "ligand", "receptor")], "NULL",
-                  bi_direct=F, df_merged$log2fc, 0 )
+                  bi_direct=T, df_merged$log2fc, 0 )
     return(tb)
 
   } else {return(NULL)}
@@ -336,30 +358,22 @@ SpatialTable=function(gobject, top_num=2, fdr_cut=0.05,
 
   topgenes=NULL
   for (c in unique(cell_meta$anno)) {
-
     #
     cell_id_c=cell_meta[which(cell_meta$anno == c), 1] %>% as.matrix()
     dat_c <- subsetGiotto(gobject = gobject, cell_ids = cell_id_c)
     Rname=colnames(cell_meta)[3]
-
 
     markers = findMarkers_one_vs_all(gobject = dat_c,
       method = "scran",
       expression_values = "custom",
       cluster_column =  Rname      # column name in cell metadata
     )
-
     # Filter by FDR first
     markers_filt <- markers[!is.na(markers$FDR) & markers$FDR < fdr_cut, ]
 
     # Split by cluster and get top N from each
     split_markers <- split(markers_filt, markers_filt$cluster)
     topgenes1 <- do.call(rbind, lapply(split_markers, function(df) head(df, top_num)))
-
-    # plotMetaDataHeatmap(dat_c,
-    #                     selected_feats = unique(topgenes),
-    #                     metadata_cols = colnames(cell_meta)[3],
-    #                     x_text_size = 10, y_text_size = 10)
 
     topgenes=rbind(topgenes, data.frame(anno=c, topgenes1))
   }

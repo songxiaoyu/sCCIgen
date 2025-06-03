@@ -11,7 +11,7 @@ Use_scDesign2(
   region = NULLL,
   depth_simu_ref_ratio = 1,
   sim_method = c("copula", "ind"),
-  region_specific_model,
+  region_specific_model = NULL,
   seed
 )
 }

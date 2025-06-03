@@ -10,7 +10,9 @@ ExprDistanceTable(
   output_file = file.path(getwd(), "est_CCI_dist_expr.csv"),
   region_specific = F,
   abs_log2fc_ICG = 0.25,
-  p_adj = 0.05
+  p_adj = 0.05,
+  spatial_network_name = "distance_based_network",
+  seed = NULL
 )
 }
 \arguments{

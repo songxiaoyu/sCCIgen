@@ -108,7 +108,8 @@ cell.loc.1region.model.fc=function(n,
                            window_method,
                            seed=NULL,
                            cell.inh.attr.input1=NULL,
-                           same.dis.cutoff=0.01) {
+                           same.dis.cutoff=0.01,
+                           even.distribution.coef = 0) {
 
   #
   if(is.null(seed)==F) {set.seed(seed)}
@@ -122,13 +123,13 @@ cell.loc.1region.model.fc=function(n,
 
   # inflate cell number to accomendate CCI in cell attraction and inhibition
   n.inflation=get.n.vec.raw(n=n,
-                            cell.prop=cell.prop.region,
+                            cell.prop=cell.prop,
                             cell.inh.attr.input=cell.inh.attr.input1,
                             same.dis.cutoff =same.dis.cutoff)
 
   # Cell type stratified models
   sim_ppp <- list()
- for (ct in 1:ncol(cell.num)) {
+  for (ct in 1:ncol(cell.num)) {
 
    p=spatstat.geom::as.ppp(PointLoc[which(PointAnno==cell.type[ct]),], W=cell_win)
    # if too many cells
@@ -138,7 +139,7 @@ cell.loc.1region.model.fc=function(n,
      p=subset(p, idx==1)
    }
 
-   fit=spatstat.model::ppm(p, ~polynom(x,y,2),spatstat.model::Poisson())
+   fit=spatstat.model::ppm(p, ~polynom(x,y,3),spatstat.model::Poisson())
 
 
    nsim=ceiling(n.inflation$n.vec.raw[ct]/p$n)
@@ -149,9 +150,9 @@ cell.loc.1region.model.fc=function(n,
 
    spatstat.geom::marks(b)=cell.type[ct]
    sim_ppp[[ct]] <- b
- }
+  }
   merged_ppp <- do.call(spatstat.geom::superimpose, sim_ppp)
-
+  merged_ppp$marks=as.factor(merged_ppp$marks)
 
   # get rid of cells on the same location
   if(merged_ppp$n-n>10) {
@@ -165,9 +166,12 @@ cell.loc.1region.model.fc=function(n,
   }
 
   # Add CCI
+  ppp2=cell.loc.1region.refine(pt.initial=merged_ppp, n.inflation=n.inflation,
+                                      cell.inh.attr.input1=cell.inh.attr.input1,
+                                      even.distribution.coef = even.distribution.coef,
+                                      grid.size.small = 19, grid.size.large = 45, seed=seed)
 
-
-  return(merged_ppp)
+  return(ppp2)
 }
 
 

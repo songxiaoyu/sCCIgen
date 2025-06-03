@@ -124,7 +124,7 @@ Use_scDesign2=function(ppp.obj,
                        region=NULLL,
                        depth_simu_ref_ratio=1,
                        sim_method = c('copula', 'ind'),
-                       region_specific_model,
+                       region_specific_model=NULL,
                        seed) {
 
   expr=as.matrix(expr)
@@ -133,8 +133,7 @@ Use_scDesign2=function(ppp.obj,
   Genes=rownames(expr)
 
 
-  if (region_specific_model!="TRUE") { # not region specific
-
+  if (identical(region_specific_model, "TRUE")==F) { # not region specific
 
     if (R==1) {
 
@@ -160,7 +159,7 @@ Use_scDesign2=function(ppp.obj,
     } # end not region specific
 
   #  region specific model
-  if (region_specific_model=="TRUE") { #  region specific
+  if (identical(region_specific_model, "TRUE")) { #  region specific
 
     Runiq=unique(region)
 
@@ -177,8 +176,6 @@ Use_scDesign2=function(ppp.obj,
     }
 
     sim.count= foreach (r = 1:length(Runiq)) %dopar% {
-      print(r)
-
 
       Use_scDesign2_1region(ppp.obj1=ppp.obj[[r]],
                                            Genes=Genes,
@@ -482,7 +479,7 @@ Add.Expr.Asso.Pattern = function(ppp.obj, sim.count, r,
 
     beta.matrix.combined[GenePairIDMatrix[,1], nbr.idx[,1]]=
       beta.matrix.combined[GenePairIDMatrix[,1], nbr.idx[,1]]+
-      beta*log(count2+1)
+      beta*(log(count2+1)+1)
 
     SignalSummary=data.frame(Type="ExprAssoGenes", Region=r, CellType=perturbed.cell.type,
                              GeneID=GenePairIDMatrix[,1], AdjCellType=adjacent.cell.type,
@@ -493,7 +490,7 @@ Add.Expr.Asso.Pattern = function(ppp.obj, sim.count, r,
 
       beta.matrix.combined[GenePairIDMatrix[,2], nbr.idx[,2]]=
         beta.matrix.combined[GenePairIDMatrix[,2], nbr.idx[,2]]+
-        beta*log(count1+1)
+        beta*(log(count2+1)+1)
 
       SignalSummary=rbind(SignalSummary,
                           data.frame(Type="ExprAssoGenes", Region=r, CellType=adjacent.cell.type ,
@@ -520,7 +517,7 @@ Add.Expr.Asso.Pattern = function(ppp.obj, sim.count, r,
     idx2=nbr.idx[,2]
     # 1 --> 2
     count2=sim.count[[idx_r]][GenePairIDMatrix[,2], idx2]
-    temp=beta.matrix[[idx_r]][GenePairIDMatrix[,1], idx1]+beta*log(count2+1)
+    temp=beta.matrix[[idx_r]][GenePairIDMatrix[,1], idx1]+beta*(1+log(count2+1))
     colnames(temp)=idx1
     temp2=sapply(1:nrow(temp), function(f) tapply(temp[f,], idx1, sum))
     beta.matrix[[idx_r]][GeneID, as.numeric(rownames(temp2))] =t(temp2)
@@ -567,11 +564,12 @@ Pattern.adj.1region= function(sim.count1, combined.beta.matrix,
   if (is.null(combined.beta.matrix)) {sim.count1.update=sim.count1} else{
     sim.count1.update= exp(log(sim.count1+1) +combined.beta.matrix)-1
   }
-
+  # negative
+  sim.count1.update[sim.count1.update<0]=0
   # bond extreme values
   if (bond.extreme==T) {
 
-    cut=quantile(sim.count1.update, probs=0.975, na.rm=T)*10
+    cut=quantile(sim.count1.update, probs=0.975, na.rm=T)*5
     sim.count1.update[which(sim.count1.update>cut)]=cut
 
     ten_pct=apply(sim.count1.update, 2, mean, na.rm=T)*100
@@ -592,9 +590,8 @@ Pattern.adj.1region= function(sim.count1, combined.beta.matrix,
   }
 
   return(sim.count1.update)
+
 }
-
-
 # Pattern.Adj --------
 #' Adjust the count data for all cells in all regions based on the
 #' input spatial patterns

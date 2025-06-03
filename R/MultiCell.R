@@ -3,7 +3,7 @@
 #' This function assigns cells into spatial spots. Each spot may contain zero, one, or
 #' multiple cells. Spots with zero cells won't be in the output.
 #' @param expr expression profile of the cells
-#' @param cell_feature cell features like their spatial coordinates.
+#' @param spatial spatial features like their spatial X and Y coordinates.
 #' @param NoSpot Number of targeted spots.
 #' @return
 #' \item{count:}{Expression profile of the spots.}
@@ -12,8 +12,8 @@
 #' @import dplyr
 #' @export
 
-multicell=function(expr, cell_feature, NoSpot=500, cl=1) {
-  cell_loc=cell_feature[,c("x.loc", "y.loc")]
+multicell=function(expr, spatial, NoSpot=500, cl=1) {
+  cell_loc=spatial[,c("x.loc", "y.loc")]
   xrange=range(cell_loc[,1])
   yrange=range(cell_loc[,2])
   m=round(sqrt(NoSpot))
@@ -50,8 +50,8 @@ multicell=function(expr, cell_feature, NoSpot=500, cl=1) {
 
 
   # Spot Region
-  if (is.null(cell_feature$region)==F) {
-    dat1=data.frame(spot.idx, region=cell_feature$region) %>%
+  if (is.null(spatial$region)==F) {
+    dat1=data.frame(spot.idx, region=spatial$region) %>%
       group_by(spot.idx, region) %>%
       mutate(count=1) %>%
       summarise(abundance = sum(count))
@@ -71,8 +71,8 @@ multicell=function(expr, cell_feature, NoSpot=500, cl=1) {
   }
 
   # Spot's Cell Type Count
-  if (is.null(cell_feature$annotation)==F) {
-    dat1=data.frame(spot.idx, cell_feature) %>%
+  if (is.null(spatial$annotation)==F) {
+    dat1=data.frame(spot.idx, spatial) %>%
       dplyr::select(spot.idx, annotation) %>%
       group_by(spot.idx, annotation) %>%
       mutate(count=1) %>%

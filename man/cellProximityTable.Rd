@@ -8,7 +8,10 @@ cellProximityTable(
   gobject,
   output_file = file.path(getwd(), "est_CCI_dist_dist.csv"),
   abs_enrichm = 0.3,
-  p_adj = 0.05
+  p_adj = 0.05,
+  spatial_network_name = "Delaunay_network",
+  save.unfiltered = T,
+  seed = NULL
 )
 }
 \arguments{

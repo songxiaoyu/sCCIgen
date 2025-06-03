@@ -9,9 +9,11 @@ ExprExprTable(
   database = c("mouse", "human", "external"),
   external_database_path = NULL,
   region_specific = F,
+  spatial_network_name,
   p_adj = 0.05,
   abs_log2fc_LR = 0.25,
-  output_file = file.path(getwd(), "est_CCI_expr_expr.csv")
+  output_file = file.path(getwd(), "est_CCI_expr_expr.csv"),
+  seed = NULL
 )
 }
 \arguments{

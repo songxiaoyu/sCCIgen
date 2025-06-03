@@ -8,8 +8,10 @@ preprocessGiotto(
   expr_data,
   spatial_data,
   run_hvg = T,
-  run_kNN_network = T,
-  run_Delaunay_network = T
+  run_kNN_network = F,
+  run_Delaunay_network = F,
+  run_Dist_network = F,
+  dis.cut = NULL
 )
 }
 \description{

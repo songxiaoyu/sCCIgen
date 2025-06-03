@@ -93,15 +93,14 @@ get.n.vec.raw=function(n, cell.prop,
     for (i in 1:nrow(cell.inh.attr.input)) {
       if (cell.inh.attr.input[i,1] ==cell.inh.attr.input[i,2]) {
         n.vec.use[,cell.inh.attr.input[i,1]]=n.vec.use[,cell.inh.attr.input[i,1]]*
-          (1+abs(cell.inh.attr.input[i,3]))
+          (1+abs(cell.inh.attr.input[i,3] *0.3))
       }
 
       if (cell.inh.attr.input[i,1] !=cell.inh.attr.input[i,2]) {
-        temp=ifelse(cell.inh.attr.input[i,3]>0, 1, 3) # more inflation for attraction
         n.vec.use[,cell.inh.attr.input[i,1]]=
-          n.vec.use[,cell.inh.attr.input[i,1]]* (1+abs(cell.inh.attr.input[i,3]) * temp)
+          n.vec.use[,cell.inh.attr.input[i,1]]* (1+abs(cell.inh.attr.input[i,3])*0.3 )
         n.vec.use[,cell.inh.attr.input[i,2]]=
-          n.vec.use[,cell.inh.attr.input[i,2]]*(1+abs(cell.inh.attr.input[i,3]) * temp)
+          n.vec.use[,cell.inh.attr.input[i,2]]*(1+abs(cell.inh.attr.input[i,3])*0.3)
       }
     }
   }
@@ -160,16 +159,22 @@ cell.loc.1region.refine <- function(pt.initial, n.inflation,
                                    grid.size.small = 19, grid.size.large = 45, seed) {
   set.seed(seed)
 
-  KP=names(table(pt.initial$marks) )
+
+  n.vec.target=n.inflation$n.vec.target
+  K=length(n.vec.target)
+  KP=names(table(pt.initial$marks))
+
   n2.vec=summary(pt.initial)$marks$frequency
   delete.idx=rep(0, pt.initial$n) # fill in this index to tell if each cell should be deleted or not
   mean.delete.prop=(n2.vec-n.vec.target)/n2.vec # average deletion prop.
   mean.delete.logit=mean.delete.prop/(1-mean.delete.prop) # logit
+  x.range=range(pt.initial$x)
+  y.range=range(pt.initial$y)
   # two resolutions
   r1 <- raster::raster(ncols=grid.size.small, nrows=grid.size.small,
-               xmn=0, xmx=1, ymn=0, ymx=1)
+               xmn=x.range[1], xmx=x.range[2], ymn=y.range[1], ymx=y.range[2])
   r2 <- raster::raster(ncols=grid.size.large, nrows=grid.size.large,
-               xmn=0, xmx=1, ymn=0, ymx=1)
+                xmn=x.range[1], xmx=x.range[2], ymn=y.range[1], ymx=y.range[2])
   # in total - for even distribution
   pt.den=raster::rasterize(cbind(pt.initial$x, pt.initial$y), r2, fun=function(x,...)length(x))
   value=raster::values(pt.den)
@@ -245,7 +250,7 @@ cell.loc.1region.refine <- function(pt.initial, n.inflation,
           diff.cell.density=cbind(diff.cell.density,(den.diff1+den.diff2)/2)
        }
        mu3=diff.cell.density%*% matrix(cell.inh.attr.input1[row.diff.idx, 3])
-     }
+      }
 
     mu=  mu1[which(pt.initial$marks==KP[k])]-mu2-mu3
 

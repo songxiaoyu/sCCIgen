@@ -4,12 +4,12 @@
 \alias{multicell}
 \title{Assigns cells into spatial spots for multi-cell resolution data}
 \usage{
-multicell(expr, cell_feature, NoSpot = 500, cl = 1)
+multicell(expr, spatial, NoSpot = 500, cl = 1)
 }
 \arguments{
 \item{expr}{expression profile of the cells}
 
-\item{cell_feature}{cell features like their spatial coordinates.}
+\item{spatial}{spatial features like their spatial X and Y coordinates.}
 
 \item{NoSpot}{Number of targeted spots.}
 }

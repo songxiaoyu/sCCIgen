@@ -197,7 +197,7 @@ scDesign2.revised <- function(model_params,
   ratio <- rep(depth_simu_ref_ratio, n_cell_type)
 
   for(iter in 1:n_cell_type) {
-    print(iter)
+    print(paste("Simulate Cell Type", iter, "in a region."))
     if(n_cell_each[iter] > 0){
       ulim <- sum(n_cell_each[1:iter])
       llim <- ulim - n_cell_each[iter] + 1
@@ -225,6 +225,10 @@ scDesign2.revised <- function(model_params,
   return(new_count)
 
 }
+
+
+
+
 
 
 

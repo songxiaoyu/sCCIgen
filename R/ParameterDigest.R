@@ -21,24 +21,16 @@
 
 ParaDigest=function(input) {
   # digest parameters
-  para1=para=readr::read_tsv(input) %>% tibble::column_to_rownames("parameters") %>%
-    t() %>% as.data.frame()
-  suppressWarnings(class(para1) <-"numeric")
-  para[,is.na(para1)==F]=para1[is.na(para1)==F]
+  para1=para=config::get(file = input)
 
   attach(para)
 
   # check if the output directory exist; if not create one
-  if (file.exists(path_to_output_dir)==F){
-    dir.create(path_to_output_dir)
-  }
+  if (file.exists(path_to_output_dir)==F){dir.create(path_to_output_dir)}
 
   # clean seeds
-  if (num_simulated_datasets>1) {
-    set.seed(parent_simulation_seed)
-    para$all_seeds=sample.int(10000, num_simulated_datasets) %>% list()
+  if (num_simulated_datasets>1) {set.seed(parent_simulation_seed); para$all_seeds=sample.int(10000, num_simulated_datasets) %>% list()
   } else{para$all_seeds=list(parent_simulation_seed)}
-
 
   # Path1: No ST data;
   # Path2: ST data - new cells
@@ -108,7 +100,7 @@ ParaCellsNoST=function(para, seed_list){
   # determine cell type proportion in each region
   cell_type_proportion=vector("list", num_regions);
 
-  tmp=as.matrix(para[,grep("cell_type_proportion_", colnames(para))])
+  tmp=do.call(rbind,para[grep("cell_type_proportion_", names(para))])
   tmp2=matrix(unlist(strsplit(tmp, ",")), ncol=3, byrow = T)
   for (i in 1:num_regions){
     cell_type_proportion[[i]]= tmp2%>%
@@ -122,9 +114,7 @@ ParaCellsNoST=function(para, seed_list){
    cell_location_interactions=vector("list", num_regions);
 
    if (custom_cell_location_interactions=="TRUE") {
-     tmp1=para[,grep("cell_interaction_", names(para))]%>%
-       as.matrix() %>% t()
-
+     tmp1=do.call(rbind, para[grep("cell_interaction_", names(para))])
      tmp2=apply(tmp1, 1, function(f) strsplit(f, split = ","))
      tmp3=as.data.frame(matrix(unlist(tmp2),ncol=3,byrow=T))
      class(tmp3$V3)="numeric"
@@ -168,8 +158,7 @@ ParaCellsST=function(para, spatial, seed_list) {
   # determine cell cell attraction/inhibition
 
   if (custom_cell_location_interactions=="TRUE") {
-    tmp1=para[,grep("cell_interaction_", names(para))]%>%
-      as.matrix() %>% t()
+    tmp1=do.call(rbind, para[grep("cell_interaction_", names(para))])
 
     tmp2=apply(tmp1, 1, function(f) strsplit(f, split = ","))
     tmp3=as.data.frame(matrix(unlist(tmp2),ncol=3,byrow=T))
@@ -212,9 +201,9 @@ ParaPattern=function(para, sim_count, cell_loc_list_i,
                      seed=NULL){
 
   # check No. of adding spatial patterns
-  t1=length(grep("spatial_pattern_", colnames(para)))/6
-  t2=length(grep("spatial_int_dist_", colnames(para)))/8
-  t3=length(grep("spatial_int_expr_", colnames(para)))/10
+  t1=length(grep("spatial_pattern_", names(para)))/6
+  t2=length(grep("spatial_int_dist_", names(para)))/8
+  t3=length(grep("spatial_int_expr_", names(para)))/10
   t0=sum(t1, t2, t3)
 
   # define beta list
@@ -226,25 +215,13 @@ ParaPattern=function(para, sim_count, cell_loc_list_i,
   # add spatial
   for (tt1 in t1:1) {
     if (tt1==0) {break}
-    #para[grep("spatial_pattern_", colnames(para))]
-    r=eval(parse(text=paste0("spatial_pattern_",
-                             tt1, "_region"))) %>% as.character()
-    CellType=eval(parse(text=paste0("spatial_pattern_",
-                                    tt1, "_cell_type")))
-    GeneID1=eval(parse(text=paste0("spatial_pattern_",
-                                   tt1, "_gene_id")))
-    if (GeneID1=="NULL") {
-      GeneID=eval(parse(text=GeneID1))
-    } else {GeneID=unlist(strsplit(GeneID1, ","))}
-
-    PropOfGenes=eval(parse(text=paste0("spatial_pattern_",
-                                       tt1, "_gene_prop")))
-    if (PropOfGenes=="NULL") {PropOfGenes=eval(parse(text=PropOfGenes))}
-
-    delta.mean=eval(parse(text=paste0("spatial_pattern_",
-                                      tt1, "_mean")))
-    delta.sd=eval(parse(text=paste0("spatial_pattern_",
-                                    tt1, "_sd")))
+    r_raw =para[[paste0("spatial_int_dist_", tt1, "_region")]]
+    r <- if (is.null(r_raw) ) "NULL" else as.character(r_raw)
+    CellType=e=para[[paste0("spatial_pattern_",tt1, "_cell_type")]]
+    GeneID=para[[paste0("spatial_pattern_",   tt1, "_gene_id")]]
+    PropOfGenes=para[[paste0("spatial_pattern_",  tt1, "_gene_prop")]]
+    delta.mean=para[[paste0("spatial_pattern_",  tt1, "_mean")]]
+    delta.sd=epara[[paste0("spatial_pattern_",tt1, "_sd")]]
     beta.all[[tt1]]=Add.Spatial.Expr.Pattern(sim.count = sim_count,
                                              r=r,
                                              CellType=CellType,
@@ -259,29 +236,15 @@ ParaPattern=function(para, sim_count, cell_loc_list_i,
   for (tt1 in t2:1) {
     if (tt1==0) {break}
     # read in parameters
-    r=eval(parse(text=paste0("spatial_int_dist_",
-                             tt1, "_region"))) %>% as.character()
-    # if (r=="NULL") {r=1}
-    perturbed.cell.type=eval(parse(text=paste0("spatial_int_dist_",
-                                               tt1, "_cell_type_perturbed")))
-    adjacent.cell.type=eval(parse(text=paste0("spatial_int_dist_",
-                                              tt1, "_cell_type_adj")))
-    int.dist.threshold=eval(parse(text=paste0("spatial_int_dist_",
-                                              tt1, "_dist_cutoff")))
-    GeneID1=eval(parse(text=paste0("spatial_int_dist_",
-                                   tt1, "_gene_id1")))
-    if (GeneID1=="NULL") {
-      GeneID=eval(parse(text=GeneID1))
-    } else {GeneID=unlist(strsplit(GeneID1, ","))}
-
-    PropOfGenes=eval(parse(text=paste0("spatial_int_dist_",
-                                       tt1, "_gene_prop")))
-    if (PropOfGenes=="NULL") {PropOfGenes=eval(parse(text=PropOfGenes))}
-
-    delta.mean=eval(parse(text=paste0("spatial_int_dist_",
-                                      tt1, "_mean")))
-    delta.sd=eval(parse(text=paste0("spatial_int_dist_",
-                                    tt1, "_sd")))
+    r_raw =para[[paste0("spatial_int_dist_", tt1, "_region")]]
+    r <- if (is.null(r_raw) ) "NULL" else as.character(r_raw)
+    perturbed.cell.type=para[[paste0("spatial_int_dist_", tt1, "_cell_type_perturbed")]]
+    adjacent.cell.type=para[[paste0("spatial_int_dist_", tt1,"_cell_type_adj")]]
+    int.dist.threshold=para[[paste0("spatial_int_dist_", tt1,"_dist_cutoff")]]
+    GeneID=para[[paste0("spatial_int_dist_", tt1, "_gene_id1")]]
+    PropOfGenes=para[[paste0("spatial_int_dist_", tt1,  "_gene_prop")]]
+    delta.mean=para[[paste0("spatial_int_dist_", tt1, "_mean")]]
+    delta.sd=para[[paste0("spatial_int_dist_",tt1, "_sd")]]
     # simulate beta
     beta.all[[(t1+tt1)]]=Add.Distance.Asso.Pattern(ppp.obj=cell_loc_list_i,
                                                    sim.count=sim_count,
@@ -295,42 +258,22 @@ ParaPattern=function(para, sim_count, cell_loc_list_i,
                                                    PropOfGenes=PropOfGenes,
                                                    seed=seed)
   }
-  # add expr-distance interaction
+  # add expr-expr interaction
   for (tt1 in t3:1) {
     if (tt1==0) {break}
-
-    r=eval(parse(text=paste0("spatial_int_expr_",
-                             tt1, "_region"))) %>% as.character()
-
-    perturbed.cell.type=eval(parse(text=paste0("spatial_int_expr_",
-                                               tt1, "_cell_type_perturbed")))
-    adjacent.cell.type=eval(parse(text=paste0("spatial_int_expr_",
-                                              tt1, "_cell_type_adj")))
-    int.dist.threshold=eval(parse(text=paste0("spatial_int_expr_",
-                                              tt1, "_dist_cutoff")))
-
-    GeneID1=eval(parse(text=paste0("spatial_int_expr_",
-                                   tt1, "_gene_id1")))
-    if (GeneID1=="NULL") {GeneID=eval(parse(text=GeneID1))
-    } else {GeneID=unlist(strsplit(GeneID1, ","))}
-
-    GeneID2=eval(parse(text=paste0("spatial_int_expr_", tt1, "_gene_id2")))
-    if (GeneID2=="NULL") {GeneIDp=eval(parse(text=GeneID2))
-    } else {GeneIDp=unlist(strsplit(GeneID2, ","))}
-
-    if (is.null(GeneID)) {
-      GenePairIDMatrix=NULL
-    } else {GenePairIDMatrix=cbind(GeneID, GeneIDp)}
-
-    PropOfGenes=eval(parse(text=paste0("spatial_int_expr_", tt1, "_gene_prop")))
-    if (PropOfGenes=="NULL") {PropOfGenes=eval(parse(text=PropOfGenes))}
-
-    Bidirectional1=eval(parse(text=paste0("spatial_int_expr_",tt1, "_bidirectional")))
-    Bidirectional=eval(parse(text=Bidirectional1))
-
-    delta.mean=eval(parse(text=paste0("spatial_int_expr_", tt1, "_mean")))
-    delta.sd=eval(parse(text=paste0("spatial_int_expr_",tt1, "_sd")))
-
+    r_raw =para[[paste0("spatial_int_dist_", tt1, "_region")]]
+    r <- if (is.null(r_raw) ) "NULL" else as.character(r_raw)
+    perturbed.cell.type=para[[paste0("spatial_int_expr_",  tt1, "_cell_type_perturbed")]]
+    adjacent.cell.type=para[[paste0("spatial_int_expr_",  tt1, "_cell_type_adj")]]
+    int.dist.threshold=para[[paste0("spatial_int_expr_",tt1, "_dist_cutoff")]]
+    GeneID=para[[paste0("spatial_int_expr_",tt1, "_gene_id1")]]
+    GeneIDp=para[[paste0("spatial_int_expr_", tt1, "_gene_id2")]]
+    if (is.null(GeneID)) {GenePairIDMatrix=NULL} else {GenePairIDMatrix=cbind(GeneID, GeneIDp)}
+    PropOfGenes=para[[paste0("spatial_int_expr_", tt1, "_gene_prop")]]
+    Bidirectional=para[[paste0("spatial_int_expr_",tt1, "_bidirectional")]]
+    delta.mean=para[[paste0("spatial_int_expr_", tt1, "_mean")]]
+    delta.sd=para[[paste0("spatial_int_expr_",tt1, "_sd")]]
+    # simulate beta
     beta.all[[(t1+t2+tt1)]]=Add.Expr.Asso.Pattern(ppp.obj=cell_loc_list_i,
                                                   sim.count=sim_count,
                                                   r=r,
@@ -413,7 +356,7 @@ ParaExpr=function(para, cell_loc_list, expr, region,
     }
 
     # multicell?
-    if (num_spots=="NULL") {
+    if (is.null(num_spots)) {
 
       write_tsv(output$meta,
                 file=paste0(save_name, "_meta_", i, ".tsv"))
@@ -463,7 +406,6 @@ ParaSimulation <- function(input, ModelFitFile=NULL) {
 
   # Digest parameters
   para=ParaDigest(input)
-
   attach(para)
 
   # Load  data
