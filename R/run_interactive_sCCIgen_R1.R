@@ -56,13 +56,13 @@ run_interactive_sCCIgen_R1 <- function() {
                                                         1000 cells of 2 cell types." = "fake1",
                                                         "Decoy data 2: It includes (1) count matrix for 10 genes by
                                                         1000 cells of 2 cell types, and (2) paired spatial feature matrix for the same
-                                                        data, including annotated cell type and spatial coordinate." = "fake2",
+                                                        data, including annotated cell type and spatial coordinates." = "fake2",
                                                         "Decoy data 3: It includes (1) count matrix for 10 genes by
                                                         1000 cells of 2 cell types, and (2) paired spatial feature matrix for the same
-                                                        data, including their annotated cell type, spatial coordinate, and region." = "fake3",
+                                                        data, including their annotated cell type, spatial coordinates, and region." = "fake3",
                                                         "Decoy data 4: It includes (1) count matrix for 10 genes by
                                                         1000 cells of 2 cell types, and (2) unpaired spatial feature matrix for a different 500
-                                                        cells, including their annotated cell type and spatial coordinate." = "fake4",
+                                                        cells, including their annotated cell type and spatial coordinates." = "fake4",
                                                         "Normal human breast snRNAseq data: It includes count matrix
                                                         for 4751 genes by 5990 cells of 6 cell types (epithelial cell,
                                                         adipocyte, fibroblast, endothelial cell, immune (myeloid) and
@@ -71,13 +71,13 @@ run_interactive_sCCIgen_R1 <- function() {
                                                         for 2,500 highly variable genes by 511 cells of 6 cell types (excitatory neuron,
                                                         interneuron, astrocyte, microglia, oligodendrocyte and
                                                         endothelial cells), and (2) cell feature matrix including cell
-                                                        type annotation, spatial coordinate on 2D (x, y), and field of view.
+                                                        type annotation, spatial coordinates on 2D (x, y), and field of view.
                                                         PMID: 35549429" = "SeqFishPlusCortex_2025",
                                                         "Ovarian cancer MERFISH data: It includes (1) count matrix
                                                         for 550 genes by 355,633 cells of 6 cell types (tumor, adipocyte,
                                                         endothelial, T-cell, macrophage, and others), and (2) cell
                                                         feature matrix including cell type annotation and spatial
-                                                        coordinate on 2D. Data source: vizgen" = "MERFISH_OV_2025",
+                                                        coordinates on 2D. Data source: vizgen" = "MERFISH_OV_2025",
                                                         "I want to use my own dataset" = "user_input"),
                                             width = "100%",
                                             selected = character(0)
@@ -86,6 +86,8 @@ run_interactive_sCCIgen_R1 <- function() {
                                           shiny::uiOutput("downloadExpression"),
 
                                           shiny::uiOutput("downloadFeature"),
+
+                                          shiny::uiOutput("paired_or_unpaired_question"),
 
                                           shiny::uiOutput("userinputexpression_text"),
 
@@ -372,7 +374,8 @@ run_interactive_sCCIgen_R1 <- function() {
             label = "What type of data are you going to upload?",
             choices = c("Only single-cell data" = "sc",
                         "Paired spatial data, where the cells in the expression matrix and the spatial file have the same IDs and come from the same technology." = "paired",
-                        "Unpaired data, where the cells in the expression matrix and the spatial file come from different sources/technologies (e.g. scRNAseq + spatial, Xenium + CODEX, etc.)" = "unpaired"))
+                        "Unpaired data, where the cells in the expression matrix and the spatial file come from different sources/technologies (e.g. scRNAseq + spatial, Xenium + CODEX, etc.) or tissue sample (e.g. a different slide) or condition (e.g. a diseased tissue)" = "unpaired"),
+            width = "100%")
         })
 
         shiny::observeEvent(input$paired_or_unpaired_answer, {
@@ -383,7 +386,7 @@ run_interactive_sCCIgen_R1 <- function() {
             output$userinputexpression_text <- renderUI({
 
               shiny::strong("Select the expression file (e.g. expression.Rdata, .tsv, or .csv).
-                        Upload a G gene by N cell matrix for expression count data.
+                        Upload a gene by cell matrix for expression count data.
                         Instruction: Row names should be unique identifiers of genes.
                         Column names should be the cell type annotation.")
             })
@@ -435,7 +438,7 @@ run_interactive_sCCIgen_R1 <- function() {
             output$userinputexpression_text <- renderUI({
 
               shiny::strong("Select the expression file (e.g. expression.Rdata, .tsv, or .csv).
-                        Upload a G gene by N cell matrix for expression count data.
+                        Upload a gene by cell matrix for expression count data.
                         Instruction: Row names should be unique identifiers of genes.
                         Column names should be the cell type annotation.")
             })
@@ -523,7 +526,7 @@ run_interactive_sCCIgen_R1 <- function() {
             output$userinputexpression_text <- renderUI({
 
               shiny::strong("Select the single-cell expression file (e.g. expression.Rdata, .tsv, or .csv).
-                        Upload a G gene by N cell matrix for expression count data.
+                        Upload a gene by cell matrix for expression count data.
                         The source of this matrix can be a technology that
                         generates single-cell level expression data
                         (e.g. scRNAseq, snRNAseq, Xenium, etc.).
@@ -568,7 +571,7 @@ run_interactive_sCCIgen_R1 <- function() {
             output$userinputspatial_text <- renderUI({
 
               shiny::strong("Select the spatial file (e.g. spatial.Rdata, .tsv, or .csv).
-                Upload a N by K matrix for spatial data, which can be unmatched to the expression data.
+                Upload a N by K matrix for spatial data, which is unmatched to the expression data.
                 The source of this file can be a different technology from the expression matrix
                 (e.g. CODEX, IF) or tissue sample (e.g. a different slide) or
                 condition (e.g. a diseased tissue).
@@ -819,6 +822,10 @@ run_interactive_sCCIgen_R1 <- function() {
 
         }
 
+      } else {
+
+        spatial_data_file("NULL")
+        spatial_data_file_type("NULL")
       }
 
       shiny::showModal(shiny::modalDialog(
@@ -841,9 +848,9 @@ run_interactive_sCCIgen_R1 <- function() {
     region_specific_model <- shiny::reactiveVal()
     region_specific_model("NULL")
 
-    shiny::observeEvent(ncol_feature_data(), {
+    shiny::observeEvent(paired_or_unpaired(), {
 
-      if(ncol_feature_data() > 1) {
+      if(paired_or_unpaired() %in% c("paired", "unpaired")) {
 
         output$ask_simulate_cells <- shiny::renderUI({
           shiny::radioButtons(inputId = "simulatecells",
@@ -1055,7 +1062,7 @@ run_interactive_sCCIgen_R1 <- function() {
         output$ask_custom_cell_type_prop <- NULL
         output$ask_even_distribution <- NULL
         output$ask_custom_interaction <- NULL
-      } else { # when ncol == 1
+      } else { # when only single-cell
         output$ask_model_per_region <- NULL
         output$ask_simulate_cells <- NULL
         output$ask_windowmethod <- NULL
@@ -1210,7 +1217,7 @@ run_interactive_sCCIgen_R1 <- function() {
             output$text_file_customcellproportions <- NULL
             output$button_read_file_customcellproportions <- NULL
 
-            x = spatial_data() %>% as.data.frame() %>%
+            x <- tibble(cell_type = colnames(expr_data())) %>%
               count(cell_type) %>%
               mutate(proportions = round(n/sum(n),3),
                      proportions2 = paste0(cell_type,",",proportions))
@@ -2115,6 +2122,7 @@ run_interactive_sCCIgen_R1 <- function() {
                                               "expression_data_file",
                                               "spatial_data_file",
                                               "expression_data_file_type",
+                                              "spatial_data_file_type",
                                               "expression_data_cell_types",
                                               "simulate_spatial_data"
         ),
@@ -2123,6 +2131,7 @@ run_interactive_sCCIgen_R1 <- function() {
                   expression_data_file(),
                   spatial_data_file(),
                   expression_data_file_type(),
+                  spatial_data_file_type(),
                   expression_data_cell_types(),
                   simulate_spatial_data()
         )
@@ -2147,7 +2156,7 @@ run_interactive_sCCIgen_R1 <- function() {
 
         }
 
-        if(ncol_feature_data() > 1 & simulate_spatial_data() == TRUE) {
+        if(paired_or_unpaired() %in% c("paired", "unpaired") & simulate_spatial_data() == TRUE) {
           param_df = rbind(param_df, c("window_method", window_method()))
         }
 
@@ -2158,7 +2167,7 @@ run_interactive_sCCIgen_R1 <- function() {
         param_df = rbind(param_df, c("region_specific_model",
                                      region_specific_model()))
 
-        if(ncol_feature_data() == 1) {
+        if(paired_or_unpaired() == "NULL") {
 
           param_df = rbind(param_df, c("custom_cell_type_proportions",
                                        custom_props()))
