@@ -189,15 +189,24 @@ run_interactive_sCCIgen_R1 <- function() {
                                           shiny::uiOutput("ask_model_per_region"),
 
                                           shiny::radioButtons(inputId = "mimiccorrelation",
-                                                              label = "Do you want to use a pre-estimated model parameter file
-                                                              to expedite the simulation? Yes is selected if you have estimated model parameters using
-                                                              'sCCIgen::Est_ModelPara'.
-                                                              Note, the pre-estimation is required for simulating gene-gene correlations .",
+                                                              label = "Do you want to calculate gene correlation?",
                                                               choices = c("No, will only simulate independent genes" = FALSE,
                                                                           "Yes, can be used to simulate independent or correlated genes " = TRUE),
                                                               width = "100%"),
 
-                                          shiny::uiOutput("mimiccorrelationSelection"),
+                                          shiny::radioButtons(inputId = "uploadcorrelation",
+                                                              label = "Do you want to use a pre-estimated model parameter file
+                                                              to expedite the simulation? Select Yes if you have estimated model parameters using
+                                                              'sCCIgen::Est_ModelPara'.
+                                                              Note, the pre-estimation is required for simulating gene-gene correlations .",
+                                                              choices = c("No" = FALSE,
+                                                                          "Yes" = TRUE),
+                                                              width = "100%"),
+
+                                          shiny::uiOutput("button_uploadcorrelation_file"),
+
+                                          shiny::uiOutput("text_custom_correlation_file"),
+                                          shiny::HTML(strrep(htmltools::br(), 1)),
 
                                           shiny::uiOutput("ask_spatialpatterns"),
 
@@ -1445,25 +1454,46 @@ run_interactive_sCCIgen_R1 <- function() {
 
     gene_cor <- shiny::reactiveVal()
     copula_input <- shiny::reactiveVal()
+    copula_input("NULL")
 
-    shiny::observeEvent(input$mimiccorrelation, {
+    shiny::observeEvent(input$mimiccorrelation, {gene_cor(input$mimiccorrelation)})
 
-      gene_cor(input$mimiccorrelation)
+    shiny::observeEvent(input$uploadcorrelation, {
 
-      if(input$mimiccorrelation == TRUE) {
-        output$mimiccorrelationSelection <- shiny::renderUI({
-          shiny::textInput(inputId = "genecorfile",
-                           label = "Provide a file path for uploading pre-estimated model parameters. The file can include gene-gene
-                           correlations or only marginal models for independent genes.",
-                           width = "100%")
+      if(input$uploadcorrelation == TRUE) {
+
+        output$button_uploadcorrelation_file <- shiny::renderUI({
+
+          shinyFiles::shinyFilesButton(id = "file_custom_correlation_file",
+                                       label = "Select the pre-estimated model file",
+                                       title = "Select the pre-estimated model file. The file can include gene-gene correlations or only marginal models for independent genes.",
+                                       multiple = FALSE,
+                                       viewtype = "list")
         })
 
-        shiny::observeEvent(input$genecorfile, {
-          copula_input(input$genecorfile)
+        shinyFiles::shinyFileChoose(input,
+                                    id = "file_custom_correlation_file",
+                                    roots = c(wd = getwd()) )
+
+        shiny::observeEvent(input$file_custom_correlation_file, {
+
+          if(!is.null(input$file_custom_correlation_file)) {
+            x <- paste0(getwd(),
+                        gsub("/wd", "",
+                             paste(unlist(input$file_custom_correlation_file),
+                                   collapse = "/")))
+
+            output$text_custom_correlation_file <- shiny::renderUI({
+              shiny::strong({paste("Your selected file is:", x)})
+            })
+
+            copula_input(x)
+          }
+
         })
 
       } else {
-        output$mimiccorrelationSelection <- NULL
+        output$button_uploadcorrelation_file <- NULL
       }
     })
 
@@ -2189,10 +2219,8 @@ run_interactive_sCCIgen_R1 <- function() {
         param_df = rbind(param_df, c("gene_cor",
                                      gene_cor() ))
 
-        if(gene_cor() == TRUE) {
-          param_df = rbind(param_df, c("copula_input",
-                                       copula_input() ))
-        }
+        param_df = rbind(param_df, c("copula_input",
+                                     copula_input() ))
 
         if(!is.null(spatialpatterns_df())) {
           param_df = rbind(param_df, spatialpatterns_df())
