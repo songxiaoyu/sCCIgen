@@ -1,0 +1,15 @@
+pandoc: '3.4'
+pkgdown: 2.1.3
+pkgdown_sha: ~
+articles:
+  docker: docker.html
+  installation: installation.html
+  Interface: Interface.html
+  Rpackage_snRNAseq: Rpackage_snRNAseq.html
+  Rpackage_SRT_region: Rpackage_SRT_region.html
+  Rpackage_SRT: Rpackage_SRT.html
+  Rpackage_unpaired: Rpackage_unpaired.html
+last_built: 2025-06-03T20:17Z
+urls:
+  reference: https://songxiaoyu.github.io/sCCIgen/reference
+  article: https://songxiaoyu.github.io/sCCIgen/articles
