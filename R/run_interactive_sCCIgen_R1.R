@@ -359,94 +359,259 @@ run_interactive_sCCIgen_R1 <- function() {
     expression_data_file <- shiny::reactiveVal()
     spatial_data_file <- shiny::reactiveVal()
     path_to_input_dir <- shiny::reactiveVal()
+    paired_or_unpaired <- shiny::reactiveVal()
+
 
     shiny::observeEvent(input$input_data, {
 
       if(input$input_data == "user_input") {
 
-        output$userinputexpression_text <- renderUI({
+        output$paired_or_unpaired_question <- renderUI({
+          shiny::radioButtons(
+            inputId = "paired_or_unpaired_answer",
+            label = "What type of data are you going to upload?",
+            choices = c("Only single-cell data" = "sc",
+                        "Paired spatial data, where the cells in the expression matrix and the spatial file have the same IDs and come from the same technology." = "paired",
+                        "Unpaired data, where the cells in the expression matrix and the spatial file come from different sources/technologies (e.g. scRNAseq + spatial, Xenium + CODEX, etc.)" = "unpaired"))
+        })
 
-          shiny::strong("Select the expression file (e.g. expression.Rdata, .tsv, or .csv).
+        shiny::observeEvent(input$paired_or_unpaired_answer, {
+
+          if(input$paired_or_unpaired_answer == "sc") {
+            paired_or_unpaired("NULL")
+
+            output$userinputexpression_text <- renderUI({
+
+              shiny::strong("Select the expression file (e.g. expression.Rdata, .tsv, or .csv).
                         Upload a G gene by N cell matrix for expression count data.
                         Instruction: Row names should be unique identifiers of genes.
                         Column names should be the cell type annotation.")
-        })
+            })
 
-        output$userinputexpression <- renderUI({
+            output$userinputexpression <- renderUI({
 
-          shinyFiles::shinyFilesButton(id = "user_expression",
-                                       label = "Select the expression file",
-                                       title = "Please select a expression file",
-                                       multiple = FALSE,
-                                       viewtype = "list")
-        })
+              shinyFiles::shinyFilesButton(id = "user_expression",
+                                           label = "Select the expression file",
+                                           title = "Please select a expression file",
+                                           multiple = FALSE,
+                                           viewtype = "list")
+            })
 
-        shinyFiles::shinyFileChoose(input,
-                                    id = 'user_expression',
-                                    roots = c(wd = getwd()) )
+            shinyFiles::shinyFileChoose(input,
+                                        id = 'user_expression',
+                                        roots = c(wd = getwd()) )
 
+            shiny::observeEvent(input$user_expression, {
+              x <- shiny::reactiveVal()
+              x_length <- shiny::reactiveVal()
 
-        shiny::observeEvent(input$user_expression, {
-          x <- shiny::reactiveVal()
-          x_length <- shiny::reactiveVal()
+              x(gsub("/wd", "", paste(unlist(input$user_expression), collapse = "/")))
+              x_length(length(unlist(input$user_expression)))
 
-          x(gsub("/wd", "", paste(unlist(input$user_expression), collapse = "/")))
-          x_length(length(unlist(input$user_expression)))
+              if(x_length() >= 2) {
+                expression_data_file(unlist(input$user_expression)[x_length() - 1])
+                x_length(length(unlist(input$user_expression)) - 2)
+                path_to_input_dir(paste0(getwd(),
+                                         paste(unlist(input$user_expression)[1:x_length()], collapse = "/")))
+              }
 
-          if(x_length() >= 2) {
-            expression_data_file(unlist(input$user_expression)[x_length() - 1])
-            x_length(length(unlist(input$user_expression)) - 2)
-            path_to_input_dir(paste0(getwd(),
-                              paste(unlist(input$user_expression)[1:x_length()], collapse = "/")))
+            })
+
+            output$user_expression_text <- renderUI({
+
+              shiny::strong({paste("Your expression file is:", expression_data_file())})
+            })
+
+            output$userinputspatial_text <- NULL
+            output$userinputspatial <- NULL
+            output$user_spatial_text <- NULL
+            spatial_data_file(NULL)
+
           }
 
-        })
+          if(input$paired_or_unpaired_answer == "paired") {
+            paired_or_unpaired("TRUE")
 
-        output$user_expression_text <- renderUI({
+            output$userinputexpression_text <- renderUI({
 
-          shiny::strong({paste("Your expression file is:", expression_data_file())})
-        })
+              shiny::strong("Select the expression file (e.g. expression.Rdata, .tsv, or .csv).
+                        Upload a G gene by N cell matrix for expression count data.
+                        Instruction: Row names should be unique identifiers of genes.
+                        Column names should be the cell type annotation.")
+            })
 
-        output$userinputspatial_text <- renderUI({
+            output$userinputexpression <- renderUI({
 
-          shiny::strong("Select the spatial file (e.g. spatial.Rdata, .tsv, or .csv).
-                Upload a N by K matrix for spatial data, which can be matched or unmatched to the expression data.
+              shinyFiles::shinyFilesButton(id = "user_expression",
+                                           label = "Select the expression file",
+                                           title = "Please select a expression file",
+                                           multiple = FALSE,
+                                           viewtype = "list")
+            })
+
+            shinyFiles::shinyFileChoose(input,
+                                        id = 'user_expression',
+                                        roots = c(wd = getwd()) )
+
+            shiny::observeEvent(input$user_expression, {
+              x <- shiny::reactiveVal()
+              x_length <- shiny::reactiveVal()
+
+              x(gsub("/wd", "", paste(unlist(input$user_expression), collapse = "/")))
+              x_length(length(unlist(input$user_expression)))
+
+              if(x_length() >= 2) {
+                expression_data_file(unlist(input$user_expression)[x_length() - 1])
+                x_length(length(unlist(input$user_expression)) - 2)
+                path_to_input_dir(paste0(getwd(),
+                                         paste(unlist(input$user_expression)[1:x_length()], collapse = "/")))
+              }
+
+            })
+
+            output$user_expression_text <- renderUI({
+
+              shiny::strong({paste("Your expression file is:", expression_data_file())})
+            })
+
+            output$userinputspatial_text <- renderUI({
+
+              shiny::strong("Select the spatial file (e.g. spatial.Rdata, .tsv, or .csv).
+                Upload a N by K matrix for spatial data, which should be matched to the expression data.
                 Instruction: Column and row names are not expected.
                 The first column should be cell type annotation.
                 The second and third columns should be the spatial coordinates on x, y axes.
-                The four column should be the spatial region.
-                Columns 2-4 are optional. ",
-          )
-        })
+                The fourth column (optional) should be the spatial region.")
+            })
 
-        output$userinputspatial <- renderUI({
+            output$userinputspatial <- renderUI({
 
-          shinyFiles::shinyFilesButton(id = "user_spatial",
-                                       label = "Select the spatial file",
-                                       title = "Please select a spatial file",
-                                       multiple = FALSE,
-                                       viewtype = "list")
+              shinyFiles::shinyFilesButton(id = "user_spatial",
+                                           label = "Select the spatial file",
+                                           title = "Please select a spatial file",
+                                           multiple = FALSE,
+                                           viewtype = "list")
 
-        })
+            })
 
-        shinyFiles::shinyFileChoose(input,
-                                    id = 'user_spatial',
-                                    roots = c(wd = getwd()) )
+            shinyFiles::shinyFileChoose(input,
+                                        id = 'user_spatial',
+                                        roots = c(wd = getwd()) )
 
-        shiny::observeEvent(input$user_spatial, {
-          x <- shiny::reactiveVal()
-          x_length <- shiny::reactiveVal()
+            shiny::observeEvent(input$user_spatial, {
+              x <- shiny::reactiveVal()
+              x_length <- shiny::reactiveVal()
 
-          x(gsub("/wd", "", paste(unlist(input$user_spatial), collapse = "/")))
-          x_length(length(unlist(input$user_spatial)))
+              x(gsub("/wd", "", paste(unlist(input$user_spatial), collapse = "/")))
+              x_length(length(unlist(input$user_spatial)))
 
-          if(x_length() >= 2) {
-            spatial_data_file(unlist(input$user_spatial)[x_length() - 1])
+              if(x_length() >= 2) {
+                spatial_data_file(unlist(input$user_spatial)[x_length() - 1])
+              }
+            })
+
+            output$user_spatial_text <- renderUI({
+              shiny::strong({paste("Your spatial file is:", spatial_data_file())})
+            })
+
           }
-        })
 
-        output$user_spatial_text <- renderUI({
-          shiny::strong({paste("Your spatial file is:", spatial_data_file())})
+
+          if(input$paired_or_unpaired_answer == "unpaired") {
+            paired_or_unpaired("FALSE")
+
+            output$userinputexpression_text <- renderUI({
+
+              shiny::strong("Select the single-cell expression file (e.g. expression.Rdata, .tsv, or .csv).
+                        Upload a G gene by N cell matrix for expression count data.
+                        The source of this matrix can be a technology that
+                        generates single-cell level expression data
+                        (e.g. scRNAseq, snRNAseq, Xenium, etc.).
+                        Row names should be unique identifiers of genes.
+                        Column names should be the cell type annotation.")
+            })
+
+            output$userinputexpression <- renderUI({
+
+              shinyFiles::shinyFilesButton(id = "user_expression",
+                                           label = "Select the expression file",
+                                           title = "Please select a expression file",
+                                           multiple = FALSE,
+                                           viewtype = "list")
+            })
+
+            shinyFiles::shinyFileChoose(input,
+                                        id = 'user_expression',
+                                        roots = c(wd = getwd()) )
+
+            shiny::observeEvent(input$user_expression, {
+              x <- shiny::reactiveVal()
+              x_length <- shiny::reactiveVal()
+
+              x(gsub("/wd", "", paste(unlist(input$user_expression), collapse = "/")))
+              x_length(length(unlist(input$user_expression)))
+
+              if(x_length() >= 2) {
+                expression_data_file(unlist(input$user_expression)[x_length() - 1])
+                x_length(length(unlist(input$user_expression)) - 2)
+                path_to_input_dir(paste0(getwd(),
+                                         paste(unlist(input$user_expression)[1:x_length()], collapse = "/")))
+              }
+
+            })
+
+            output$user_expression_text <- renderUI({
+
+              shiny::strong({paste("Your expression file is:", expression_data_file())})
+            })
+
+            output$userinputspatial_text <- renderUI({
+
+              shiny::strong("Select the spatial file (e.g. spatial.Rdata, .tsv, or .csv).
+                Upload a N by K matrix for spatial data, which can be unmatched to the expression data.
+                The source of this file can be a different technology from the expression matrix
+                (e.g. CODEX, IF) or tissue sample (e.g. a different slide) or
+                condition (e.g. a diseased tissue).
+                Column and row names are not expected.
+                The first column should be the cell type annotation from the spatial data.
+                The second and third columns should be the spatial coordinates on x, y axes.
+                The fourth column (optional) should be the spatial region.")
+            })
+
+            output$userinputspatial <- renderUI({
+
+              shinyFiles::shinyFilesButton(id = "user_spatial",
+                                           label = "Select the spatial file",
+                                           title = "Please select a spatial file",
+                                           multiple = FALSE,
+                                           viewtype = "list")
+
+            })
+
+            shinyFiles::shinyFileChoose(input,
+                                        id = 'user_spatial',
+                                        roots = c(wd = getwd()) )
+
+            shiny::observeEvent(input$user_spatial, {
+              x <- shiny::reactiveVal()
+              x_length <- shiny::reactiveVal()
+
+              x(gsub("/wd", "", paste(unlist(input$user_spatial), collapse = "/")))
+              x_length(length(unlist(input$user_spatial)))
+
+              if(x_length() >= 2) {
+                spatial_data_file(unlist(input$user_spatial)[x_length() - 1])
+              }
+            })
+
+            output$user_spatial_text <- renderUI({
+              shiny::strong({paste("Your spatial file is:", spatial_data_file())})
+            })
+
+
+          }
+
+
         })
 
         output$downloadExpression <- NULL
@@ -456,6 +621,7 @@ run_interactive_sCCIgen_R1 <- function() {
 
       } else {
 
+        output$paired_or_unpaired_question <- NULL
         output$userinputexpression_text <- NULL
         output$userinputexpression <- NULL
         output$user_expression_text <- NULL
@@ -489,6 +655,16 @@ run_interactive_sCCIgen_R1 <- function() {
 
         expression_data_file(paste0(input$input_data,"_expr.Rdata"))
         spatial_data_file(paste0(input$input_data,"_spatial.Rdata"))
+
+        if(input$input_data == "fake1") {paired_or_unpaired("NULL")}
+        if(input$input_data == "fake2") {paired_or_unpaired("TRUE")}
+        if(input$input_data == "fake3") {paired_or_unpaired("TRUE")}
+        if(input$input_data == "fake4") {paired_or_unpaired("FALSE")}
+        if(input$input_data == "MERFISH_OV_2025") {paired_or_unpaired("TRUE")}
+        if(input$input_data == "MERFISH_OV_2025_unpaired") {paired_or_unpaired("FALSE")}
+        if(input$input_data == "SeqFishPlusCortex_2025") {paired_or_unpaired("TRUE")}
+        if(input$input_data == "snRNAseq_breast_2025") {paired_or_unpaired("NULL")}
+
 
         output$text_ask_data_directory <- renderUI({
           shiny::strong("Where is your input data located? Click the button to select your data directory.")
@@ -536,6 +712,7 @@ run_interactive_sCCIgen_R1 <- function() {
     # Create parameters file
 
     expression_data_file_type <- shiny::reactiveVal()
+    spatial_data_file_type <- shiny::reactiveVal()
     expression_data_cell_types <- shiny::reactiveVal()
     expr_data <- shiny::reactiveVal()
     spatial_data <- shiny::reactiveVal()
@@ -543,69 +720,117 @@ run_interactive_sCCIgen_R1 <- function() {
 
     shiny::observeEvent(input$use_input_data, {
 
-      if(file.exists(fs::path(path_to_input_dir(), expression_data_file())) &
-         file.exists(fs::path(path_to_input_dir(), spatial_data_file())) ) {
+      if (!is.null(expression_data_file())) {
 
-        expression_data_file_type(tools::file_ext(expression_data_file()))
+        if(file.exists(fs::path(path_to_input_dir(), expression_data_file()))) {
 
-        if(expression_data_file_type() == "Rdata" ||
-           expression_data_file_type() == "RData") {
+          expression_data_file_type(tools::file_ext(expression_data_file()))
 
-          load(fs::path(path_to_input_dir(), expression_data_file()), x <- new.env())
-          expr_data(get(ls(x), envir = x))
-          rm(x)
+          if(expression_data_file_type() == "Rdata" ||
+             expression_data_file_type() == "RData") {
 
-          load(fs::path(path_to_input_dir(), spatial_data_file()), x <- new.env())
-          y = get(ls(x), envir = x)
-          rm(x)
+            load(fs::path(path_to_input_dir(), expression_data_file()), x <- new.env())
+            expr_data(get(ls(x), envir = x))
+            rm(x)
 
-          colnames(y)[1] = "cell_type"
-          spatial_data(y)
+          } else if(expression_data_file_type() == "csv") {
 
-        } else if(expression_data_file_type() == "csv") {
-
-          expr_data(read.csv(fs::path(path_to_input_dir(), expression_data_file()),
-                             row.names = 1))
-
-          spatial_data(read.csv(fs::path(path_to_input_dir(), spatial_data_file()),
-                                    row.names = 1))
-
-        } else if(expression_data_file_type() == "tsv") {
-
-          expr_data(read.delim(fs::path(path_to_input_dir(), expression_data_file()),
+            expr_data(read.csv(fs::path(path_to_input_dir(), expression_data_file()),
                                row.names = 1))
 
-          spatial_data(read.delim(fs::path(path_to_input_dir(), spatial_data_file()),
-                                      row.names = 1))
+          } else if(expression_data_file_type() == "tsv") {
+
+            expr_data(read.delim(fs::path(path_to_input_dir(), expression_data_file()),
+                                 row.names = 1))
+
+          } else {
+
+            shiny::showModal(shiny::modalDialog(
+              title = "Error reading the expression file",
+              "The extension of your file is not supported, make sure to provide
+              an Rdata, .csv or .tsv file.",
+              footer = modalButton("OK")
+            ))
+
+          }
+
+          expression_data_cell_types(paste(sort(unique(colnames(expr_data()))),
+                                           collapse = ","))
+        } else {
+
+          shiny::showModal(shiny::modalDialog(
+            title = "Error reading the expression file",
+            "Your expression file was not found in your input directory.
+            Verify that the expression file is in the right directory.",
+            footer = modalButton("OK")
+          ))
+
         }
 
-        expression_data_cell_types(paste(unique(sort(unique(spatial_data()[,1]) )),
-                                         collapse = ","))
-
-        ncol_feature_data(ncol(spatial_data()))
-
-        shiny::showModal(shiny::modalDialog(
-          title = "Successful reading of input files",
-          "Your input files were successfully loaded.",
-          footer = modalButton("OK")
-        ))
-
-      } else {
-
-        shiny::showModal(shiny::modalDialog(
-          title = "Error reading input files",
-          "At least one of your input files was not found in your input directory.
-          Verify that the expression and spatial files are in the right directory.",
-          footer = modalButton("OK")
-        ))
       }
+
+      if (!is.null(spatial_data_file())) {
+
+        if(file.exists(fs::path(path_to_input_dir(), spatial_data_file()))) {
+
+          spatial_data_file_type(tools::file_ext(spatial_data_file()))
+
+          if(spatial_data_file_type() == "Rdata" ||
+             spatial_data_file_type() == "RData") {
+
+            load(fs::path(path_to_input_dir(), spatial_data_file()), x <- new.env())
+            y = get(ls(x), envir = x)
+            rm(x)
+
+            colnames(y)[1] = "cell_type"
+            spatial_data(y)
+
+          } else if(spatial_data_file_type() == "csv") {
+
+            spatial_data(read.csv(fs::path(path_to_input_dir(), spatial_data_file()),
+                                  row.names = 1))
+
+          } else if(spatial_data_file_type() == "tsv") {
+
+            spatial_data(read.delim(fs::path(path_to_input_dir(), spatial_data_file()),
+                                    row.names = 1))
+
+          } else {
+
+            shiny::showModal(shiny::modalDialog(
+              title = "Error reading the spatial file",
+              "The extension of your file is not supported, make sure to provide
+              an Rdata, .csv or .tsv file.",
+              footer = modalButton("OK")
+            ))
+
+          }
+
+          ncol_feature_data(ncol(spatial_data()))
+
+        } else {
+
+          shiny::showModal(shiny::modalDialog(
+            title = "Error reading the spatial file",
+            "Your spatial file was not found in your input directory.
+            Verify that the spatial file is in the right directory.",
+            footer = modalButton("OK")
+          ))
+
+        }
+
+      }
+
+      shiny::showModal(shiny::modalDialog(
+        title = "Successful reading of input files",
+        "Your input files were successfully loaded.",
+        footer = modalButton("OK")
+      ))
 
     })
 
     simulate_spatial_data <- shiny::reactiveVal()
-
     window_method <- shiny::reactiveVal()
-
     num_regions <- shiny::reactiveVal()
     custom_cell_type_proportions <- shiny::reactiveVal()
     cell_type_proportions <- shiny::reactiveVal()
@@ -1886,6 +2111,7 @@ run_interactive_sCCIgen_R1 <- function() {
       content = function(con) {
 
         param_df <- data.frame(parameters = c("path_to_input_dir",
+                                              "paired",
                                               "expression_data_file",
                                               "spatial_data_file",
                                               "expression_data_file_type",
@@ -1893,6 +2119,7 @@ run_interactive_sCCIgen_R1 <- function() {
                                               "simulate_spatial_data"
         ),
         value = c(path_to_input_dir(),
+                  paired_or_unpaired(),
                   expression_data_file(),
                   spatial_data_file(),
                   expression_data_file_type(),
