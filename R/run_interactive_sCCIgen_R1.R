@@ -850,7 +850,7 @@ run_interactive_sCCIgen_R1 <- function() {
 
     shiny::observeEvent(paired_or_unpaired(), {
 
-      if(paired_or_unpaired() %in% c("paired", "unpaired")) {
+      if(paired_or_unpaired() %in% c(TRUE, FALSE)) {
 
         output$ask_simulate_cells <- shiny::renderUI({
           shiny::radioButtons(inputId = "simulatecells",
@@ -1035,28 +1035,32 @@ run_interactive_sCCIgen_R1 <- function() {
 
         num_regions("NULL")
 
-        if(ncol_feature_data() > 3) {
-          unique_regions = unique(sort(spatial_data()[,4]))
+        shiny::observeEvent(ncol_feature_data(), {
+          if(ncol_feature_data() > 3 & paired_or_unpaired() == FALSE) {region_specific_model("FALSE")}
 
-          num_regions(length(unique_regions))
+          if(ncol_feature_data() > 3 & paired_or_unpaired() == TRUE) {
+            unique_regions = unique(sort(spatial_data()[,4]))
 
-          if(length(unique_regions) > 1) {
-            output$ask_model_per_region <- shiny::renderUI({
-              shiny::radioButtons(inputId = "model_per_region",
-                                  label = "Do you want to model the input expression data
+            num_regions(length(unique_regions))
+
+            if(length(unique_regions) > 1) {
+              output$ask_model_per_region <- shiny::renderUI({
+                shiny::radioButtons(inputId = "model_per_region",
+                                    label = "Do you want to model the input expression data
                                   separately for each region?",
-                                  choices = c("No" = FALSE,
-                                              "Yes" = TRUE),
-                                  width = "100%")
-            })
+                                    choices = c("No" = FALSE,
+                                                "Yes" = TRUE),
+                                    width = "100%")
+              })
 
-            shiny::observeEvent(input$model_per_region, {
-              region_specific_model(input$model_per_region)
-            })
-          } else {
-            output$ask_model_per_region <- NULL
+              shiny::observeEvent(input$model_per_region, {
+                region_specific_model(input$model_per_region)
+              })
+            } else {
+              output$ask_model_per_region <- NULL
+            }
           }
-        }
+        })
 
         output$ask_numberregions <- NULL
         output$ask_custom_cell_type_prop <- NULL
@@ -2156,7 +2160,7 @@ run_interactive_sCCIgen_R1 <- function() {
 
         }
 
-        if(paired_or_unpaired() %in% c("paired", "unpaired") & simulate_spatial_data() == TRUE) {
+        if(paired_or_unpaired() %in% c(TRUE, FALSE) & simulate_spatial_data() == TRUE) {
           param_df = rbind(param_df, c("window_method", window_method()))
         }
 
@@ -2167,7 +2171,7 @@ run_interactive_sCCIgen_R1 <- function() {
         param_df = rbind(param_df, c("region_specific_model",
                                      region_specific_model()))
 
-        if(paired_or_unpaired() == "NULL") {
+        if(is.null(paired_or_unpaired())) {
 
           param_df = rbind(param_df, c("custom_cell_type_proportions",
                                        custom_props()))
