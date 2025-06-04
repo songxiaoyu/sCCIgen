@@ -5,90 +5,29 @@
 
 ## 1. Introduction
 
-Spatially resolved transcriptomics (SRT) provides an invaluable avenue
-for examining cell-cell interactions within native tissue environments.
-The development and evaluation of analytical tools for SRT data
-necessitate tools for generating synthetic datasets with known ground
-truth of cell-cell interaction induced features.
+Spatially resolved transcriptomics (SRT) provides an invaluable avenue for examining cell-cell interactions within native tissue environments. The development and evaluation of analytical tools for SRT data necessitate tools for generating synthetic datasets with known ground truth of cell-cell interaction induced features. 
 
-We introduce `sCCIgen`, a novel real-data-based simulator tailored to
-generate high-fidelity SRT data with a focus on cell-cell interactions.
-`sCCIgen` preserves transcriptomic and spatial characteristics in SRT
-data, while comprehensively models various cell-cell interaction
-features, including cell colocalization, spatial dependence among gene
-expressions, and gene-gene interactions between nearby cells.
-
-Reference: XS… ““.
+We introduce `sCCIgen`, a novel real-data-based simulator tailored to generate high-fidelity SRT data with a focus on cell-cell interactions. `sCCIgen` preserves transcriptomic and spatial characteristics in SRT data, while comprehensively models various cell-cell interaction features, including cell colocalization, spatial dependence among gene expressions, and gene-gene interactions between nearby cells. 
 
 ## 2. Installation
 
-<!-- 
-### Installation through Docker
-1. An installation of  `Docker Desktop` is highly recommended, especially for beginners. Docker can be downloaded at https://www.docker.com. 
-&#10;2. `sCCIgen` uses command line prompts, such as through `Terminal` in Mac. You might want to download your favorite software to run command line. My favorite is Visual Studio Code (`VSC`). If `VSC` is used, Docker needs to be installed in its Extension. I will use `VSC` for this tutorial. 
-&#10;3. Clone `sCCIgen` repository to your local machine, such as on `Terminal` type
-```
-git clone https://github.com/songxiaoyu/sCCIgen
-```
-&#10;3. Open Docker Desktop. 
-&#10;4. On `VSC` terminal, pull image from the Docker Hub as follows: 
-```
-docker pull songxiaoyu152/sCCIgen
-```
-&#10;3. Run the Docker container directly with a working directory (WORKDIR) bound to your local machine. Note WORKDIR will be the location of all of your input data and your outputs.
-&#10;```
-docker run --mount type=bind,source="${WORKDIR}",target=/working_directory 
-  -it songxiaoyu152/sCCIgen
-````
-For example, my working directory is "/Users/songxiaoyu152/NUS Dropbox/Xiaoyu Song/SpatialTranscriptomics/Paper_sCCIgen/Github/sCCIgen/UseDocker", 
-so this is my code:
-```
-docker run --mount type=bind,source=/Users/songxiaoyu152/NUS Dropbox/Xiaoyu Song/SpatialTranscriptomics/Paper_sCCIgen/Github/sCCIgen/UseDocker,target=/working_directory 
-  -it songxiaoyu152/sCCIgen
-````
-&#10;
-&#10;### Installation of the R package instead 
-&#10;Alternatively, users can also install the latest version from GitHub with [devtools](https://github.com/hadley/devtools):
--->
-
-``` r
+```{r, eval=FALSE}
 install.packages("devtools")
 devtools::install_github("songxiaoyu/sCCIgen")
 ```
 
 ## 3. Simulation options
 
-Users have two options to perform SRT simulations using `sCCIgen`.
-Depending on preference, Users can choose to use:
+Users have two options to perform SRT simulations using `sCCIgen`. Depending on preference, Users can choose to use:
 
-- **An interactive interface.** The interface helps users to choose
-  tasks, data, and parameters, and lets `sCCIgen` run simulations to
-  provide simulated data, together with parameters and documentations,
-  saved in the working directory. As simulations usually involve many
-  parameters, this option is highly recommended for the first time user
-  or researchers with limited programming expertise.
-  - [Tutorials for using the interface to simulate
-    SRT.](https://github.com/songxiaoyu/sCCIgen/tree/main/Rmd/Interface.md)
-- **R package.** A direct use of `sCCIgen` package offers greater
-  flexibility, allowing users to adjust more parameters that would
-  otherwise be fixed at default values. It also enables the output of
-  simulation byproducts, such as spatial windows. This approach is
-  recommended for users with goode programming experience who wish to
-  perform customized simulations.
-  - [Tutorials for using the R package to simulate SRT based on snRNAseq
-    data.](https://github.com/songxiaoyu/sCCIgen/tree/main/Rmd/Rpackage_snRNAseq.md)
-  - [Tutorials for using the R package to simulate SRT based on
-    single-cell SRT data (single
-    region).](https://github.com/songxiaoyu/sCCIgen/tree/main/Rmd/Rpackage_SRT.md)
-  - [Tutorials for using the R package to simulate SRT based on
-    single-cell SRT data (multiple
-    regions).](https://github.com/songxiaoyu/sCCIgen/tree/main/Rmd/Rpackage_SRT_region.md)
-  - [Tutorials for using the R package to simulate SRT based on
-    single-cell expression and unpaired spatial
-    data.](https://github.com/songxiaoyu/sCCIgen/tree/main/Rmd/Rpackage_unpaired.md)
+  - **An interactive interface.** The interface helps users to choose tasks, data, and parameters, and lets `sCCIgen` run simulations to provide simulated data, together with parameters and documentations, saved in the working directory. As simulations usually involve many parameters, this option is highly recommended for the first time user or researchers with limited programming expertise. 
+    - [Tutorials for using the interface to simulate SRT.](https://songxiaoyu.github.io/sCCIgen/articles/Interface.html)
+  - **R package.** A direct use of `sCCIgen` package offers greater flexibility, allowing users to adjust more parameters that would otherwise be fixed at default values. It also enables the output of simulation byproducts, such as spatial windows. This approach is recommended for users with goode programming experience who wish to perform customized simulations.
+    - [Tutorials for using the R package to simulate SRT based on snRNAseq data.](https://songxiaoyu.github.io/sCCIgen/articles/Rpackage_snRNAseq.html)
+    - [Tutorials for using the R package to simulate SRT based on single-cell SRT data (single region).](https://songxiaoyu.github.io/sCCIgen/articles/Rpackage_SRT_region.html)
+    - [Tutorials for using the R package to simulate SRT based on single-cell SRT data (multiple regions).](https://songxiaoyu.github.io/sCCIgen/articles/Rpackage_SRT.html)
+    - [Tutorials for using the R package to simulate SRT based on single-cell expression and unpaired spatial data.](https://songxiaoyu.github.io/sCCIgen/articles/Rpackage_unpaired.html)
+  
+## References
 
-## 4. SessionInfo
-
-``` r
-sessionInfo("sCCIgen")
-```
+- [Song, X., et al. sCCIgen: A high-fidelity spatially resolved transcriptomics data simulator for cell-cell interaction studies. bioRxiv  (2025)](https://www.biorxiv.org/content/10.1101/2025.01.07.631830v1)
