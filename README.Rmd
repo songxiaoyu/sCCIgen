@@ -15,62 +15,20 @@ Reference: XS... "".
 
 ## 2. Installation
 
-<!-- 
-### Installation through Docker
-1. An installation of  `Docker Desktop` is highly recommended, especially for beginners. Docker can be downloaded at https://www.docker.com. 
-
-2. `sCCIgen` uses command line prompts, such as through `Terminal` in Mac. You might want to download your favorite software to run command line. My favorite is Visual Studio Code (`VSC`). If `VSC` is used, Docker needs to be installed in its Extension. I will use `VSC` for this tutorial. 
-
-3. Clone `sCCIgen` repository to your local machine, such as on `Terminal` type
-```
-git clone https://github.com/songxiaoyu/sCCIgen
-```
-
-3. Open Docker Desktop. 
-
-4. On `VSC` terminal, pull image from the Docker Hub as follows: 
-```
-docker pull songxiaoyu152/sCCIgen
-```
-
-3. Run the Docker container directly with a working directory (WORKDIR) bound to your local machine. Note WORKDIR will be the location of all of your input data and your outputs.
-
-```
-docker run --mount type=bind,source="${WORKDIR}",target=/working_directory 
-  -it songxiaoyu152/sCCIgen
-````
-For example, my working directory is "/Users/songxiaoyu152/NUS Dropbox/Xiaoyu Song/SpatialTranscriptomics/Paper_sCCIgen/Github/sCCIgen/UseDocker", 
-so this is my code:
-```
-docker run --mount type=bind,source=/Users/songxiaoyu152/NUS Dropbox/Xiaoyu Song/SpatialTranscriptomics/Paper_sCCIgen/Github/sCCIgen/UseDocker,target=/working_directory 
-  -it songxiaoyu152/sCCIgen
-````
-
-
-
-### Installation of the R package instead 
-
-Alternatively, users can also install the latest version from GitHub with [devtools](https://github.com/hadley/devtools):
--->
-```R
+```{r, eval=FALSE}
 install.packages("devtools")
 devtools::install_github("songxiaoyu/sCCIgen")
-````
+```
 
 ## 3. Simulation options
 
 Users have two options to perform SRT simulations using `sCCIgen`. Depending on preference, Users can choose to use:
 
   - **An interactive interface.** The interface helps users to choose tasks, data, and parameters, and lets `sCCIgen` run simulations to provide simulated data, together with parameters and documentations, saved in the working directory. As simulations usually involve many parameters, this option is highly recommended for the first time user or researchers with limited programming expertise. 
-    - [Tutorials for using the interface to simulate SRT.](https://github.com/songxiaoyu/sCCIgen/tree/main/Rmd/Interface.md)
+    - [Tutorials for using the interface to simulate SRT.](https://songxiaoyu.github.io/sCCIgen/articles/Interface.html)
   - **R package.** A direct use of `sCCIgen` package offers greater flexibility, allowing users to adjust more parameters that would otherwise be fixed at default values. It also enables the output of simulation byproducts, such as spatial windows. This approach is recommended for users with goode programming experience who wish to perform customized simulations.
-    - [Tutorials for using the R package to simulate SRT based on snRNAseq data.](https://github.com/songxiaoyu/sCCIgen/tree/main/Rmd/Rpackage_snRNAseq.md)
-    - [Tutorials for using the R package to simulate SRT based on single-cell SRT data (single region).](https://github.com/songxiaoyu/sCCIgen/tree/main/Rmd/Rpackage_SRT.md)
-    - [Tutorials for using the R package to simulate SRT based on single-cell SRT data (multiple regions).](https://github.com/songxiaoyu/sCCIgen/tree/main/Rmd/Rpackage_SRT_region.md)
-    - [Tutorials for using the R package to simulate SRT based on single-cell expression and unpaired spatial data.](https://github.com/songxiaoyu/sCCIgen/tree/main/Rmd/Rpackage_unpaired.md)
+    - [Tutorials for using the R package to simulate SRT based on snRNAseq data.](https://songxiaoyu.github.io/sCCIgen/articles/Rpackage_snRNAseq.html)
+    - [Tutorials for using the R package to simulate SRT based on single-cell SRT data (single region).](https://songxiaoyu.github.io/sCCIgen/articles/Rpackage_SRT_region.html)
+    - [Tutorials for using the R package to simulate SRT based on single-cell SRT data (multiple regions).](https://songxiaoyu.github.io/sCCIgen/articles/Rpackage_SRT.html)
+    - [Tutorials for using the R package to simulate SRT based on single-cell expression and unpaired spatial data.](https://songxiaoyu.github.io/sCCIgen/articles/Rpackage_unpaired.html)
   
-## 4. SessionInfo
-
-```R
-sessionInfo("sCCIgen")
-````
