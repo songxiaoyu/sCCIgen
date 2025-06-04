@@ -11,7 +11,7 @@ We introduce `sCCIgen`, a novel real-data-based simulator tailored to generate h
 
 ## 2. Installation
 
-```{r, eval=FALSE}
+```
 install.packages("devtools")
 devtools::install_github("songxiaoyu/sCCIgen")
 ```
