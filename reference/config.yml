@@ -1,3 +1,0 @@
-default:
-    expression_data_file: fake1_expr.Rdata
-    num_simulated_cells: 10000

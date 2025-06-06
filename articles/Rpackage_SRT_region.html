@@ -45,6 +45,7 @@
     <li><a class="dropdown-item" href="../articles/Rpackage_SRT.html">Running a simulation based on SRT data</a></li>
     <li><a class="dropdown-item" href="../articles/Rpackage_SRT_region.html">Running a simulation based on SRT data region</a></li>
     <li><a class="dropdown-item" href="../articles/Rpackage_unpaired.html">Running a simulation based on unpaired expression and spatial data</a></li>
+    <li><a class="dropdown-item" href="../articles/converters.html">Convert sCCIgen to other objects</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">News</a></li>
@@ -97,7 +98,7 @@ data<a class="anchor" aria-label="anchor" href="#load-and-clean-sample-data"></a
 <span><span class="va">expr</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">spatial</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">anno</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://drieslab.github.io/GiottoClass/reference/row-plus-colnames-generic.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">expr</span><span class="op">)</span></span>
+<span><span class="va">anno</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">expr</span><span class="op">)</span></span>
 <span><span class="va">region</span> <span class="op">&lt;-</span> <span class="va">spatial</span><span class="op">[</span>, <span class="fl">4</span><span class="op">]</span></span></code></pre></div>
 </div>
 <div class="section level2" number="3">
