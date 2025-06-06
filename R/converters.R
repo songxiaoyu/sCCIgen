@@ -7,10 +7,12 @@
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' df <- data.frame(
 #'     parameters = c("expression_data_file", "num_simulated_cells"),
 #'     value = c("fake1_expr.Rdata", 10000))
 #' df_to_config(df)
+#' }
 df_to_config <- function(x, parameter_file = "config.yml") {
   # add a new column to input df
   x$yaml <- paste0(x$parameters, ": ", x$value)
@@ -34,7 +36,9 @@ df_to_config <- function(x, parameter_file = "config.yml") {
 #' @export
 #'
 #' @examples
-#' giotto_object <- sCCIgen_to_Giotto()
+#' \dontrun{
+#' giotto_object <- sCCIgen_to_Giotto("counts_file.tsv", "metadata_file.tsv")
+#' }
 sCCIgen_to_Giotto <- function(counts_file, metadata_file) {
 
   # Check that the Giotto package is installed
@@ -73,7 +77,9 @@ sCCIgen_to_Giotto <- function(counts_file, metadata_file) {
 #' @export
 #'
 #' @examples
-#' seurat_object <- sCCIgen_to_Seurat()
+#' \dontrun{
+#' seurat_object <- sCCIgen_to_Seurat("counts_file.tsv", "metadata_file.tsv")
+#' }
 sCCIgen_to_Seurat <- function(counts_file, metadata_file) {
 
   # Check that Seurat is installed
@@ -121,7 +127,9 @@ sCCIgen_to_Seurat <- function(counts_file, metadata_file) {
 #' @export
 #'
 #' @examples
-#' spe_object <- sCCIgen_to_SpatialExperiment()
+#' \dontrun{
+#' spe_object <- sCCIgen_to_SpatialExperiment("counts_file.tsv", "metadata_file.tsv")
+#' }
 sCCIgen_to_SpatialExperiment <- function(counts_file, metadata_file) {
 
   # Check that SpatialExperiment is installed

@@ -18,8 +18,10 @@ a config.yml file
 Convert a data.frame to config.yml
 }
 \examples{
+\dontrun{
 df <- data.frame(
     parameters = c("expression_data_file", "num_simulated_cells"),
     value = c("fake1_expr.Rdata", 10000))
 df_to_config(df)
+}
 }
