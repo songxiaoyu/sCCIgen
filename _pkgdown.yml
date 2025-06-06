@@ -45,6 +45,8 @@ navbar:
         href: articles/Rpackage_SRT_region.html
       - text: Running a simulation based on unpaired expression and spatial data
         href: articles/Rpackage_unpaired.html
+      - text: Convert sCCIgen to other objects
+        href: articles/converters.html
     news:
       text: News
       href: news/index.html
@@ -67,6 +69,7 @@ articles:
   - Rpackage_SRT
   - Rpackage_SRT_region
   - Rpackage_unpaired
+  - converters
 
 home:
   sidebar:
