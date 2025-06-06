@@ -19,5 +19,7 @@ a SpatialExperiment object
 Convert sCCIgen output to a SpatialExperiment object
 }
 \examples{
-spe_object <- sCCIgen_to_SpatialExperiment()
+\dontrun{
+spe_object <- sCCIgen_to_SpatialExperiment("counts_file.tsv", "metadata_file.tsv")
+}
 }

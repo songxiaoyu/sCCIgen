@@ -19,5 +19,7 @@ a Seurat object
 Convert sCCIgen output to a Seurat object
 }
 \examples{
-seurat_object <- sCCIgen_to_Seurat()
+\dontrun{
+seurat_object <- sCCIgen_to_Seurat("counts_file.tsv", "metadata_file.tsv")
+}
 }

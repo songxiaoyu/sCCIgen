@@ -1,0 +1,81 @@
+---
+title: "Convert sCCIgen to other objects"
+output: 
+  html_document:
+    number_sections: true
+    toc: true
+pkgdown:
+  as_is: true
+vignette: >
+  %\VignetteIndexEntry{Convert sCCIgen to other objects}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+We have created functions to convert the standard sCCIgen output files to widely used R objects.
+
+First, run a simulation to obtain the count.tsv and meta.tsv files. You will need the path to these two files to run the next steps.
+
+# Convert sCCIgen to a Giotto object
+
+```{r, eval=FALSE}
+g_object <- sCCIgen_to_Giotto("path/to/counts_file", "path/to/metadata_file")
+
+g_object
+```
+
+```{r, eval=FALSE}
+An object of class giotto 
+>Active spat_unit:  cell 
+>Active feat_type:  rna 
+dimensions    : 10, 10000 (features, cells)
+[SUBCELLULAR INFO]
+[AGGREGATE INFO]
+expression -----------------------
+  [cell][rna] raw
+spatial locations ----------------
+  [cell] raw
+
+
+Use objHistory() to see steps and params used
+```
+
+# Convert sCCIgen to a Seurat object 
+
+```{r, eval=FALSE}
+s_object <- sCCIgen_to_Seurat("path/to/counts_file", "path/to/metadata_file")
+
+s_object
+```
+
+```{r, eval=FALSE}
+An object of class Seurat 
+10 features across 10000 samples within 1 assay 
+Active assay: Spatial (10 features, 0 variable features)
+ 1 layer present: counts
+ 1 image present: image
+```
+
+# Convert sCCIgen to a SpatialExperiment object 
+
+```{r, eval=FALSE}
+se_object <- sCCIgen_to_SpatialExperiment("path/to/counts_file", "path/to/metadata_file")
+
+se_object
+```
+
+```{r, eval=FALSE}
+class: SpatialExperiment 
+dim: 10 10000 
+metadata(0):
+assays(1): counts
+rownames(10): Gene1 Gene2 ... Gene9 Gene10
+rowData names(0):
+colnames(10000): Cell1 Cell2 ... Cell9999 Cell10000
+colData names(3): annotation region sample_id
+reducedDimNames(0):
+mainExpName: NULL
+altExpNames(0):
+spatialCoords names(2) : x y
+imgData names(0):
+```

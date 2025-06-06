@@ -19,5 +19,7 @@ a Giotto object
 Convert sCCIgen output to a Giotto object
 }
 \examples{
-giotto_object <- sCCIgen_to_Giotto()
+\dontrun{
+giotto_object <- sCCIgen_to_Giotto("counts_file.tsv", "metadata_file.tsv")
+}
 }
