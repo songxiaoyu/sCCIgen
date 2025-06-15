@@ -54,7 +54,7 @@ ModelEst <- Est_ModelPara(expr = expr,
                           anno = anno, 
                           sim_method = "ind", 
                           region = region, 
-                          ncores = 14)
+                          ncores = 10)
 
 saveRDS(ModelEst, file = "SeqFishPlusCortex_fit_wo_cor_region.RDS")
 ```

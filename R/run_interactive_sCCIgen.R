@@ -1,8 +1,8 @@
 #' Run interactive sCCIgen
 #'
 #' @import dplyr shiny
-#' @returns Either a .csv parameter file or a simulated dataset. If running the
-#' simulation, individual csv files with counts and cell features are locally
+#' @returns Either a .yml parameter file or a simulated dataset. If running the
+#' simulation, individual .csv files with counts and cell features are locally
 #' saved. Optionally, a Giotto, Seurat, or SpatialExperiment object is created
 #' and saved locally as an .RDS file.
 #'
@@ -18,15 +18,11 @@ run_interactive_sCCIgen <- function() {
 
         shiny::tabPanel("Download a pre-simulated dataset",
                         shiny::radioButtons(inputId = "dataset",
-                                            label = "Select a pre-simulated spatial transcriptomics dataset to download.
-                                            These pre-simulated data include 5% spatial differential expressed genes in one cell
-                                            type, 5% interaction changed genes in one cell type that are associated with the
-                                            proximity of another cell type, and 5% interaction changed genes in cell-type pair that
-                                            are associated with each other in the neighboring cells.",
+                                            label = "Select a pre-simulated spatial transcriptomics dataset to download.",
                                             choices = c("Simulated data for 4,751 genes in 4,000 cells of 6 cell types
                                                         in two regions on a unit square, using normal breast data profiled by
                                                         snRNAseq as reference." = "example1",
-                                                        "Simulated data for 10,000 genes in 500 spots of 6 cell types, using
+                                                        "Simulated data for 2,500 genes in 500 spots of 6 cell types, using
                                                         mouse brain data profiled by SeqFISH+ as reference." = "example2",
                                                         "Simulated data for 550 genes in 10,000 cells of 6 cell types, using
                                                         human ovarian cancer data profiled by MERFISH as reference." = "example3"),
@@ -34,10 +30,10 @@ run_interactive_sCCIgen <- function() {
                                             selected = character(0)
                         ), # ends radioButtons for dataset
 
-                        shiny::downloadButton("downloadCount", "Download Counts"),
-                        shiny::downloadButton("downloadMeta", "Download Metadata"),
+                        shiny::downloadButton("downloadCount", "Download Expression Data"),
+                        shiny::downloadButton("downloadMeta", "Download Spatial Data"),
                         shiny::downloadButton("downloadExpr", "Download Expression Pattern"),
-                        shiny::downloadButton("downloadParameter", "Download Parameter file")
+                        shiny::downloadButton("downloadParameter", "Download Parameter File")
         ), # ends Download a pre-simulated dataset tab
 
         shiny::tabPanel("Create the parameter file",
@@ -45,50 +41,53 @@ run_interactive_sCCIgen <- function() {
                           type = "tabs",
                           shiny::tabPanel("Step 1: Select your dataset",
                                           shiny::radioButtons(
-                                            inputId = "inputdata",
+                                            inputId = "input_data",
                                             label = "sCCIgen is a real-data based simulator. It accepts a
-                                                    variety of input data types including scRNAseq, snRNAseq, or
-                                                    single-cell spatially resolved transcriptomics. The simulator
-                                                    provides users access to several publicly available datasets
+                                                    variety of input data types including scRNAseq, snRNAseq,
+                                                    single-cell spatially resolved transcriptomics, or an assembled dataset
+                                                    with expresson and spatial information from different sources.
+                                                    The simulator provides users access to several publicly available datasets
                                                     and also allows them to use their own data, offering flexibility
                                                     in the simulations.
-
                                                     What data do you want to use as the base for simulation? If the data
                                                     is not yet in your working directory, use the Download buttons
                                                     to get the files in your computer.",
-                                            choices = c("Decoy data 1: It includes (1) count matrix for 10 genes by
-                                                        1000 cells of 2 cell types, and (2) cell feature matrix for
-                                                        annotated cell type." = "fake1",
+                                            choices = c("Decoy data 1: It includes expression count matrix for 10 genes by
+                                                        1000 cells of 2 cell types." = "fake1",
                                                         "Decoy data 2: It includes (1) count matrix for 10 genes by
-                                                        1000 cells of 2 cell types, and (2) cell feature matrix for
-                                                        annotated cell type and spatial coordinate." = "fake2",
+                                                        1000 cells of 2 cell types, and (2) paired spatial feature matrix for the same
+                                                        data, including annotated cell type and spatial coordinates." = "fake2",
                                                         "Decoy data 3: It includes (1) count matrix for 10 genes by
-                                                        1000 cells of 2 cell types, and (2) cell feature matrix for
-                                                        annotated cell type, spatial coordinate, and region." = "fake3",
-                                                        "Normal human breast snRNAseq data: It includes (1) count matrix
+                                                        1000 cells of 2 cell types, and (2) paired spatial feature matrix for the same
+                                                        data, including their annotated cell type, spatial coordinates, and region." = "fake3",
+                                                        "Decoy data 4: It includes (1) count matrix for 10 genes by
+                                                        1000 cells of 2 cell types, and (2) unpaired spatial feature matrix for a different 500
+                                                        cells, including their annotated cell type and spatial coordinates." = "fake4",
+                                                        "Normal human breast snRNAseq data: It includes count matrix
                                                         for 4751 genes by 5990 cells of 6 cell types (epithelial cell,
                                                         adipocyte, fibroblast, endothelial cell, immune (myeloid) and
-                                                        muscle), and (2) cell feature matrix for annotated cell type.
-                                                        PMID: 35549429" = "snRNAseq_breast_033023",
+                                                        muscle). PMID: 35549429" = "snRNAseq_breast_2025",
                                                         "Normal mouse brain SeqFISH+ data: It includes (1) count matrix
-                                                        for 10,000 genes by 511 cells of 6 cell types (excitatory neuron,
+                                                        for 2,500 highly variable genes by 511 cells of 6 cell types (excitatory neuron,
                                                         interneuron, astrocyte, microglia, oligodendrocyte and
-                                                        endothelial cells), and (2)cell feature matrix including cell
-                                                        type annotation and spatial coordinate on 2D (x, y).
-                                                        PMID: 35549429" = "SeqFishPlusCortex_033023",
+                                                        endothelial cells), and (2) cell feature matrix including cell
+                                                        type annotation, spatial coordinates on 2D (x, y), and field of view.
+                                                        PMID: 35549429" = "SeqFishPlusCortex_2025",
                                                         "Ovarian cancer MERFISH data: It includes (1) count matrix
                                                         for 550 genes by 355,633 cells of 6 cell types (tumor, adipocyte,
                                                         endothelial, T-cell, macrophage, and others), and (2) cell
                                                         feature matrix including cell type annotation and spatial
-                                                        coordinate on 2D. Data source: vizgen" = "MERFISH_OV",
+                                                        coordinates on 2D. Data source: vizgen" = "MERFISH_OV_2025",
                                                         "I want to use my own dataset" = "user_input"),
                                             width = "100%",
                                             selected = character(0)
-                                          ), # ends radioButtons for inputdata
+                                          ), # ends radioButtons for input_data
 
                                           shiny::uiOutput("downloadExpression"),
 
                                           shiny::uiOutput("downloadFeature"),
+
+                                          shiny::uiOutput("paired_or_unpaired_question"),
 
                                           shiny::uiOutput("userinputexpression_text"),
 
@@ -102,15 +101,15 @@ run_interactive_sCCIgen <- function() {
 
                                           shiny::HTML(strrep(htmltools::br(), 1)),
 
-                                          shiny::uiOutput("userinputcellfeature_text"),
+                                          shiny::uiOutput("userinputspatial_text"),
 
                                           shiny::HTML(strrep(htmltools::br(), 1)),
 
-                                          shiny::uiOutput("userinputcellfeature"),
+                                          shiny::uiOutput("userinputspatial"),
 
                                           shiny::HTML(strrep(htmltools::br(), 1)),
 
-                                          shiny::uiOutput("user_cellfeature_text"),
+                                          shiny::uiOutput("user_spatial_text"),
 
                                           shiny::HTML(strrep(htmltools::br(), 1)),
 
@@ -190,17 +189,24 @@ run_interactive_sCCIgen <- function() {
                                           shiny::uiOutput("ask_model_per_region"),
 
                                           shiny::radioButtons(inputId = "mimiccorrelation",
-                                                              label = "Do you want to mimic gene-gene correlation of
-                                                              the reference data? Select 'Yes' only if the gene-gene
-                                                              correlation is pre-estimated for each cell type.
-                                                              STsimulator provides functions/pipelines for estimating
-                                                              and saving gene-gene correlation, which can be served
-                                                              as input here.",
-                                                              choices = c("No, simulate independent genes" = FALSE,
+                                                              label = "Do you want to calculate gene correlation?",
+                                                              choices = c("No, will only simulate independent genes" = FALSE,
+                                                                          "Yes, can be used to simulate independent or correlated genes " = TRUE),
+                                                              width = "100%"),
+
+                                          shiny::radioButtons(inputId = "uploadcorrelation",
+                                                              label = "Do you want to use a pre-estimated model parameter file
+                                                              to expedite the simulation? Select Yes if you have estimated model parameters using
+                                                              'sCCIgen::Est_ModelPara'.
+                                                              Note, the pre-estimation is required for simulating gene-gene correlations .",
+                                                              choices = c("No" = FALSE,
                                                                           "Yes" = TRUE),
                                                               width = "100%"),
 
-                                          shiny::uiOutput("mimiccorrelationSelection"),
+                                          shiny::uiOutput("button_uploadcorrelation_file"),
+
+                                          shiny::uiOutput("text_custom_correlation_file"),
+                                          shiny::HTML(strrep(htmltools::br(), 1)),
 
                                           shiny::uiOutput("ask_spatialpatterns"),
 
@@ -274,8 +280,8 @@ run_interactive_sCCIgen <- function() {
                                                            width = "100%"),
 
                                           shiny::textInput(inputId = "parameter_filename",
-                                                           label = "Type the name of the parameter file.",
-                                                           value = "parameter_file.tsv",
+                                                           label = "Type the name of the parameter file. It must have the extension .yml",
+                                                           value = "parameter_file.yml",
                                                            width = "100%"),
 
 
@@ -291,9 +297,9 @@ run_interactive_sCCIgen <- function() {
         ), # ends Create parameter file
         shiny::tabPanel("Run a simulation",
                         shiny::textInput(inputId = "inputparamfile",
-                                         label = "By default, we will look for a parameter_file.tsv file. If your file has a different name, type it here:",
+                                         label = "By default, we will look for a parameter_file.yml file. If your file has a different name, type it here. Make sure your file has a .yml extension:",
                                          width = "100%",
-                                         value = "parameter_file.tsv"),
+                                         value = "parameter_file.yml"),
 
                         shiny::radioButtons(inputId = "createObjects",
                                             label = "By the default, the simulation will create the expression, metadata, and pattern output files. Optionally, you can also create additional objects.",
@@ -362,96 +368,262 @@ run_interactive_sCCIgen <- function() {
     # Provide or download Rdata
 
     expression_data_file <- shiny::reactiveVal()
-    cell_feature_data_file <- shiny::reactiveVal()
+    spatial_data_file <- shiny::reactiveVal()
     path_to_input_dir <- shiny::reactiveVal()
+    paired_or_unpaired <- shiny::reactiveVal()
 
-    shiny::observeEvent(input$inputdata, {
 
-      if(input$inputdata == "user_input") {
+    shiny::observeEvent(input$input_data, {
 
-        output$userinputexpression_text <- renderUI({
+      if(input$input_data == "user_input") {
 
-          shiny::strong("Select the expression file (e.g. expression.Rdata, .tsv, or .csv).
-                        Upload a G gene by N cell matrix for expression count data.
-                        Instruction: Row names should be unique identifiers of genes.")
+        output$paired_or_unpaired_question <- renderUI({
+          shiny::radioButtons(
+            inputId = "paired_or_unpaired_answer",
+            label = "What type of data are you going to upload?",
+            choices = c("Only single-cell data" = "sc",
+                        "Paired spatial data, where the cells in the expression matrix and the spatial file have the same IDs and come from the same technology." = "paired",
+                        "Unpaired data, where the cells in the expression matrix and the spatial file come from different sources/technologies (e.g. scRNAseq + spatial, Xenium + CODEX, etc.) or tissue sample (e.g. a different slide) or condition (e.g. a diseased tissue)" = "unpaired"),
+            width = "100%")
         })
 
-        output$userinputexpression <- renderUI({
+        shiny::observeEvent(input$paired_or_unpaired_answer, {
 
-          shinyFiles::shinyFilesButton(id = "user_expression",
-                                       label = "Select the expression file",
-                                       title = "Please select a expression file",
-                                       multiple = FALSE,
-                                       viewtype = "list")
-        })
+          if(input$paired_or_unpaired_answer == "sc") {
+            paired_or_unpaired("NULL")
 
-        shinyFiles::shinyFileChoose(input,
-                                    id = 'user_expression',
-                                    roots = c(wd = getwd()) )
+            output$userinputexpression_text <- renderUI({
 
+              shiny::strong("Select the expression file (e.g. expression.Rdata, .tsv, or .csv).
+                        Upload a gene by cell matrix for expression count data.
+                        Instruction: Row names should be unique identifiers of genes.
+                        Column names should be the cell type annotation.")
+            })
 
-        shiny::observeEvent(input$user_expression, {
-          x <- shiny::reactiveVal()
-          x_length <- shiny::reactiveVal()
+            output$userinputexpression <- renderUI({
 
-          x(gsub("/wd", "", paste(unlist(input$user_expression), collapse = "/")))
-          x_length(length(unlist(input$user_expression)))
+              shinyFiles::shinyFilesButton(id = "user_expression",
+                                           label = "Select the expression file",
+                                           title = "Please select a expression file",
+                                           multiple = FALSE,
+                                           viewtype = "list")
+            })
 
-          if(x_length() >= 2) {
-            expression_data_file(unlist(input$user_expression)[x_length() - 1])
-            x_length(length(unlist(input$user_expression)) - 2)
-            path_to_input_dir(paste0(getwd(),
-                              paste(unlist(input$user_expression)[1:x_length()], collapse = "/")))
+            shinyFiles::shinyFileChoose(input,
+                                        id = 'user_expression',
+                                        roots = c(wd = getwd()) )
+
+            shiny::observeEvent(input$user_expression, {
+              x <- shiny::reactiveVal()
+              x_length <- shiny::reactiveVal()
+
+              x(gsub("/wd", "", paste(unlist(input$user_expression), collapse = "/")))
+              x_length(length(unlist(input$user_expression)))
+
+              if(x_length() >= 2) {
+                expression_data_file(unlist(input$user_expression)[x_length() - 1])
+                x_length(length(unlist(input$user_expression)) - 2)
+                path_to_input_dir(paste0(getwd(),
+                                         paste(unlist(input$user_expression)[1:x_length()], collapse = "/")))
+              }
+
+            })
+
+            output$user_expression_text <- renderUI({
+
+              shiny::strong({paste("Your expression file is:", expression_data_file())})
+            })
+
+            output$userinputspatial_text <- NULL
+            output$userinputspatial <- NULL
+            output$user_spatial_text <- NULL
+            spatial_data_file(NULL)
+
           }
 
-        })
+          if(input$paired_or_unpaired_answer == "paired") {
+            paired_or_unpaired("TRUE")
 
-        output$user_expression_text <- renderUI({
+            output$userinputexpression_text <- renderUI({
 
-          shiny::strong({paste("Your expression file is:", expression_data_file())})
-        })
+              shiny::strong("Select the expression file (e.g. expression.Rdata, .tsv, or .csv).
+                        Upload a gene by cell matrix for expression count data.
+                        Instruction: Row names should be unique identifiers of genes.
+                        Column names should be the cell type annotation.")
+            })
 
-        output$userinputcellfeature_text <- renderUI({
+            output$userinputexpression <- renderUI({
 
-          shiny::strong("Select the cellfeature file (e.g. cellfeature.Rdata, .tsv, or .csv).
-                Upload a N by K matrix for cell feature data.
+              shinyFiles::shinyFilesButton(id = "user_expression",
+                                           label = "Select the expression file",
+                                           title = "Please select a expression file",
+                                           multiple = FALSE,
+                                           viewtype = "list")
+            })
+
+            shinyFiles::shinyFileChoose(input,
+                                        id = 'user_expression',
+                                        roots = c(wd = getwd()) )
+
+            shiny::observeEvent(input$user_expression, {
+              x <- shiny::reactiveVal()
+              x_length <- shiny::reactiveVal()
+
+              x(gsub("/wd", "", paste(unlist(input$user_expression), collapse = "/")))
+              x_length(length(unlist(input$user_expression)))
+
+              if(x_length() >= 2) {
+                expression_data_file(unlist(input$user_expression)[x_length() - 1])
+                x_length(length(unlist(input$user_expression)) - 2)
+                path_to_input_dir(paste0(getwd(),
+                                         paste(unlist(input$user_expression)[1:x_length()], collapse = "/")))
+              }
+
+            })
+
+            output$user_expression_text <- renderUI({
+
+              shiny::strong({paste("Your expression file is:", expression_data_file())})
+            })
+
+            output$userinputspatial_text <- renderUI({
+
+              shiny::strong("Select the spatial file (e.g. spatial.Rdata, .tsv, or .csv).
+                Upload a N by K matrix for spatial data, which should be matched to the expression data.
                 Instruction: Column and row names are not expected.
-                Cells should be in the same order as the uploaded expression count data.
-                The first column is required, which should be cell type annotation.
-                Other columns are optional. If spatial coordinates on x, y axes are provided,
-                they should be the 2-3 columns of the input cell feature data.
-                If a spatial region variable is provided, it should be the 4th column of the data.",
-          )
-        })
+                The first column should be cell type annotation.
+                The second and third columns should be the spatial coordinates on x, y axes.
+                The fourth column (optional) should be the spatial region.")
+            })
 
-        output$userinputcellfeature <- renderUI({
+            output$userinputspatial <- renderUI({
 
-          shinyFiles::shinyFilesButton(id = "user_cellfeature",
-                                       label = "Select the cell feature file",
-                                       title = "Please select a cell feature file",
-                                       multiple = FALSE,
-                                       viewtype = "list")
+              shinyFiles::shinyFilesButton(id = "user_spatial",
+                                           label = "Select the spatial file",
+                                           title = "Please select a spatial file",
+                                           multiple = FALSE,
+                                           viewtype = "list")
 
-        })
+            })
 
-        shinyFiles::shinyFileChoose(input,
-                                    id = 'user_cellfeature',
-                                    roots = c(wd = getwd()) )
+            shinyFiles::shinyFileChoose(input,
+                                        id = 'user_spatial',
+                                        roots = c(wd = getwd()) )
 
-        shiny::observeEvent(input$user_cellfeature, {
-          x <- shiny::reactiveVal()
-          x_length <- shiny::reactiveVal()
+            shiny::observeEvent(input$user_spatial, {
+              x <- shiny::reactiveVal()
+              x_length <- shiny::reactiveVal()
 
-          x(gsub("/wd", "", paste(unlist(input$user_cellfeature), collapse = "/")))
-          x_length(length(unlist(input$user_cellfeature)))
+              x(gsub("/wd", "", paste(unlist(input$user_spatial), collapse = "/")))
+              x_length(length(unlist(input$user_spatial)))
 
-          if(x_length() >= 2) {
-            cell_feature_data_file(unlist(input$user_cellfeature)[x_length() - 1])
+              if(x_length() >= 2) {
+                spatial_data_file(unlist(input$user_spatial)[x_length() - 1])
+              }
+            })
+
+            output$user_spatial_text <- renderUI({
+              shiny::strong({paste("Your spatial file is:", spatial_data_file())})
+            })
+
           }
-        })
 
-        output$user_cellfeature_text <- renderUI({
-          shiny::strong({paste("Your cell feature file is:", cell_feature_data_file())})
+
+          if(input$paired_or_unpaired_answer == "unpaired") {
+            paired_or_unpaired("FALSE")
+
+            output$userinputexpression_text <- renderUI({
+
+              shiny::strong("Select the single-cell expression file (e.g. expression.Rdata, .tsv, or .csv).
+                        Upload a gene by cell matrix for expression count data.
+                        The source of this matrix can be a technology that
+                        generates single-cell level expression data
+                        (e.g. scRNAseq, snRNAseq, Xenium, etc.).
+                        Row names should be unique identifiers of genes.
+                        Column names should be the cell type annotation.")
+            })
+
+            output$userinputexpression <- renderUI({
+
+              shinyFiles::shinyFilesButton(id = "user_expression",
+                                           label = "Select the expression file",
+                                           title = "Please select a expression file",
+                                           multiple = FALSE,
+                                           viewtype = "list")
+            })
+
+            shinyFiles::shinyFileChoose(input,
+                                        id = 'user_expression',
+                                        roots = c(wd = getwd()) )
+
+            shiny::observeEvent(input$user_expression, {
+              x <- shiny::reactiveVal()
+              x_length <- shiny::reactiveVal()
+
+              x(gsub("/wd", "", paste(unlist(input$user_expression), collapse = "/")))
+              x_length(length(unlist(input$user_expression)))
+
+              if(x_length() >= 2) {
+                expression_data_file(unlist(input$user_expression)[x_length() - 1])
+                x_length(length(unlist(input$user_expression)) - 2)
+                path_to_input_dir(paste0(getwd(),
+                                         paste(unlist(input$user_expression)[1:x_length()], collapse = "/")))
+              }
+
+            })
+
+            output$user_expression_text <- renderUI({
+
+              shiny::strong({paste("Your expression file is:", expression_data_file())})
+            })
+
+            output$userinputspatial_text <- renderUI({
+
+              shiny::strong("Select the spatial file (e.g. spatial.Rdata, .tsv, or .csv).
+                Upload a N by K matrix for spatial data, which is unmatched to the expression data.
+                The source of this file can be a different technology from the expression matrix
+                (e.g. CODEX, IF) or tissue sample (e.g. a different slide) or
+                condition (e.g. a diseased tissue).
+                Column and row names are not expected.
+                The first column should be the cell type annotation from the spatial data.
+                The second and third columns should be the spatial coordinates on x, y axes.
+                The fourth column (optional) should be the spatial region.")
+            })
+
+            output$userinputspatial <- renderUI({
+
+              shinyFiles::shinyFilesButton(id = "user_spatial",
+                                           label = "Select the spatial file",
+                                           title = "Please select a spatial file",
+                                           multiple = FALSE,
+                                           viewtype = "list")
+
+            })
+
+            shinyFiles::shinyFileChoose(input,
+                                        id = 'user_spatial',
+                                        roots = c(wd = getwd()) )
+
+            shiny::observeEvent(input$user_spatial, {
+              x <- shiny::reactiveVal()
+              x_length <- shiny::reactiveVal()
+
+              x(gsub("/wd", "", paste(unlist(input$user_spatial), collapse = "/")))
+              x_length(length(unlist(input$user_spatial)))
+
+              if(x_length() >= 2) {
+                spatial_data_file(unlist(input$user_spatial)[x_length() - 1])
+              }
+            })
+
+            output$user_spatial_text <- renderUI({
+              shiny::strong({paste("Your spatial file is:", spatial_data_file())})
+            })
+
+
+          }
+
+
         })
 
         output$downloadExpression <- NULL
@@ -461,13 +633,14 @@ run_interactive_sCCIgen <- function() {
 
       } else {
 
+        output$paired_or_unpaired_question <- NULL
         output$userinputexpression_text <- NULL
         output$userinputexpression <- NULL
         output$user_expression_text <- NULL
 
-        output$userinputcellfeature_text <- NULL
-        output$userinputcellfeature <- NULL
-        output$user_cellfeature_text <- NULL
+        output$userinputspatial_text <- NULL
+        output$userinputspatial <- NULL
+        output$user_spatial_text <- NULL
 
         # show download buttons
         output$downloadExpression <- renderUI({
@@ -475,25 +648,35 @@ run_interactive_sCCIgen <- function() {
         })
 
         output$downloadFeature <- renderUI({
-          shiny::downloadButton("downloadselectedcellfeature", "Download selected cellfeature data")
+          shiny::downloadButton("downloadselectedspatial", "Download selected spatial data")
         })
 
         output$downloadselectedexpression <- shiny::downloadHandler(
-          filename = paste0(input$inputdata,"_expr.Rdata"),
+          filename = paste0(input$input_data,"_expr.Rdata"),
           content = function(con) {
-            download.file(url = paste0("https://github.com/songxiaoyu/sCCIgen_data/raw/main/InputData/expression_data/",input$inputdata,"_expr.Rdata"),
+            download.file(url = paste0("https://github.com/songxiaoyu/sCCIgen_data/raw/main/input_data/",input$input_data,"_expr.Rdata"),
                           destfile = con)
           })
 
-        output$downloadselectedcellfeature <- shiny::downloadHandler(
-          filename = paste0(input$inputdata,"_cellfeature.Rdata"),
+        output$downloadselectedspatial <- shiny::downloadHandler(
+          filename = paste0(input$input_data,"_spatial.Rdata"),
           content = function(con) {
-            download.file(url = paste0("https://github.com/songxiaoyu/sCCIgen_data/raw/main/InputData/cell_feature_data/",input$inputdata,"_cellfeature.Rdata"),
+            download.file(url = paste0("https://github.com/songxiaoyu/sCCIgen_data/raw/main/input_data/",input$input_data,"_spatial.Rdata"),
                           destfile = con)
           })
 
-        expression_data_file(paste0(input$inputdata,"_expr.Rdata"))
-        cell_feature_data_file(paste0(input$inputdata,"_cellfeature.Rdata"))
+        expression_data_file(paste0(input$input_data,"_expr.Rdata"))
+        spatial_data_file(paste0(input$input_data,"_spatial.Rdata"))
+
+        if(input$input_data == "fake1") {paired_or_unpaired("NULL")}
+        if(input$input_data == "fake2") {paired_or_unpaired("TRUE")}
+        if(input$input_data == "fake3") {paired_or_unpaired("TRUE")}
+        if(input$input_data == "fake4") {paired_or_unpaired("FALSE")}
+        if(input$input_data == "MERFISH_OV_2025") {paired_or_unpaired("TRUE")}
+        if(input$input_data == "MERFISH_OV_2025_unpaired") {paired_or_unpaired("FALSE")}
+        if(input$input_data == "SeqFishPlusCortex_2025") {paired_or_unpaired("TRUE")}
+        if(input$input_data == "snRNAseq_breast_2025") {paired_or_unpaired("NULL")}
+
 
         output$text_ask_data_directory <- renderUI({
           shiny::strong("Where is your input data located? Click the button to select your data directory.")
@@ -532,7 +715,7 @@ run_interactive_sCCIgen <- function() {
     shiny::observeEvent(path_to_input_dir(), {
       if (!is.null(path_to_input_dir())) {
         output$button_read_data <- shiny::renderUI({
-          shiny::actionButton(inputId = "use_inputdata",
+          shiny::actionButton(inputId = "use_input_data",
                               label = "Use this directory and read my data")
         })
       }
@@ -541,76 +724,129 @@ run_interactive_sCCIgen <- function() {
     # Create parameters file
 
     expression_data_file_type <- shiny::reactiveVal()
+    spatial_data_file_type <- shiny::reactiveVal()
     expression_data_cell_types <- shiny::reactiveVal()
     expr_data <- shiny::reactiveVal()
-    cellfeature_data <- shiny::reactiveVal()
+    spatial_data <- shiny::reactiveVal()
     ncol_feature_data <- shiny::reactiveVal()
 
-    shiny::observeEvent(input$use_inputdata, {
+    shiny::observeEvent(input$use_input_data, {
 
-      if(file.exists(fs::path(path_to_input_dir(), expression_data_file())) &
-         file.exists(fs::path(path_to_input_dir(), cell_feature_data_file())) ) {
+      if (!is.null(expression_data_file())) {
 
-        expression_data_file_type(tools::file_ext(expression_data_file()))
+        if(file.exists(fs::path(path_to_input_dir(), expression_data_file()))) {
 
-        if(expression_data_file_type() == "Rdata" ||
-           expression_data_file_type() == "RData") {
+          expression_data_file_type(tools::file_ext(expression_data_file()))
 
-          load(fs::path(path_to_input_dir(), expression_data_file()), x <- new.env())
-          expr_data(get(ls(x), envir = x))
-          rm(x)
+          if(expression_data_file_type() == "Rdata" ||
+             expression_data_file_type() == "RData") {
 
-          load(fs::path(path_to_input_dir(), cell_feature_data_file()), x <- new.env())
-          y = get(ls(x), envir = x)
-          rm(x)
+            load(fs::path(path_to_input_dir(), expression_data_file()), x <- new.env())
+            expr_data(get(ls(x), envir = x))
+            rm(x)
 
-          colnames(y)[1] = "cell_type"
-          cellfeature_data(y)
+          } else if(expression_data_file_type() == "csv") {
 
-        } else if(expression_data_file_type() == "csv") {
-
-          expr_data(read.csv(fs::path(path_to_input_dir(), expression_data_file()),
-                             row.names = 1))
-
-          cellfeature_data(read.csv(fs::path(path_to_input_dir(), cell_feature_data_file()),
-                                    row.names = 1))
-
-        } else if(expression_data_file_type() == "tsv") {
-
-          expr_data(read.delim(fs::path(path_to_input_dir(), expression_data_file()),
+            expr_data(read.csv(fs::path(path_to_input_dir(), expression_data_file()),
                                row.names = 1))
 
-          cellfeature_data(read.delim(fs::path(path_to_input_dir(), cell_feature_data_file()),
-                                      row.names = 1))
+          } else if(expression_data_file_type() == "tsv") {
+
+            expr_data(read.delim(fs::path(path_to_input_dir(), expression_data_file()),
+                                 row.names = 1))
+
+          } else {
+
+            shiny::showModal(shiny::modalDialog(
+              title = "Error reading the expression file",
+              "The extension of your file is not supported, make sure to provide
+              an Rdata, .csv or .tsv file.",
+              footer = modalButton("OK")
+            ))
+
+          }
+
+          expression_data_cell_types(paste(sort(unique(colnames(expr_data()))),
+                                           collapse = ","))
+        } else {
+
+          shiny::showModal(shiny::modalDialog(
+            title = "Error reading the expression file",
+            "Your expression file was not found in your input directory.
+            Verify that the expression file is in the right directory.",
+            footer = modalButton("OK")
+          ))
+
         }
 
-        expression_data_cell_types(paste(unique(sort(unique(cellfeature_data()[,1]) )),
-                                         collapse = ","))
+      }
 
-        ncol_feature_data(ncol(cellfeature_data()))
+      if (!is.null(spatial_data_file())) {
 
-        shiny::showModal(shiny::modalDialog(
-          title = "Successful reading of input files",
-          "Your input files were successfully loaded.",
-          footer = modalButton("OK")
-        ))
+        if(file.exists(fs::path(path_to_input_dir(), spatial_data_file()))) {
+
+          spatial_data_file_type(tools::file_ext(spatial_data_file()))
+
+          if(spatial_data_file_type() == "Rdata" ||
+             spatial_data_file_type() == "RData") {
+
+            load(fs::path(path_to_input_dir(), spatial_data_file()), x <- new.env())
+            y = get(ls(x), envir = x)
+            rm(x)
+
+            colnames(y)[1] = "cell_type"
+            spatial_data(y)
+
+          } else if(spatial_data_file_type() == "csv") {
+
+            spatial_data(read.csv(fs::path(path_to_input_dir(), spatial_data_file()),
+                                  row.names = 1))
+
+          } else if(spatial_data_file_type() == "tsv") {
+
+            spatial_data(read.delim(fs::path(path_to_input_dir(), spatial_data_file()),
+                                    row.names = 1))
+
+          } else {
+
+            shiny::showModal(shiny::modalDialog(
+              title = "Error reading the spatial file",
+              "The extension of your file is not supported, make sure to provide
+              an Rdata, .csv or .tsv file.",
+              footer = modalButton("OK")
+            ))
+
+          }
+
+          ncol_feature_data(ncol(spatial_data()))
+
+        } else {
+
+          shiny::showModal(shiny::modalDialog(
+            title = "Error reading the spatial file",
+            "Your spatial file was not found in your input directory.
+            Verify that the spatial file is in the right directory.",
+            footer = modalButton("OK")
+          ))
+
+        }
 
       } else {
 
-        shiny::showModal(shiny::modalDialog(
-          title = "Error reading input files",
-          "At least one of your input files was not found in your input directory.
-          Verify that the expression and cellfeature files are in the right directory.",
-          footer = modalButton("OK")
-        ))
+        spatial_data_file("NULL")
+        spatial_data_file_type("NULL")
       }
+
+      shiny::showModal(shiny::modalDialog(
+        title = "Successful reading of input files",
+        "Your input files were successfully loaded.",
+        footer = modalButton("OK")
+      ))
 
     })
 
     simulate_spatial_data <- shiny::reactiveVal()
-
     window_method <- shiny::reactiveVal()
-
     num_regions <- shiny::reactiveVal()
     custom_cell_type_proportions <- shiny::reactiveVal()
     cell_type_proportions <- shiny::reactiveVal()
@@ -621,9 +857,9 @@ run_interactive_sCCIgen <- function() {
     region_specific_model <- shiny::reactiveVal()
     region_specific_model("NULL")
 
-    shiny::observeEvent(ncol_feature_data(), {
+    shiny::observeEvent(paired_or_unpaired(), {
 
-      if(ncol_feature_data() > 1) {
+      if(paired_or_unpaired() %in% c(TRUE, FALSE)) {
 
         output$ask_simulate_cells <- shiny::renderUI({
           shiny::radioButtons(inputId = "simulatecells",
@@ -685,7 +921,7 @@ run_interactive_sCCIgen <- function() {
                                <cell_type_A>,<cell_type_B>,<value>. Separate the entries by blank space
                                (e.g. 'cell_type_A,cell_type_B,1.2 cell_type_B,cell_type_C,-0.8').
 
-                               Alternatively, select a file separated by commas, where each line is an
+                               Alternatively, select a file separated by commas, without header, where each line is an
                                entry with the format described above.",
                                    width = "100%")
                 })
@@ -761,9 +997,10 @@ run_interactive_sCCIgen <- function() {
                                                 gsub("/wd", "",
                                                      paste(unlist(input$file_custom_interaction_file),
                                                            collapse = "/"))),
-                                         header = TRUE, sep = ",")
+                                         header = FALSE, sep = ",")
 
                       if(ncol(x_df) == 3) {
+                        colnames(x_df) <- c("cell_type_A", "cell_type_B", "value")
                         x_df$join <- paste(x_df$cell_type_A, x_df$cell_type_B, x_df$value,
                                            sep = ",")
 
@@ -807,34 +1044,38 @@ run_interactive_sCCIgen <- function() {
 
         num_regions("NULL")
 
-        if(ncol_feature_data() > 3) {
-          unique_regions = unique(sort(cellfeature_data()[,4]))
+        shiny::observeEvent(ncol_feature_data(), {
+          if(ncol_feature_data() > 3 & paired_or_unpaired() == FALSE) {region_specific_model("FALSE")}
 
-          num_regions(length(unique_regions))
+          if(ncol_feature_data() > 3 & paired_or_unpaired() == TRUE) {
+            unique_regions = unique(sort(spatial_data()[,4]))
 
-          if(length(unique_regions) > 1) {
-            output$ask_model_per_region <- shiny::renderUI({
-              shiny::radioButtons(inputId = "model_per_region",
-                                  label = "Do you want to model the input expression data
+            num_regions(length(unique_regions))
+
+            if(length(unique_regions) > 1) {
+              output$ask_model_per_region <- shiny::renderUI({
+                shiny::radioButtons(inputId = "model_per_region",
+                                    label = "Do you want to model the input expression data
                                   separately for each region?",
-                                  choices = c("No" = FALSE,
-                                              "Yes" = TRUE),
-                                  width = "100%")
-            })
+                                    choices = c("No" = FALSE,
+                                                "Yes" = TRUE),
+                                    width = "100%")
+              })
 
-            shiny::observeEvent(input$model_per_region, {
-              region_specific_model(input$model_per_region)
-            })
-          } else {
-            output$ask_model_per_region <- NULL
+              shiny::observeEvent(input$model_per_region, {
+                region_specific_model(input$model_per_region)
+              })
+            } else {
+              output$ask_model_per_region <- NULL
+            }
           }
-        }
+        })
 
         output$ask_numberregions <- NULL
         output$ask_custom_cell_type_prop <- NULL
         output$ask_even_distribution <- NULL
         output$ask_custom_interaction <- NULL
-      } else { # when ncol == 1
+      } else { # when only single-cell
         output$ask_model_per_region <- NULL
         output$ask_simulate_cells <- NULL
         output$ask_windowmethod <- NULL
@@ -950,7 +1191,7 @@ run_interactive_sCCIgen <- function() {
                 shiny::observeEvent(input$read_file_customcellproportions,{
                   x_df <- read.delim(paste0(getwd(),
                                             gsub("/wd", "", paste(unlist(input$file_customcellproportions), collapse = "/"))),
-                                     header = TRUE, sep = ",")
+                                     header = FALSE, sep = ",")
 
                   if(ncol(x_df) == 3) {
                     colnames(x_df) <- c("region", "annotation", "proportion")
@@ -989,7 +1230,7 @@ run_interactive_sCCIgen <- function() {
             output$text_file_customcellproportions <- NULL
             output$button_read_file_customcellproportions <- NULL
 
-            x = cellfeature_data() %>%
+            x <- tibble(cell_type = colnames(expr_data())) %>%
               count(cell_type) %>%
               mutate(proportions = round(n/sum(n),3),
                      proportions2 = paste0(cell_type,",",proportions))
@@ -1108,7 +1349,7 @@ run_interactive_sCCIgen <- function() {
                                             gsub("/wd", "",
                                                  paste(unlist(input$file_custom_interaction_file),
                                                        collapse = "/"))),
-                                     header = TRUE, sep = ",")
+                                     header = FALSE, sep = ",")
 
                   if(ncol(x_df) == 3) {
                     colnames(x_df) <- c("cell_type_A", "cell_type_B", "value")
@@ -1213,24 +1454,46 @@ run_interactive_sCCIgen <- function() {
 
     gene_cor <- shiny::reactiveVal()
     copula_input <- shiny::reactiveVal()
+    copula_input("NULL")
 
-    shiny::observeEvent(input$mimiccorrelation, {
+    shiny::observeEvent(input$mimiccorrelation, {gene_cor(input$mimiccorrelation)})
 
-      gene_cor(input$mimiccorrelation)
+    shiny::observeEvent(input$uploadcorrelation, {
 
-      if(input$mimiccorrelation == TRUE) {
-        output$mimiccorrelationSelection <- shiny::renderUI({
-          shiny::textInput(inputId = "genecorfile",
-                           label = "Provide a path for uploading a pre-estimated gene-gene correlation file:",
-                           width = "100%")
+      if(input$uploadcorrelation == TRUE) {
+
+        output$button_uploadcorrelation_file <- shiny::renderUI({
+
+          shinyFiles::shinyFilesButton(id = "file_custom_correlation_file",
+                                       label = "Select the pre-estimated model file",
+                                       title = "Select the pre-estimated model file. The file can include gene-gene correlations or only marginal models for independent genes.",
+                                       multiple = FALSE,
+                                       viewtype = "list")
         })
 
-        shiny::observeEvent(input$genecorfile, {
-          copula_input(input$genecorfile)
+        shinyFiles::shinyFileChoose(input,
+                                    id = "file_custom_correlation_file",
+                                    roots = c(wd = getwd()) )
+
+        shiny::observeEvent(input$file_custom_correlation_file, {
+
+          if(!is.null(input$file_custom_correlation_file)) {
+            x <- paste0(getwd(),
+                        gsub("/wd", "",
+                             paste(unlist(input$file_custom_correlation_file),
+                                   collapse = "/")))
+
+            output$text_custom_correlation_file <- shiny::renderUI({
+              shiny::strong({paste("Your selected file is:", x)})
+            })
+
+            copula_input(x)
+          }
+
         })
 
       } else {
-        output$mimiccorrelationSelection <- NULL
+        output$button_uploadcorrelation_file <- NULL
       }
     })
 
@@ -1345,7 +1608,7 @@ run_interactive_sCCIgen <- function() {
                                                     paste(unlist(input$file_spatialpatterns),
                                                           collapse = "/"))),
                                  sep = ",",
-                                 header = TRUE)
+                                 header = FALSE)
 
               if(ncol(x_df) == 6) {
                 colnames(x_df) <- c("region", "annotation", "gene_id",
@@ -1536,7 +1799,7 @@ run_interactive_sCCIgen <- function() {
                                                     paste(unlist(input$file_cellcellinteractionexpression),
                                                           collapse = "/"))),
                                  sep = ",",
-                                 header = TRUE)
+                                 header = FALSE)
 
               if(ncol(x_df) == 7) {
                 x_df$region <- rep("NULL", nrow(x_df))
@@ -1750,7 +2013,7 @@ run_interactive_sCCIgen <- function() {
                                         gsub("/wd", "",
                                              paste(unlist(input$file_cellcellinteraction_neighborhood),
                                                    collapse = "/"))),
-                                 header = TRUE, sep = ",")
+                                 header = FALSE, sep = ",")
 
               if(ncol(x_df) == 9) {
                 x_df$region <- rep("NULL", nrow(x_df))
@@ -1889,16 +2152,20 @@ run_interactive_sCCIgen <- function() {
       content = function(con) {
 
         param_df <- data.frame(parameters = c("path_to_input_dir",
+                                              "paired",
                                               "expression_data_file",
-                                              "cell_feature_data_file",
+                                              "spatial_data_file",
                                               "expression_data_file_type",
+                                              "spatial_data_file_type",
                                               "expression_data_cell_types",
                                               "simulate_spatial_data"
         ),
         value = c(path_to_input_dir(),
+                  paired_or_unpaired(),
                   expression_data_file(),
-                  cell_feature_data_file(),
+                  spatial_data_file(),
                   expression_data_file_type(),
+                  spatial_data_file_type(),
                   expression_data_cell_types(),
                   simulate_spatial_data()
         )
@@ -1923,7 +2190,7 @@ run_interactive_sCCIgen <- function() {
 
         }
 
-        if(ncol_feature_data() > 1 & simulate_spatial_data() == TRUE) {
+        if(paired_or_unpaired() %in% c(TRUE, FALSE) & simulate_spatial_data() == TRUE) {
           param_df = rbind(param_df, c("window_method", window_method()))
         }
 
@@ -1934,7 +2201,7 @@ run_interactive_sCCIgen <- function() {
         param_df = rbind(param_df, c("region_specific_model",
                                      region_specific_model()))
 
-        if(ncol_feature_data() == 1) {
+        if(is.null(paired_or_unpaired())) {
 
           param_df = rbind(param_df, c("custom_cell_type_proportions",
                                        custom_props()))
@@ -1952,10 +2219,8 @@ run_interactive_sCCIgen <- function() {
         param_df = rbind(param_df, c("gene_cor",
                                      gene_cor() ))
 
-        if(gene_cor() == TRUE) {
-          param_df = rbind(param_df, c("copula_input",
-                                       copula_input() ))
-        }
+        param_df = rbind(param_df, c("copula_input",
+                                     copula_input() ))
 
         if(!is.null(spatialpatterns_df())) {
           param_df = rbind(param_df, spatialpatterns_df())
@@ -1986,16 +2251,9 @@ run_interactive_sCCIgen <- function() {
         param_df = rbind(param_df, c("output_name",
                                      output_name()))
 
-        param_df = rbind(param_df, c("parameter_file",
-                                     parameter_file_name()))
+        df_to_config(x = param_df,
+                     parameter_file = con)
 
-
-
-        write.table(param_df,
-                    file = con,
-                    quote = FALSE,
-                    row.names = FALSE,
-                    sep = "\t")
       }
     ) # ends export parameters file
 

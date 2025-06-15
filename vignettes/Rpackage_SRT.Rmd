@@ -47,7 +47,7 @@ This is part is to fit the expression data. When sim_method=="copula", it will f
 Note: If the number of genes or cells are large, model fitting may take some time. It is suggested to select a reasonable sample size (e.g. <10000 per cell type) before the model fitting, as more cells may not be needed improve the estimation. Similarly, if some genes are extremely zero-inflated, narrowing the simulation to reasonbly variable genes is an option. 
 
 ```{r, eval=FALSE}
-# model fitting w/o gene-gene correlation
+# model fitting w/o gene-gene correlation (fast but less accurate estimation)
 ModelEst <- Est_ModelPara(expr = expr, 
                           anno = anno, 
                           sim_method = "ind",
@@ -68,46 +68,43 @@ saveRDS(ModelEst, file = "SeqFishPlusCortex_fit_w_cor.RDS")
 ## Task 2: Estimate CCIs in the input data following the existing Giotto pipeline
 
 ```{r, eval=FALSE}
+library(Giotto)
 # Preprocess data with Giotto pipeline
 db <- preprocessGiotto(expr_data = expr, 
                        spatial_data = spatial, 
                        run_hvg = TRUE,
-                       run_kNN_network = TRUE, 
-                       run_Delaunay_network = TRUE)
-
+                       run_Dist_network = TRUE,
+                       dis.cut=150)
+db
 # Estimate cell-cell attraction and inhibition patterns, and save in pre-defined folder
 cellProximityTable(gobject = db, 
                    abs_enrichm = 0.3, 
                    p_adj = 0.05,
-                   output_file = "est_CCI_dist_dist.csv")
+                   spatial_network_name = "distance_based_network",
+                   save.unfiltered=TRUE,
+                   output_file = "est_CCI_dist_dist.csv",
+                   seed=123)
 
 # Estimate gene expressions of cells impacted by their neighbors, and save in pre-defined folder
 ExprDistanceTable(gobject = db, 
                   in_hvg = TRUE, 
                   region_specific = FALSE, 
+                  spatial_network_name = "distance_based_network",
                   abs_log2fc_ICG = 0.3, 
                   p_adj = 0.05,
-                  output_file = "est_CCI_dist_expr.csv")
+                  output_file = "est_CCI_dist_expr.csv",
+                  seed=123)
 
 # Estimate gene expressions of cells impacted by gene expressions of neighboring cells, narrow to
 #  known pairs, such as ligand and receptor pairs, and save in pre-defined folder
 ExprExprTable(gobject = db, 
               database = "mouse", 
               region_specific = FALSE, 
+              spatial_network_name = "distance_based_network",
               p_adj = 0.05, 
-              abs_log2fc_LR = 0.3,
-              output_file = "est_CCI_expr_expr_region.csv")
-```
-
-
-## Task 3: Estimate spatial region specific genes
-
-```{r, eval=FALSE}
-# Estimate spatial region specific genes.
-SpatialTable(gobject = db, 
-             top_num = 2, 
-             fdr_cut = 0.05,
-             output_file = "est_region_specific_genes.csv")
+              abs_log2fc_LR = 0.2,
+              output_file = "est_CCI_expr_expr.csv",
+              seed=123)
 ```
 
 # Create a parameter file
@@ -119,7 +116,6 @@ Users need to create a parameter file. The sample parameter file for snRNAseq ba
 Assuming you already have a parameter file, you can run the entire simulation using codes like this:
 
 ```{r, eval=FALSE}
-model_param_path <- "SeqFishPlusCortex_2025_fit_wo_cor.RDS"
 
 # Simulate default data - using existing cells but simulate expression with ground truth
 input <- "SeqFishPlus_default.tsv"

@@ -2,7 +2,7 @@
 % Please edit documentation in R/EstCCI.R
 \name{ExprDistanceTable}
 \alias{ExprDistanceTable}
-\title{Estimate cell expression - distance patterns and save the table for simulation}
+\title{Save cell expression - distance patterns for simulation}
 \usage{
 ExprDistanceTable(
   gobject,
@@ -16,8 +16,23 @@ ExprDistanceTable(
 )
 }
 \arguments{
-\item{expr_data}{Input expression data.}
+\item{gobject}{Giotto object, output of preprocessGiotto.}
+
+\item{in_hvg}{Perform the analysis within the highly variable genes.}
+
+\item{output_file}{Provide a path and file name to save the CCI results for use in sCCIgen.}
+
+\item{region_specific}{Perform the analysis separately for each region.}
+
+\item{abs_log2fc_ICG}{Effect size threshold for saving.}
+
+\item{p_adj}{Adjusted p-value threshold (Default = 0.05) for saving.}
+
+\item{spatial_network_name}{Networks to choose. Possible values include
+"Delaunay_network", "distance_based_network", "knn_network".}
+
+\item{seed}{Seed.}
 }
 \description{
-Estimate cell expression - distance patterns and save the table for simulation
+Save cell expression - distance patterns for simulation
 }

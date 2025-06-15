@@ -51,7 +51,7 @@ ParaDigest=function(input) {
 #' Load RData with new assigned file name
 #' @param fileName  File name
 #' @return Data
-#'
+#' @export
 
 loadRData <- function(fileName){
   #loads an RData file, and returns it
@@ -60,6 +60,7 @@ loadRData <- function(fileName){
 }
 
 # Load expression data
+#' @export
 ExprLoad=function(para){
   if(expression_data_file_type=="Rdata" | expression_data_file_type=="RData") {
     expr=as.data.frame(loadRData(fs::path(path_to_input_dir, expression_data_file)))
@@ -72,6 +73,7 @@ ExprLoad=function(para){
 }
 
 # Load cell feature data
+#' @export
 SpatialLoad=function(para){
   type=utils::tail(unlist(strsplit(spatial_data_file, ".", fixed=TRUE)), 1)
   if(type=="Rdata" | type=="RData" ) {
@@ -94,10 +96,11 @@ SpatialLoad=function(para){
 #' `ParaDigest`.
 #' @param seed_list Seeds for all simulated data
 #' @import parallel foreach doParallel
-#'
-ParaCellsNoST=function(para, seed_list){
+#' @export
+ParaCellsNoST=function(para, annoseed_list){
 
   # determine cell type proportion in each region
+
   cell_type_proportion=vector("list", num_regions);
 
   tmp=do.call(rbind,para[grep("cell_type_proportion_", names(para))])
@@ -149,6 +152,7 @@ ParaCellsNoST=function(para, seed_list){
 #' @param spatial Cell spatial data (cannot unpaired with expression data).
 #' @param seed_list Seeds for all simulated data
 #' @import parallel foreach doParallel
+#' @export
 
 ParaCellsST=function(para, spatial, seed_list) {
 
@@ -184,6 +188,7 @@ ParaCellsST=function(para, spatial, seed_list) {
 #' Use parameters to simulate cell location. Here directly use existing SRT data.
 #' @param m No. of simulated data
 #' @param spatial Cell spatial data
+#' @export
 #'
 ParaExistingCellsST=function(m, spatial) {
   if (ncol(spatial)==4) {R=spatial[,4]} else {R=rep(NA, nrow(spatial))}
@@ -197,6 +202,7 @@ ParaExistingCellsST=function(m, spatial) {
 
 # ----------------- ParaPattern ---------------
 # Internal function
+#' @export
 ParaPattern=function(para, sim_count, cell_loc_list_i,
                      seed=NULL){
 
@@ -400,7 +406,7 @@ ParaExpr=function(para, cell_loc_list, expr, region,
 ParaSimulation <- function(input, ModelFitFile=NULL) {
 
   # library(parallel); library(doParallel)
-  ncores=detectCores()-2; registerDoParallel(ncores)
+  ncores=detectCores(); registerDoParallel(ncores)
   print(paste("No. of Cores in Use:", ncores))
   print("Start the simulation")
 
@@ -444,10 +450,11 @@ ParaSimulation <- function(input, ModelFitFile=NULL) {
   if (is.null(ModelFitFile)==F) {
     model_params=readRDS(ModelFitFile)
   } else {
-    if (exists("copula_input")) {model_params=readRDS(copula_input)
+    if (is.null(copula_input)==F) {model_params=readRDS(copula_input)
     }else{
       sim_method=ifelse(gene_cor=="TRUE", "copula", "ind")
-      model_params=Est_ModelPara(sim_method=sim_method, expr=expr2, anno=anno, ncores=ncores)
+      model_params=Est_ModelPara(sim_method=sim_method, expr=expr2,
+                                 anno=anno, ncores=ncores)
     }
   }
 

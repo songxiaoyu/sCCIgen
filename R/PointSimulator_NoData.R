@@ -86,21 +86,22 @@ RandomRegionWindow <- function(nRegion=3, nGrid=20, seed=NULL){
 
 get.n.vec.raw=function(n, cell.prop,
                        cell.inh.attr.input=NULL,
-                       same.dis.cutoff=0.05) {
+                       same.dis.cutoff=0.05,
+                       inflate.parameter=0.1) {
   n.vec.target=n.vec.use=round(n*cell.prop)
   # if exists cell-cell inhibition & attraction, inflate n.vec.use
   if (is.null(cell.inh.attr.input)==F) {
     for (i in 1:nrow(cell.inh.attr.input)) {
       if (cell.inh.attr.input[i,1] ==cell.inh.attr.input[i,2]) {
         n.vec.use[,cell.inh.attr.input[i,1]]=n.vec.use[,cell.inh.attr.input[i,1]]*
-          (1+abs(cell.inh.attr.input[i,3] *0.3))
+          (1+abs(cell.inh.attr.input[i,3] * inflate.parameter))
       }
 
       if (cell.inh.attr.input[i,1] !=cell.inh.attr.input[i,2]) {
         n.vec.use[,cell.inh.attr.input[i,1]]=
-          n.vec.use[,cell.inh.attr.input[i,1]]* (1+abs(cell.inh.attr.input[i,3])*0.3 )
+          n.vec.use[,cell.inh.attr.input[i,1]]* (1+abs(cell.inh.attr.input[i,3])* inflate.parameter )
         n.vec.use[,cell.inh.attr.input[i,2]]=
-          n.vec.use[,cell.inh.attr.input[i,2]]*(1+abs(cell.inh.attr.input[i,3])*0.3)
+          n.vec.use[,cell.inh.attr.input[i,2]]*(1+abs(cell.inh.attr.input[i,3])* inflate.parameter)
       }
     }
   }
@@ -155,7 +156,7 @@ cell.loc.1region.initiate <- function(n.inflation, window1,
 # (3) even distribution
 cell.loc.1region.refine <- function(pt.initial, n.inflation,
                                    cell.inh.attr.input1,
-                                   even.distribution.coef = 0.1,
+                                   even.distribution.coef = 0,
                                    grid.size.small = 19, grid.size.large = 45, seed) {
   set.seed(seed)
 

@@ -74,6 +74,8 @@ Est_ModelPara <- function(expr, anno, sim_method=c('ind', 'copula'), region=NULL
 
 
 # Use_scDesign2_1region ------
+
+#' @export
 Use_scDesign2_1region=function(ppp.obj1, Genes, model_params,
                        depth_simu_ref_ratio=1, cell_type_sel, seed,
                        sim_method = c('copula', 'ind')) {
@@ -193,6 +195,7 @@ Use_scDesign2=function(ppp.obj,
 
 # Find.Neighbor.Pairs ----------
 
+#' @export
 Find.Neighbor.Pairs=function(ppp.obj,
                              interacting.cell.type.pair,
                              int.dist.threshold) {
@@ -271,6 +274,7 @@ Add.Spatial.Expr.Pattern= function(sim.count,
 
 
 
+#' @export
 MergePPP=function(points.list) {
   K=length(points.list)
 
@@ -429,7 +433,7 @@ Add.Distance.Asso.Pattern = function(ppp.obj,
 #' \item{SignalSummary:}{Summary of this spatial pattern, including the type
 #' of spatial patterns, impacted cell types, perturbed genes, and effect sizes.}
 #' \item{beta.matrix:}{Effect size on each gene in each cell. }
-
+#' @export
 Add.Expr.Asso.Pattern = function(ppp.obj, sim.count, r,
                            perturbed.cell.type,
                            adjacent.cell.type,
@@ -547,6 +551,8 @@ Add.Expr.Asso.Pattern = function(ppp.obj, sim.count, r,
 
 
 # ExprPattern --------
+
+#' @export
 ExprPattern=function(pattern.list.i){
   L=length(pattern.list.i)
   res=NULL
@@ -557,6 +563,7 @@ ExprPattern=function(pattern.list.i){
 }
 # Pattern.adj.1region --------
 
+#' @export
 Pattern.adj.1region= function(sim.count1, combined.beta.matrix,
                     bond.extreme=T, keep.total.count=F,
                     integer=T) {

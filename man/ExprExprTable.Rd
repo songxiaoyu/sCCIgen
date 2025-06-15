@@ -2,7 +2,7 @@
 % Please edit documentation in R/EstCCI.R
 \name{ExprExprTable}
 \alias{ExprExprTable}
-\title{Estimate cell expression -expression patterns and save the table for simulation}
+\title{Save cell expression - cell expression association patterns for simulation}
 \usage{
 ExprExprTable(
   gobject,
@@ -17,8 +17,27 @@ ExprExprTable(
 )
 }
 \arguments{
-\item{expr_data}{Input expression data.}
+\item{gobject}{Giotto object, output of preprocessGiotto.}
+
+\item{database}{Specify databases for pairs of genes for consideration. Possible values include
+"mouse", "human", and "external". The "mouse" and "human" are ligand-receptor pairs downloaded from CellTalkDB.
+If "external" is used, users also need to provide value for \code{external_database_path}.}
+
+\item{external_database_path}{A path and file name to external gene-gene pair database.}
+
+\item{region_specific}{Perform the analysis separately for each region.}
+
+\item{spatial_network_name}{Networks to choose. Possible values include
+"Delaunay_network", "distance_based_network", "knn_network".}
+
+\item{p_adj}{Adjusted p-value threshold (Default = 0.05) for saving.}
+
+\item{abs_log2fc_LR}{Effect size threshold for saving.}
+
+\item{output_file}{Provide a path and file name to save the CCI results for use in sCCIgen.}
+
+\item{seed}{Seed.}
 }
 \description{
-Estimate cell expression -expression patterns and save the table for simulation
+Save cell expression - cell expression association patterns for simulation
 }

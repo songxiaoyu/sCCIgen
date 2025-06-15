@@ -4,7 +4,7 @@
 \alias{ParaCellsNoST}
 \title{Use parameters to simulate cell location (no existing spatial info)}
 \usage{
-ParaCellsNoST(para, seed_list)
+ParaCellsNoST(para, annoseed_list)
 }
 \arguments{
 \item{para}{Parameters loaded and cleaned from the parameter file using function

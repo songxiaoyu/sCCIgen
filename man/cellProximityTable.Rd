@@ -2,7 +2,7 @@
 % Please edit documentation in R/EstCCI.R
 \name{cellProximityTable}
 \alias{cellProximityTable}
-\title{Estimate cell attraction and inhibition patterns and save the table for simulation}
+\title{Save cell attraction and inhibition patterns for simulation}
 \usage{
 cellProximityTable(
   gobject,
@@ -10,24 +10,27 @@ cellProximityTable(
   abs_enrichm = 0.3,
   p_adj = 0.05,
   spatial_network_name = "Delaunay_network",
-  save.unfiltered = T,
+  save.unfiltered = F,
   seed = NULL
 )
 }
 \arguments{
+\item{gobject}{Giotto object, output of preprocessGiotto.}
+
 \item{output_file}{Provide a path and file name to save the CCI results for use in sCCIgen.}
 
-\item{abs_enrichm}{Effect size threshold.}
+\item{abs_enrichm}{Effect size threshold for saving.}
 
-\item{p_adj}{Adjusted p-value threshold (Default = 0.05).
-File est_CCI_dist_dist.tsv will save results of CCI through cell location attraction and inhibition.
-File est_CCI_expr_dist.tsv will save results of CCI through expression via cell location impact.
-File est_CCI_expr_expr.tsv will save results of CCI through ligand and recepter expression.}
+\item{p_adj}{Adjusted p-value threshold (Default = 0.05) for saving.}
 
-\item{expr_data}{Input expression data.}
+\item{spatial_network_name}{Networks to choose. Possible values include
+"Delaunay_network", "distance_based_network", "knn_network".}
 
-\item{spatial_data}{Input spatial data.}
+\item{save.unfiltered}{If save a parallel table for all results, unfiltered by
+asb_enrich and p_adj.}
+
+\item{seed}{Seed.}
 }
 \description{
-Estimate cell attraction and inhibition patterns and save the table for simulation
+Save cell attraction and inhibition patterns for simulation
 }

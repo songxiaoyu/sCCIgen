@@ -7,8 +7,8 @@
 run_interactive_sCCIgen()
 }
 \value{
-Either a .csv parameter file or a simulated dataset. If running the
-simulation, individual csv files with counts and cell features are locally
+Either a .yml parameter file or a simulated dataset. If running the
+simulation, individual .csv files with counts and cell features are locally
 saved. Optionally, a Giotto, Seurat, or SpatialExperiment object is created
 and saved locally as an .RDS file.
 }

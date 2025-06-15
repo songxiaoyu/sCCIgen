@@ -27,7 +27,8 @@ multicell=function(expr, spatial, NoSpot=500, cl=1) {
   if (cl==1) {
     expr2=matrix(0, ncol=mm, nrow=nrow(expr))
     for (i in 1: mm) {
-      expr2[,i]=apply(expr, 1, function(f) sum(as.numeric(f)[spot.idx==i], na.rm=T))
+      expr2[,i]=apply(expr, 1, function(f)
+        sum(as.numeric(f)[spot.idx==i], na.rm=T))
     }
   } else {
 
@@ -72,19 +73,17 @@ multicell=function(expr, spatial, NoSpot=500, cl=1) {
 
   # Spot's Cell Type Count
   if (is.null(spatial$annotation)==F) {
-    dat1=data.frame(spot.idx, spatial) %>%
-      dplyr::select(spot.idx, annotation) %>%
+
+    dat=data.frame(spot.idx, spatial) [1:100,] %>%
       group_by(spot.idx, annotation) %>%
       mutate(count=1) %>%
-      summarise(abundance = sum(count))
-    # add zero
-    dat2=data.frame(spot.idx=setdiff(1: mm, spot.idx),
-                    annotation=dat1$annotation[1],
-                    abundance=0)
-    dat=rbind(dat1, dat2) %>%
-      tidyr::pivot_wider(names_from = annotation, values_from = abundance,
+      summarise(abundance = sum(count)) %>%
+      tidyr::pivot_wider(names_from = annotation,
+                         values_from = abundance,
                          values_fill = 0)
-    spot_loc=data.frame(spot_loc, dat[,-1])
+
+    spot_loc=spot_loc%>% rownames_to_column("spot.idx")%>%
+      left_join(dat %>% mutate(spot.idx=as.character(spot.idx)))
   }
 
   return(list(count=expr2, spot_feature=spot_loc))

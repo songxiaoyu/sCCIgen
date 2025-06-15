@@ -33,6 +33,7 @@
 #'  \item{u}{NULL or a matrix of the same shape as x, which records the transformed quantiles,
 #'  by DT.}
 #'}
+#' @export
 #'
 fit_marginals <- function(x, marginal = c('auto_choose', 'zinb', 'nb', 'poisson'),
                           pval_cutoff = 0.05, epsilon = 1e-5,
@@ -194,6 +195,7 @@ fit_marginals <- function(x, marginal = c('auto_choose', 'zinb', 'nb', 'poisson'
 #' (w/o copula) model.}
 #' }
 #'
+#' @export
 
 fit_Gaussian_copula <- function(x, marginal = c('auto_choose', 'zinb', 'nb', 'poisson'),
                                 jitter = TRUE, zp_cutoff = 0.9,
@@ -257,6 +259,7 @@ fit_Gaussian_copula <- function(x, marginal = c('auto_choose', 'zinb', 'nb', 'po
 #' distinguished with the copula model.}
 #' }
 #'
+#' @export
 
 
 fit_wo_copula <- function(x, marginal = c('auto_choose', 'zinb', 'nb', 'poisson'),
@@ -303,6 +306,7 @@ fit_wo_copula <- function(x, marginal = c('auto_choose', 'zinb', 'nb', 'poisson'
 #' @return A list with the same length as \code{cell_type_sel} that contains the fitted model
 #' as each of its element.
 #'
+#' @export
 
 fit_model_scDesign2 <- function(data_mat, cell_type_sel,
                                 sim_method = c('copula', 'ind'),

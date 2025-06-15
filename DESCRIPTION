@@ -43,8 +43,9 @@ Imports:
     utils,
     edgeR, 
     fastDummies,
-    RANN
-Suggests: 
+    RANN,
+    knitr
+Suggests:
     Giotto,
     Seurat,
     future,

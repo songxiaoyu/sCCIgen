@@ -11,12 +11,28 @@ preprocessGiotto(
   run_kNN_network = F,
   run_Delaunay_network = F,
   run_Dist_network = F,
+  k = 5,
   dis.cut = NULL
 )
 }
-\description{
-This function takes input data and goes through data processing procedures for CCI analysis.
+\arguments{
+\item{expr_data}{expr_data}
+
+\item{spatial_data}{spatial_data}
+
+\item{run_hvg}{run_hvg}
+
+\item{run_kNN_network}{Run K-nearest neighbor (kNN) based network.}
+
+\item{run_Delaunay_network}{Run Delaunay Triangulation-based network.}
+
+\item{run_Dist_network}{Run distance-based network. It requires a value for distance cutoff.}
+
+\item{k}{No. of cells k in kNN (Default =5).}
+
+\item{dis.cut}{Distance cutoff if run distance-based network}
 }
-\details{
-#' @import Giotto
+\description{
+This function takes input data and goes through data processing procedures
+for CCI analysis.
 }

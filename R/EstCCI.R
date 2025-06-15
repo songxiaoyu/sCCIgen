@@ -6,12 +6,22 @@
 
 #' Process SRT data using Giotto for CCI analysis.
 #'
-#' This function takes input data and goes through data processing procedures for CCI analysis.
-#'
-#' #' @import Giotto
+#' This function takes input data and goes through data processing procedures
+#' for CCI analysis.
+#' @param expr_data expr_data
+#' @param spatial_data spatial_data
+#' @param run_hvg run_hvg
+#' @param run_kNN_network Run K-nearest neighbor (kNN) based network.
+#' @param run_Delaunay_network Run Delaunay Triangulation-based network.
+#' @param run_Dist_network Run distance-based network. It requires a value for distance cutoff.
+#' @param k No. of cells k in kNN (Default =5).
+#' @param dis.cut Distance cutoff if run distance-based network
+#' @import Giotto
 #' @export
 
-preprocessGiotto=function(expr_data, spatial_data, run_hvg=T, run_kNN_network=F, run_Delaunay_network=F, run_Dist_network=F, dis.cut=NULL) {
+preprocessGiotto=function(expr_data, spatial_data, run_hvg=T,
+                          run_kNN_network=F, run_Delaunay_network=F,
+                          run_Dist_network=F, k=5, dis.cut=NULL) {
   # harmonize input with Giotto requirement
   anno=colnames(expr_data)
   colnames(expr_data) = paste0("cell_", 1:ncol(expr_data))
@@ -59,7 +69,7 @@ preprocessGiotto=function(expr_data, spatial_data, run_hvg=T, run_kNN_network=F,
     dat =createSpatialNetwork(gobject= dat, method = "kNN", maximum_distance_knn = dis.cut, k=100, name = "distance_based_network")
   }
   if (run_Delaunay_network==T) {dat <- createSpatialNetwork(gobject = dat,minimum_k = 2,maximum_distance_delaunay = 400)}
-  if (run_kNN_network==T) {dat <- createSpatialNetwork(gobject = dat, method = "kNN", k = 5, name = "knn_network")}
+  if (run_kNN_network==T) {dat <- createSpatialNetwork(gobject = dat, method = "kNN", k = k, name = "knn_network")}
 
   return(dat)
 }
@@ -72,22 +82,23 @@ preprocessGiotto=function(expr_data, spatial_data, run_hvg=T, run_kNN_network=F,
 #                                                          #
 ##%######################################################%##
 # EstCCI ------------
-#' Estimate cell attraction and inhibition patterns and save the table for simulation
+#' Save cell attraction and inhibition patterns for simulation
 #'
-#' @param expr_data Input expression data.
-#' @param spatial_data Input spatial data.
+#' @param gobject Giotto object, output of preprocessGiotto.
+#' @param spatial_network_name Networks to choose. Possible values include
+#' "Delaunay_network", "distance_based_network", "knn_network".
 #' @param output_file Provide a path and file name to save the CCI results for use in sCCIgen.
-#' @param abs_enrichm Effect size threshold.
-#' @param p_adj Adjusted p-value threshold (Default = 0.05).
-
-#' File est_CCI_dist_dist.tsv will save results of CCI through cell location attraction and inhibition.
-#' File est_CCI_expr_dist.tsv will save results of CCI through expression via cell location impact.
-#' File est_CCI_expr_expr.tsv will save results of CCI through ligand and recepter expression.
+#' @param abs_enrichm Effect size threshold for saving.
+#' @param p_adj Adjusted p-value threshold (Default = 0.05) for saving.
+#' @param save.unfiltered If save a parallel table for all results, unfiltered by
+#' asb_enrich and p_adj.
+#' @param seed Seed.
 #' @export
 
-cellProximityTable = function (gobject, output_file=file.path(getwd(), "est_CCI_dist_dist.csv"), abs_enrichm=0.3, p_adj = 0.05,
+cellProximityTable = function (gobject, output_file=file.path(getwd(), "est_CCI_dist_dist.csv"),
+                               abs_enrichm=0.3, p_adj = 0.05,
                                spatial_network_name = "Delaunay_network",
-                               save.unfiltered=T, seed=NULL) {
+                               save.unfiltered=F, seed=NULL) {
   set.seed(seed)
   # cellProximityEnrichment analysis
   cell_proximities <- cellProximityEnrichment(gobject = gobject,
@@ -132,18 +143,27 @@ cellProximityTable = function (gobject, output_file=file.path(getwd(), "est_CCI_
 #                                                          #
 ##%######################################################%##
 
-#' Estimate cell expression - distance patterns and save the table for simulation
+
+
+#' Save cell expression - distance patterns for simulation
 #'
-#' @param expr_data Input expression data.
-#' @import future
+#' @param gobject Giotto object, output of preprocessGiotto.
+#' @param spatial_network_name Networks to choose. Possible values include
+#' "Delaunay_network", "distance_based_network", "knn_network".
+#' @param output_file Provide a path and file name to save the CCI results for use in sCCIgen.
+#' @param abs_log2fc_ICG Effect size threshold for saving.
+#' @param p_adj Adjusted p-value threshold (Default = 0.05) for saving.
+#' @param region_specific Perform the analysis separately for each region.
+#' @param in_hvg Perform the analysis within the highly variable genes.
+#' @param seed Seed.
 #' @export
 
-
 ExprDistanceTable = function(gobject, in_hvg=F, output_file=file.path(getwd(), "est_CCI_dist_expr.csv"),
-                              region_specific=F, abs_log2fc_ICG=0.25, p_adj = 0.05, spatial_network_name = "distance_based_network",
+                              region_specific=F, abs_log2fc_ICG=0.25, p_adj = 0.05,
+                             spatial_network_name = "distance_based_network",
                              seed=NULL) {
   set.seed(seed)
-  plan(future::multisession)
+  future::plan(future::multisession)
 
   # if in_hvg ==T, select genes based on highly variable features and gene statistics, both found in feature (gene) metadata
   if (in_hvg==T) {
@@ -211,6 +231,7 @@ ExprDistanceTable_1region = function (gobject, r, cell_meta, abs_log2fc_ICG=0.25
       dplyr::filter(is.na(value)==F)%>%
       dplyr::rename(cell_type = Var1, int_cell_type = Var2, threshold = value)
     df_merged <- df_table %>% dplyr::inner_join(dist_value, by = c("cell_type", "int_cell_type"))
+
     # <Region>,<Perturbed cell type>,<Adjacent cell type>,<Interaction distance threshold (default 0.1)>,
     # <Gene ID (optional)>,<Gene proportion (optional)>,<Mean effect at log(count) scale (default = 0.5)>,
     # <SD of effect at log(count) scale (default = 0)>
@@ -228,17 +249,29 @@ ExprDistanceTable_1region = function (gobject, r, cell_meta, abs_log2fc_ICG=0.25
 ####      3) Expression-Expression (e.g. LR) analysis   ####
 #                                                          #
 ##%######################################################%##
-#' Estimate cell expression -expression patterns and save the table for simulation
+
+#' Save cell expression - cell expression association patterns for simulation
 #'
-#' @param expr_data Input expression data.
-#' @import future
+#' @param gobject Giotto object, output of preprocessGiotto.
+#' @param database Specify databases for pairs of genes for consideration. Possible values include
+#' "mouse", "human", and "external". The "mouse" and "human" are ligand-receptor pairs downloaded from CellTalkDB.
+#' If "external" is used, users also need to provide value for `external_database_path`.
+#' @param external_database_path A path and file name to external gene-gene pair database.
+#' @param region_specific Perform the analysis separately for each region.
+#' @param spatial_network_name Networks to choose. Possible values include
+#' "Delaunay_network", "distance_based_network", "knn_network".
+#' @param output_file Provide a path and file name to save the CCI results for use in sCCIgen.
+#' @param abs_log2fc_LR Effect size threshold for saving.
+#' @param p_adj Adjusted p-value threshold (Default = 0.05) for saving.
+#' @param seed Seed.
 #' @export
-#'
+
 ExprExprTable = function(gobject, database=c("mouse", "human", "external"), external_database_path=NULL,
                          region_specific=F, spatial_network_name,
-                         p_adj=0.05, abs_log2fc_LR=0.25, output_file=file.path(getwd(), "est_CCI_expr_expr.csv"), seed=NULL) {
+                         p_adj=0.05, abs_log2fc_LR=0.25,
+                         output_file=file.path(getwd(), "est_CCI_expr_expr.csv"), seed=NULL) {
   set.seed(seed)
-  plan(future::multisession)
+  future::plan(future::multisession)
   # load database
 
   if (database=="external" & is.null(external_database_path)) {
@@ -296,8 +329,7 @@ ExprExprTable = function(gobject, database=c("mouse", "human", "external"), exte
 ExprExprTable_1region = function(gobject, r, cell_meta, select_ligands, select_receptors, spatial_network_name,
                    p_adj=0.05, abs_log2fc_LR=0.25) {
 
-  plan(future::multisession)
-
+  future::plan(future::multisession)
 
   ## get statistical significance of gene pair expression changes upon cell-cell interaction
   sc <- spatCellCellcom(gobject = gobject, spatial_network_name = spatial_network_name,
@@ -347,7 +379,7 @@ ExprExprTable_1region = function(gobject, r, cell_meta, select_ligands, select_r
 #' @param fdr_cut Keep genes whose FDR is less than this cutoff.
 #' @param output_file output_file
 #' @export
-#'
+
 SpatialTable=function(gobject, top_num=2, fdr_cut=0.05,
                       output_file= file.path(getwd(), "est_region_specific_genes.csv")){
 
