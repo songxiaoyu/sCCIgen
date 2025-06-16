@@ -2201,7 +2201,7 @@ run_interactive_sCCIgen <- function() {
         param_df = rbind(param_df, c("region_specific_model",
                                      region_specific_model()))
 
-        if(is.null(paired_or_unpaired())) {
+        if(!paired_or_unpaired() %in% c("TRUE", "FALSE")) {
 
           param_df = rbind(param_df, c("custom_cell_type_proportions",
                                        custom_props()))
