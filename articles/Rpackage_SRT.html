@@ -128,7 +128,7 @@ may not be needed improve the estimation. Similarly, if some genes are
 extremely zero-inflated, narrowing the simulation to reasonbly variable
 genes is an option.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># model fitting w/o gene-gene correlation</span></span>
+<code class="sourceCode R"><span><span class="co"># model fitting w/o gene-gene correlation (fast but less accurate estimation)</span></span>
 <span><span class="va">ModelEst</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/Est_ModelPara.html">Est_ModelPara</a></span><span class="op">(</span>expr <span class="op">=</span> <span class="va">expr</span>, </span>
 <span>                          anno <span class="op">=</span> <span class="va">anno</span>, </span>
 <span>                          sim_method <span class="op">=</span> <span class="st">"ind"</span>,</span>
@@ -150,47 +150,43 @@ genes is an option.</p>
 in the input data following the existing Giotto pipeline<a class="anchor" aria-label="anchor" href="#task-2-estimate-ccis-in-the-input-data-following-the-existing-giotto-pipeline"></a>
 </h3>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Preprocess data with Giotto pipeline</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://drieslab.github.io/Giotto/" class="external-link">Giotto</a></span><span class="op">)</span></span>
+<span><span class="co"># Preprocess data with Giotto pipeline</span></span>
 <span><span class="va">db</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocessGiotto.html">preprocessGiotto</a></span><span class="op">(</span>expr_data <span class="op">=</span> <span class="va">expr</span>, </span>
 <span>                       spatial_data <span class="op">=</span> <span class="va">spatial</span>, </span>
 <span>                       run_hvg <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                       run_kNN_network <span class="op">=</span> <span class="cn">TRUE</span>, </span>
-<span>                       run_Delaunay_network <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span></span>
+<span>                       run_Dist_network <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                       dis.cut<span class="op">=</span><span class="fl">150</span><span class="op">)</span></span>
+<span><span class="va">db</span></span>
 <span><span class="co"># Estimate cell-cell attraction and inhibition patterns, and save in pre-defined folder</span></span>
 <span><span class="fu"><a href="../reference/cellProximityTable.html">cellProximityTable</a></span><span class="op">(</span>gobject <span class="op">=</span> <span class="va">db</span>, </span>
 <span>                   abs_enrichm <span class="op">=</span> <span class="fl">0.3</span>, </span>
 <span>                   p_adj <span class="op">=</span> <span class="fl">0.05</span>,</span>
-<span>                   output_file <span class="op">=</span> <span class="st">"est_CCI_dist_dist.csv"</span><span class="op">)</span></span>
+<span>                   spatial_network_name <span class="op">=</span> <span class="st">"distance_based_network"</span>,</span>
+<span>                   save.unfiltered<span class="op">=</span><span class="cn">TRUE</span>,</span>
+<span>                   output_file <span class="op">=</span> <span class="st">"est_CCI_dist_dist.csv"</span>,</span>
+<span>                   seed<span class="op">=</span><span class="fl">123</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Estimate gene expressions of cells impacted by their neighbors, and save in pre-defined folder</span></span>
 <span><span class="fu"><a href="../reference/ExprDistanceTable.html">ExprDistanceTable</a></span><span class="op">(</span>gobject <span class="op">=</span> <span class="va">db</span>, </span>
 <span>                  in_hvg <span class="op">=</span> <span class="cn">TRUE</span>, </span>
 <span>                  region_specific <span class="op">=</span> <span class="cn">FALSE</span>, </span>
+<span>                  spatial_network_name <span class="op">=</span> <span class="st">"distance_based_network"</span>,</span>
 <span>                  abs_log2fc_ICG <span class="op">=</span> <span class="fl">0.3</span>, </span>
 <span>                  p_adj <span class="op">=</span> <span class="fl">0.05</span>,</span>
-<span>                  output_file <span class="op">=</span> <span class="st">"est_CCI_dist_expr.csv"</span><span class="op">)</span></span>
+<span>                  output_file <span class="op">=</span> <span class="st">"est_CCI_dist_expr.csv"</span>,</span>
+<span>                  seed<span class="op">=</span><span class="fl">123</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Estimate gene expressions of cells impacted by gene expressions of neighboring cells, narrow to</span></span>
 <span><span class="co">#  known pairs, such as ligand and receptor pairs, and save in pre-defined folder</span></span>
 <span><span class="fu"><a href="../reference/ExprExprTable.html">ExprExprTable</a></span><span class="op">(</span>gobject <span class="op">=</span> <span class="va">db</span>, </span>
 <span>              database <span class="op">=</span> <span class="st">"mouse"</span>, </span>
 <span>              region_specific <span class="op">=</span> <span class="cn">FALSE</span>, </span>
+<span>              spatial_network_name <span class="op">=</span> <span class="st">"distance_based_network"</span>,</span>
 <span>              p_adj <span class="op">=</span> <span class="fl">0.05</span>, </span>
-<span>              abs_log2fc_LR <span class="op">=</span> <span class="fl">0.3</span>,</span>
-<span>              output_file <span class="op">=</span> <span class="st">"est_CCI_expr_expr_region.csv"</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3" number="3.3">
-<h3 id="task-3-estimate-spatial-region-specific-genes">
-<span class="header-section-number">3.3</span> Task 3: Estimate
-spatial region specific genes<a class="anchor" aria-label="anchor" href="#task-3-estimate-spatial-region-specific-genes"></a>
-</h3>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Estimate spatial region specific genes.</span></span>
-<span><span class="fu"><a href="../reference/SpatialTable.html">SpatialTable</a></span><span class="op">(</span>gobject <span class="op">=</span> <span class="va">db</span>, </span>
-<span>             top_num <span class="op">=</span> <span class="fl">2</span>, </span>
-<span>             fdr_cut <span class="op">=</span> <span class="fl">0.05</span>,</span>
-<span>             output_file <span class="op">=</span> <span class="st">"est_region_specific_genes.csv"</span><span class="op">)</span></span></code></pre></div>
+<span>              abs_log2fc_LR <span class="op">=</span> <span class="fl">0.2</span>,</span>
+<span>              output_file <span class="op">=</span> <span class="st">"est_CCI_expr_expr.csv"</span>,</span>
+<span>              seed<span class="op">=</span><span class="fl">123</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2" number="4">
@@ -209,10 +205,8 @@ simulation and save the results.<a class="anchor" aria-label="anchor" href="#per
 </h2>
 <p>Assuming you already have a parameter file, you can run the entire
 simulation using codes like this:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">model_param_path</span> <span class="op">&lt;-</span> <span class="st">"SeqFishPlusCortex_2025_fit_wo_cor.RDS"</span></span>
-<span></span>
-<span><span class="co"># Simulate default data - using existing cells but simulate expression with ground truth</span></span>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Simulate default data - using existing cells but simulate expression with ground truth</span></span>
 <span><span class="va">input</span> <span class="op">&lt;-</span> <span class="st">"SeqFishPlus_default.tsv"</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/ParaSimulation.html">ParaSimulation</a></span><span class="op">(</span>input <span class="op">=</span> <span class="va">input</span>, ModelFitFile <span class="op">=</span> <span class="va">model_param_path</span><span class="op">)</span></span>
