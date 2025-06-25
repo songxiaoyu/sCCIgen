@@ -26,8 +26,8 @@ Users have two options to perform SRT simulations using `sCCIgen`. Depending on 
     - [Tutorials for using the interface to simulate SRT.](https://songxiaoyu.github.io/sCCIgen/articles/Interface.html)
   - **R package.** A direct use of `sCCIgen` package offers greater flexibility, allowing users to adjust more parameters that would otherwise be fixed at default values. It also enables the output of simulation byproducts, such as spatial windows. This approach is recommended for users with goode programming experience who wish to perform customized simulations.
     - [Tutorials for using the R package to simulate SRT based on snRNAseq data.](https://songxiaoyu.github.io/sCCIgen/articles/Rpackage_snRNAseq.html)
-    - [Tutorials for using the R package to simulate SRT based on single-cell SRT data (single region).](https://songxiaoyu.github.io/sCCIgen/articles/Rpackage_SRT_region.html)
-    - [Tutorials for using the R package to simulate SRT based on single-cell SRT data (multiple regions).](https://songxiaoyu.github.io/sCCIgen/articles/Rpackage_SRT.html)
+    - [Tutorials for using the R package to simulate SRT based on single-cell SRT data (single region).](https://songxiaoyu.github.io/sCCIgen/articles/Rpackage_SRT.html)
+    - [Tutorials for using the R package to simulate SRT based on single-cell SRT data (multiple regions).](https://songxiaoyu.github.io/sCCIgen/articles/Rpackage_SRT_region.html)
     - [Tutorials for using the R package to simulate SRT based on single-cell expression and unpaired spatial data.](https://songxiaoyu.github.io/sCCIgen/articles/Rpackage_unpaired.html)
   
 ## References
