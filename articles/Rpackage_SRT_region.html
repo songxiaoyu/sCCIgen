@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Running a simulation based on SRT data region • sCCIgen</title>
+<title>Running a simulation based on SRT data in multiple regions • sCCIgen</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Running a simulation based on SRT data region">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Running a simulation based on SRT data in multiple regions">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -66,7 +66,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Running a simulation based on SRT data region</h1>
+      <h1>Running a simulation based on SRT data in multiple regions</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/songxiaoyu/sCCIgen/blob/HEAD/vignettes/Rpackage_SRT_region.Rmd" class="external-link"><code>vignettes/Rpackage_SRT_region.Rmd</code></a></small>
@@ -92,13 +92,25 @@ data<a class="anchor" aria-label="anchor" href="#load-and-clean-sample-data"></a
 <p>Download sample data from <a href="https://github.com/songxiaoyu/sCCIgen_data/tree/main/input_data" class="external-link uri">https://github.com/songxiaoyu/sCCIgen_data/tree/main/input_data</a></p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/load.html" class="external-link">load</a></span><span class="op">(</span><span class="st">"SeqFishPlusCortex_2025_expr.Rdata"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/load.html" class="external-link">load</a></span><span class="op">(</span><span class="st">"SeqFishPlusCortex_2025_spatial.Rdata"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html" class="external-link">load</a></span><span class="op">(</span><span class="st">"SeqFishPlusCortex_2025_region_spatial.Rdata"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">expr</span><span class="op">)</span></span>
-<span><span class="va">expr</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span>
+<span><span class="co"># [1] 2500  511</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">spatial</span><span class="op">)</span></span>
+<span><span class="co"># [1] 511   4</span></span>
+<span><span class="va">expr</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span>
+<span><span class="co">#       ExcitatoryNeuron ExcitatoryNeuron ExcitatoryNeuron</span></span>
+<span><span class="co"># Aatf                 0                0                0</span></span>
+<span><span class="co"># Abat                 1                0                0</span></span>
+<span><span class="co"># Abhd2                2                2                0</span></span>
 <span></span>
-<span><span class="va">anno</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://drieslab.github.io/GiottoClass/reference/row-plus-colnames-generic.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">expr</span><span class="op">)</span></span>
+<span><span class="va">spatial</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>,<span class="op">]</span></span>
+<span><span class="co">#               anno X_final  Y_final field_col</span></span>
+<span><span class="co"># 1 ExcitatoryNeuron 1632.02 -1305.70         0</span></span>
+<span><span class="co"># 2 ExcitatoryNeuron 1589.47  -669.51         0</span></span>
+<span><span class="co"># 3 ExcitatoryNeuron 1539.89 -1185.90         0</span></span>
+<span></span>
+<span><span class="va">anno</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">expr</span><span class="op">)</span></span>
 <span><span class="va">region</span> <span class="op">&lt;-</span> <span class="va">spatial</span><span class="op">[</span>, <span class="fl">4</span><span class="op">]</span></span></code></pre></div>
 </div>
 <div class="section level2" number="3">
@@ -115,20 +127,21 @@ large and users want to run simulation for more than once. By splitting
 the simulation into these two steps, users can estimate model parameters
 only once and save the results for multiple use.</p>
 <div class="section level3" number="3.1">
-<h3 id="task-1-estimate-model-parameters-from-the-snrnaseq-for-simulation">
+<h3 id="task-1-estimate-model-parameters-from-the-srt-for-simulation">
 <span class="header-section-number">3.1</span> Task 1: Estimate
-model parameters from the snRNAseq for simulation<a class="anchor" aria-label="anchor" href="#task-1-estimate-model-parameters-from-the-snrnaseq-for-simulation"></a>
+model parameters from the SRT for simulation<a class="anchor" aria-label="anchor" href="#task-1-estimate-model-parameters-from-the-srt-for-simulation"></a>
 </h3>
-<p>This is part is to fit the expression data. When
-sim_method==“copula”, it will fit both the gene marginal distribution
-and gene-gene correlation. When sim_method==“ind”, it will only fit the
-gene marginal distribution.</p>
+<p>This is part is to fit the expression data. When sim_method=“copula”,
+it will fit both the gene marginal distribution and gene-gene
+correlation. When sim_method=“ind”, it will only fit the gene marginal
+distribution.</p>
 <p>Note: If the number of genes or cells are large, model fitting may
 take some time. It is suggested to select a reasonable sample size
-(e.g. &lt;10000 per cell type) before the model fitting, as more cells
-may not be needed improve the estimation. Similarly, if some genes are
-extremely zero-inflated, narrowing the simulation to reasonably variable
-genes is an option.</p>
+(e.g. &lt;2500 cells per cell type) before the model fitting, as more
+cells may not be needed improve the estimation. The user interface
+automatically uses a maximum of 2500 cells per cell type in model
+fitting. In the meantime, if some genes are extremely zero-inflated,
+narrowing the simulation to reasonably variable genes is an option.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># model fitting</span></span>
 <span><span class="va">ModelEst</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/Est_ModelPara.html">Est_ModelPara</a></span><span class="op">(</span>expr <span class="op">=</span> <span class="va">expr</span>, </span>
@@ -148,18 +161,22 @@ in the input data following the existing Giotto pipeline<a class="anchor" aria-l
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://drieslab.github.io/Giotto/" class="external-link">Giotto</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Preprocess data with Giotto pipeline</span></span>
+<span><span class="co">## Three types of networks are built in to determine cell neighborhood: Delaunay, kNN, and distance-based. Here we use Delaunay network as an example. </span></span>
 <span><span class="va">db</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preprocessGiotto.html">preprocessGiotto</a></span><span class="op">(</span>expr_data <span class="op">=</span> <span class="va">expr</span>, </span>
 <span>                       spatial_data <span class="op">=</span> <span class="va">spatial</span>, </span>
 <span>                       run_hvg <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                       run_kNN_network <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                       run_Delaunay_network <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span>                       run_kNN_network <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>                       run_Delaunay_network <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                       run_Dist_network<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Estimate cell-cell attraction and inhibition patterns, and save in </span></span>
 <span><span class="co"># pre-defined folder</span></span>
 <span><span class="fu"><a href="../reference/cellProximityTable.html">cellProximityTable</a></span><span class="op">(</span>gobject <span class="op">=</span> <span class="va">db</span>, </span>
 <span>                   abs_enrichm <span class="op">=</span> <span class="fl">0.3</span>, </span>
 <span>                   p_adj <span class="op">=</span> <span class="fl">0.05</span>,</span>
-<span>                   output_file <span class="op">=</span> <span class="st">"est_CCI_dist_dist_region.csv"</span><span class="op">)</span></span>
+<span>                   spatial_network_name <span class="op">=</span> <span class="st">"Delaunay_network"</span>,</span>
+<span>                   output_file <span class="op">=</span> <span class="st">"est_CCI_dist_dist_DN_region.csv"</span>, </span>
+<span>                   seed<span class="op">=</span><span class="fl">123</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Estimate gene expressions of cells impacted by their neighbors, and save in</span></span>
 <span><span class="co"># pre-defined folder</span></span>
@@ -168,16 +185,18 @@ in the input data following the existing Giotto pipeline<a class="anchor" aria-l
 <span>                  region_specific <span class="op">=</span> <span class="cn">TRUE</span>, </span>
 <span>                  abs_log2fc_ICG <span class="op">=</span> <span class="fl">0.3</span>, </span>
 <span>                  p_adj <span class="op">=</span> <span class="fl">0.05</span>,</span>
-<span>                  output_file <span class="op">=</span> <span class="st">"est_CCI_dist_expr_region.csv"</span><span class="op">)</span></span>
+<span>                  spatial_network_name <span class="op">=</span> <span class="st">"Delaunay_network"</span>,</span>
+<span>                  output_file <span class="op">=</span> <span class="st">"est_CCI_dist_expr_DN_region.csv"</span>, seed<span class="op">=</span><span class="fl">123</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Estimate gene expressions of cells impacted by gene expressions of neighboring # cells, narrow to known pairs, such as ligand and receptor pairs, and save in</span></span>
 <span><span class="co"># pre-defined folder</span></span>
 <span><span class="fu"><a href="../reference/ExprExprTable.html">ExprExprTable</a></span><span class="op">(</span>gobject <span class="op">=</span> <span class="va">db</span>, </span>
 <span>              database <span class="op">=</span> <span class="st">"mouse"</span>, </span>
 <span>              region_specific <span class="op">=</span> <span class="cn">TRUE</span>, </span>
+<span>              spatial_network_name<span class="op">=</span> <span class="st">"Delaunay_network"</span>,</span>
 <span>              p_adj <span class="op">=</span> <span class="fl">0.05</span>, </span>
 <span>              abs_log2fc_LR <span class="op">=</span> <span class="fl">0.3</span>,</span>
-<span>              output_file <span class="op">=</span> <span class="st">"est_CCI_expr_expr_region.csv"</span><span class="op">)</span></span></code></pre></div>
+<span>              output_file <span class="op">=</span> <span class="st">"est_CCI_expr_expr_DN_region.csv"</span>, seed<span class="op">=</span><span class="fl">123</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3" number="3.3">
 <h3 id="task-3-estimate-spatial-region-specific-genes">
@@ -198,7 +217,7 @@ spatial region specific genes<a class="anchor" aria-label="anchor" href="#task-3
 file<a class="anchor" aria-label="anchor" href="#create-a-parameter-file"></a>
 </h2>
 <p>Users need to create a parameter file. The sample parameter file for
-snRNAseq based simulation is <a href="https://github.com/songxiaoyu/sCCIgen_data/tree/main/sample_parameter_file/SRT" class="external-link">here</a>
+SRT based simulation is <a href="https://github.com/songxiaoyu/sCCIgen_data/tree/main/sample_parameter_file/" class="external-link">here</a>
 for downloading and filling in to perform simulations.</p>
 </div>
 <div class="section level2" number="5">
@@ -209,10 +228,14 @@ simulation and save the results<a class="anchor" aria-label="anchor" href="#perf
 <p>Assuming you already have a parameter file, you can run the entire
 simulation using codes like this:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">model_param_path</span> <span class="op">&lt;-</span> <span class="st">"SeqFishPlusCortex_fit_wo_cor_region.RDS"</span></span>
+<code class="sourceCode R"><span><span class="co"># We select the parameter file developed for SeqFISH+ data with region information. This file simulates 10000 cells, with no gene-gene correlation (ind), and have an output of 400 spots.</span></span>
+<span><span class="va">input</span> <span class="op">&lt;-</span> <span class="st">"SeqFishPlus_Region_n10000_ind_multi400_param.yml"</span></span>
 <span></span>
-<span><span class="va">input</span> <span class="op">&lt;-</span> <span class="st">"SeqFishPlus_Region_AllPattern.tsv"</span></span>
+<span><span class="fu"><a href="../reference/ParaSimulation.html">ParaSimulation</a></span><span class="op">(</span>input <span class="op">=</span> <span class="va">input</span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># Simulate new cells and genes where genes have region specific expressions</span></span>
+<span><span class="va">input</span> <span class="op">&lt;-</span> <span class="st">"SeqFishPlus_RegionDiffGenes.yml"</span></span>
+<span><span class="va">model_param_path</span><span class="op">=</span><span class="st">"SeqFishPlusCortex_fit_wo_cor_region.RDS"</span></span>
 <span><span class="fu"><a href="../reference/ParaSimulation.html">ParaSimulation</a></span><span class="op">(</span>input <span class="op">=</span> <span class="va">input</span>, ModelFitFile <span class="op">=</span> <span class="va">model_param_path</span><span class="op">)</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

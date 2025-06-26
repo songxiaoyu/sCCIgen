@@ -60,7 +60,9 @@
 <span>  <span class="va">PointRegion</span>,</span>
 <span>  <span class="va">window_method</span>,</span>
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  cell.inh.attr.input1 <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  cell.inh.attr.input1 <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  same.dis.cutoff <span class="op">=</span> <span class="fl">0.01</span>,</span>
+<span>  even.distribution.coef <span class="op">=</span> <span class="fl">0</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -90,6 +92,14 @@
 
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
 <dd><p>Random seed.</p></dd>
+
+
+<dt id="arg-same-dis-cutoff">same.dis.cutoff<a class="anchor" aria-label="anchor" href="#arg-same-dis-cutoff"></a></dt>
+<dd><p>Cutoff value for regarding two cells are in the same location (default = 0).</p></dd>
+
+
+<dt id="arg-even-distribution-coef">even.distribution.coef<a class="anchor" aria-label="anchor" href="#arg-even-distribution-coef"></a></dt>
+<dd><p>A parameter to avoid cells gathering from each other.</p></dd>
 
 </dl></div>
 

@@ -91,11 +91,16 @@ data<a class="anchor" aria-label="anchor" href="#load-and-clean-sample-data"></a
 </h2>
 <p>Download sample data from <a href="https://github.com/songxiaoyu/sCCIgen_data/tree/main/input_data" class="external-link uri">https://github.com/songxiaoyu/sCCIgen_data/tree/main/input_data</a></p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/load.html" class="external-link">load</a></span><span class="op">(</span><span class="st">"Github/sCCIgen_data/input_data/snRNAseq_breast_2025_expr.Rdata"</span><span class="op">)</span></span>
-<span><span class="va">anno</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://drieslab.github.io/GiottoClass/reference/row-plus-colnames-generic.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">expr</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/load.html" class="external-link">load</a></span><span class="op">(</span><span class="st">"snRNAseq_breast_2025_expr.Rdata"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">expr</span><span class="op">)</span></span>
-<span><span class="va">expr</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span></code></pre></div>
+<span><span class="co">#[1] 4751 5990</span></span>
+<span><span class="va">expr</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span>
+<span><span class="co">#        Epithelial Adipocyte Adipocyte</span></span>
+<span><span class="co"># NOC2L           0         0         0</span></span>
+<span><span class="co"># KLHL17          1         0         0</span></span>
+<span><span class="co"># ISG15           0         0         0</span></span>
+<span><span class="va">anno</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">expr</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2" number="3">
 <h2 id="analysis-of-the-existing-data-to-provide-insights-into-the-parameters-of-the-simulation">
@@ -115,13 +120,13 @@ only once and save the results for multiple use.</p>
 <span class="header-section-number">3.1</span> Task 1: Estimate
 model parameters from the snRNAseq for simulation<a class="anchor" aria-label="anchor" href="#task-1-estimate-model-parameters-from-the-snrnaseq-for-simulation"></a>
 </h3>
-<p>This is part is to fit the expression data. When
-sim_method==“copula”, it will fit both the gene marginal distribution
-and gene-gene correlation. When sim_method==“ind”, it will only fit the
-gene marginal distribution.</p>
+<p>This is part is to fit the expression data. When sim_method=“copula”,
+it will fit both the gene marginal distribution and gene-gene
+correlation. When sim_method=“ind”, it will only fit the gene marginal
+distribution.</p>
 <p>Note: If the number of genes or cells are large, model fitting may
 take some time. It is suggested to select a reasonable sample size
-(e.g. &lt;10000 per cell type) before the model fitting, as more cells
+(e.g. &lt;2500 per cell type) before the model fitting, as more cells
 may not be needed improve the estimation. Similarly, if some genes are
 extremely zero-inflated, narrowing the simulation to reasonably variable
 genes is an option.</p>
@@ -145,7 +150,7 @@ variations.</p>
 file<a class="anchor" aria-label="anchor" href="#create-a-parameter-file"></a>
 </h2>
 <p>Users need to create a parameter file. The sample parameter file for
-snRNAseq based simulation is <a href="https://github.com/songxiaoyu/sCCIgen_data/tree/main/sample_parameter_file/snRNAseq" class="external-link">here</a>
+snRNAseq based simulation is <a href="https://github.com/songxiaoyu/sCCIgen_data/tree/main/sample_parameter_file" class="external-link">here</a>
 for downloading and filling in to perform simulations.</p>
 </div>
 <div class="section level2" number="5">
@@ -154,16 +159,14 @@ for downloading and filling in to perform simulations.</p>
 </h2>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># load parameter file</span></span>
-<span><span class="va">input</span> <span class="op">&lt;-</span> <span class="st">"scRNAseq_default.tsv"</span></span>
+<span><span class="va">input</span> <span class="op">&lt;-</span> <span class="st">"snRNAseq_default_param.yml"</span></span>
 <span></span>
-<span><span class="co"># The default parameter file does not provide estimated model parameters.</span></span>
-<span><span class="co"># Run simulation, with model parameters added in with ModelFitFile.</span></span>
-<span><span class="va">model_param_path</span> <span class="op">&lt;-</span> <span class="st">"snRNAseq_breast_2025_fit_w_cor.RDS"</span></span>
+<span><span class="co"># The default parameter file does not provide estimated model parameters. One can run below for simulation</span></span>
+<span><span class="fu"><a href="../reference/ParaSimulation.html">ParaSimulation</a></span><span class="op">(</span>input <span class="op">=</span> <span class="va">input</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/ParaSimulation.html">ParaSimulation</a></span><span class="op">(</span>input <span class="op">=</span> <span class="va">input</span>, ModelFitFile <span class="op">=</span> <span class="va">model_param_path</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Run simulation including the estimation of the model parameters.</span></span>
-<span><span class="fu"><a href="../reference/ParaSimulation.html">ParaSimulation</a></span><span class="op">(</span>input <span class="op">=</span> <span class="va">input</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># Alternatively, one can run simulation, with model parameters added in with ModelFitFile (optional for speed).</span></span>
+<span><span class="va">model_param_path</span> <span class="op">&lt;-</span> <span class="st">"snRNAseq_breast_2025_fit_wo_cor.RDS"</span></span>
+<span><span class="fu"><a href="../reference/ParaSimulation.html">ParaSimulation</a></span><span class="op">(</span>input <span class="op">=</span> <span class="va">input</span>, ModelFitFile <span class="op">=</span> <span class="va">model_param_path</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2" number="6">
 <h2 id="run-nested-functions-to-obtain-simulation-byproducts">
@@ -176,13 +179,13 @@ obtain simulation byproducts<a class="anchor" aria-label="anchor" href="#run-nes
 spatial regions simulated by sCCIgen<a class="anchor" aria-label="anchor" href="#task-1-plot-the-spatial-regions-simulated-by-sccigen"></a>
 </h3>
 <p>If users are interested to obtain the simulated regions, a nested
-function RandomRegionWindow can be used as folllows:</p>
+function <code>RandomRegionWindow</code> can be used as follows:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># The parameter file specifies that nRegion=2 and seed=1234</span></span>
 <span><span class="va">win</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/RandomRegionWindow.html">RandomRegionWindow</a></span><span class="op">(</span>nRegion <span class="op">=</span> <span class="fl">2</span>, seed <span class="op">=</span> <span class="fl">1234</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">win</span><span class="op">$</span><span class="va">window</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, col <span class="op">=</span> <span class="st">"pink"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">win</span><span class="op">$</span><span class="va">window</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span>, col <span class="op">=</span> <span class="st">"blue"</span>, add <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">win</span><span class="op">$</span><span class="va">window</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, col <span class="op">=</span> <span class="st">"pink"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">win</span><span class="op">$</span><span class="va">window</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span>, col <span class="op">=</span> <span class="st">"blue"</span>, add <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
