@@ -1,5 +1,5 @@
 ---
-title: "Running a simulation based on SRT data"
+title: "Running a simulation based on SRT data in a single-region"
 output: 
   html_document:
     number_sections: true
@@ -12,7 +12,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-This tutorial will run a simulation with `sCCIgen` without the interactive interface based on SRT data. 
+This tutorial will run a simulation with `sCCIgen` without the interactive interface based on a SRT data in a single-region. 
 
 # Load R package 
 
@@ -27,11 +27,23 @@ Download sample data from https://github.com/songxiaoyu/sCCIgen_data/tree/main/i
 ```{r, eval=FALSE}
 load("SeqFishPlusCortex_2025_expr.Rdata")
 load("SeqFishPlusCortex_2025_spatial.Rdata")
-anno <- colnames(expr)
 
 dim(expr)
-expr[1:3, 1:3]
+# [1] 2500  511
 dim(spatial)
+# [1] 511   3
+expr[1:3, 1:3]
+#       ExcitatoryNeuron ExcitatoryNeuron ExcitatoryNeuron
+# Aatf                 0                0                0
+# Abat                 1                0                0
+# Abhd2                2                2                0
+spatial[1:3,]
+#               anno X_final  Y_final
+# 1 ExcitatoryNeuron 1632.02 -1305.70
+# 2 ExcitatoryNeuron 1589.47  -669.51
+# 3 ExcitatoryNeuron 1539.89 -1185.90
+anno <- colnames(expr)
+
 ```
 
 # Analysis of the existing data to provide insights into the parameters of the simulation
@@ -40,11 +52,11 @@ Users can split the `sCCIgen` simulation into (1) <u> model fitting </u> and (2)
 
 It is especially helpful if the number of genes and/or cells are very large and users want to run simulation for more than once.  By splitting the simulation into these two steps, users can estimate model parameters only once and save the results for multiple use. 
 
-## Task 1: Estimate model parameters from the snRNAseq for simulation
+## Task 1: Estimate model parameters from the SRT data for simulation
 
-This is part is to fit the expression data. When sim_method=="copula", it will fit both the gene marginal distribution and gene-gene correlation. When sim_method=="ind", it will only fit the gene marginal distribution. 
+This is part is to fit the expression data. When sim_method="copula", it will fit both the gene marginal distribution and gene-gene correlation. When sim_method="ind", it will only fit the gene marginal distribution. 
 
-Note: If the number of genes or cells are large, model fitting may take some time. It is suggested to select a reasonable sample size (e.g. <10000 per cell type) before the model fitting, as more cells may not be needed improve the estimation. Similarly, if some genes are extremely zero-inflated, narrowing the simulation to reasonbly variable genes is an option. 
+Note: If the number of genes or cells are large, model fitting may take some time. It is suggested to select a reasonable sample size (e.g. <1500 cells per cell type) before the model fitting, as more cells may not be needed improve the estimation. The user interface automatically uses a maximum of 2500 cells per cell type in model fitting. In the meantime, if some genes are extremely zero-inflated, narrowing the simulation to reasonably variable genes is an option. 
 
 ```{r, eval=FALSE}
 # model fitting w/o gene-gene correlation (fast but less accurate estimation)
@@ -70,6 +82,8 @@ saveRDS(ModelEst, file = "SeqFishPlusCortex_fit_w_cor.RDS")
 ```{r, eval=FALSE}
 library(Giotto)
 # Preprocess data with Giotto pipeline
+## Three types of networks are built in to determine cell neighborhood: Delaunay, kNN, and distance-based. Here we use distance-based network as an example. 
+
 db <- preprocessGiotto(expr_data = expr, 
                        spatial_data = spatial, 
                        run_hvg = TRUE,
@@ -109,7 +123,7 @@ ExprExprTable(gobject = db,
 
 # Create a parameter file
 
-Users need to create a parameter file. The sample parameter file for snRNAseq based simulation is [here](https://github.com/songxiaoyu/sCCIgen_data/tree/main/sample_parameter_file/SRT) for downloading and filling in to perform simulations. 
+Users need to create a parameter file. The sample parameter file for SRT based simulation is [here](https://github.com/songxiaoyu/sCCIgen_data/tree/main/sample_parameter_file) for downloading and filling in to perform simulations. 
  
 
 # Perform the entire simulation and save the results. 
@@ -118,24 +132,16 @@ Assuming you already have a parameter file, you can run the entire simulation us
 ```{r, eval=FALSE}
 
 # Simulate default data - using existing cells but simulate expression with ground truth
-input <- "SeqFishPlus_default.tsv"
-
+input <- "SeqFishPlus_default_param.yml"
+model_param_path="SeqFishPlusCortex_fit_wo_cor.RDS"
 ParaSimulation(input = input, ModelFitFile = model_param_path)
 
-# Simulate new cells and genes where genes have region specific expressions
-input <- "SeqFishPlus_RegionDiffGenes.tsv"
 
-ParaSimulation(input = input, ModelFitFile = model_param_path)
 
-# Simulate new cells and genes where expression of genes are associated with distances to other cells.
-input <- "SeqFishPlus_ICGs.tsv"
+# Simulate new cells of the same number (n=511) and expression of genes with gene-gene correlation expression, including three types of estimated CCIs.
+input <- "SeqFishPlus_n511_cor_CCIs_param.yml"
+ParaSimulation(input = input)
 
-ParaSimulation(input = input, ModelFitFile = model_param_path)
-
-# Simulate new cells and genes where expression of genes are associated with distances to other cells.
-input <- "SeqFishPlus_LR.tsv"
-
-ParaSimulation(input = input, ModelFitFile = model_param_path)
 ```
 
 

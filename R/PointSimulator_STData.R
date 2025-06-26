@@ -131,25 +131,30 @@ cell.loc.1region.model.fc=function(n,
   sim_ppp <- list()
   for (ct in 1:ncol(cell.num)) {
 
-   p=spatstat.geom::as.ppp(PointLoc[which(PointAnno==cell.type[ct]),], W=cell_win)
-   # if too many cells
-   n1=cell.num[ct]
-   if (p$n>5000) {
-     idx=rbinom(p$n, 1, prob=5000/p$n)
-     p=subset(p, idx==1)
-   }
+    n1=cell.num[ct]
 
-   fit=spatstat.model::ppm(p, ~polynom(x,y,3),spatstat.model::Poisson())
+      p=spatstat.geom::as.ppp(PointLoc[which(PointAnno==cell.type[ct]),], W=cell_win)
+      # if too many cells
 
+      if (p$n>5000) {
+        idx=rbinom(p$n, 1, prob=5000/p$n)
+        p=subset(p, idx==1)
+      }
 
-   nsim=ceiling(n.inflation$n.vec.raw[ct]/p$n)
+      if(n1>10) {
+        fit=spatstat.model::ppm(p, ~polynom(x,y,3),spatstat.model::Poisson())
+      } else {
+        fit=spatstat.model::ppm(p, ~polynom(x,y,2),spatstat.model::Poisson())}
 
-   if (nsim>1) {
-     b=spatstat.geom::superimpose(spatstat.random::rmh(model=fit, nsim=nsim))
-   } else{b=spatstat.random::rmh(model=fit, nsim=nsim)}
+      nsim=ceiling(n.inflation$n.vec.raw[ct]/p$n)
 
-   spatstat.geom::marks(b)=cell.type[ct]
-   sim_ppp[[ct]] <- b
+      if (nsim>1) {
+        b=spatstat.geom::superimpose(spatstat.random::rmh(model=fit, nsim=nsim))
+      } else{b=spatstat.random::rmh(model=fit, nsim=nsim)}
+
+      spatstat.geom::marks(b)=cell.type[ct]
+      sim_ppp[[ct]] <- b
+
   }
   merged_ppp <- do.call(spatstat.geom::superimpose, sim_ppp)
   merged_ppp$marks=as.factor(merged_ppp$marks)
@@ -185,6 +190,8 @@ cell.loc.1region.model.fc=function(n,
 #' @param PointRegion The spatial regions of input cells.
 #' @param window_method Method for estimating window of cells.
 #' @param seed Random seed.
+#' @param same.dis.cutoff Cutoff value for regarding two cells are in the same location (default = 0).
+#' @param even.distribution.coef A parameter to avoid cells gathering from each other.
 #' @import spatstat
 #' @export
 cell.loc.model.fc=function(n,
@@ -193,7 +200,10 @@ cell.loc.model.fc=function(n,
                            PointRegion,
                            window_method,
                            seed=NULL,
-                           cell.inh.attr.input1=NULL) {
+                           cell.inh.attr.input1=NULL,
+                           same.dis.cutoff=0.01,
+                           even.distribution.coef=0
+                           ) {
   Rcat=unique(PointRegion)
   bb=vector("list", length(Rcat))
   names(bb)=Rcat
@@ -209,7 +219,9 @@ cell.loc.model.fc=function(n,
                               PointAnno=PointAnno[idx],
                              window_method=window_method,
                              seed=seed,
-                             cell.inh.attr.input1=cell.inh.attr.input1)
+                             cell.inh.attr.input1=cell.inh.attr.input1,
+                             same.dis.cutoff=same.dis.cutoff,
+                             even.distribution.coef=even.distribution.coef)
   }
 
   return(bb)

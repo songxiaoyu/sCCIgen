@@ -135,7 +135,7 @@ Use_scDesign2=function(ppp.obj,
   Genes=rownames(expr)
 
 
-  if (identical(region_specific_model, "TRUE")==F) { # not region specific
+  if (region_specific_model==F || is.null(region_specific_model)) { # not region specific
 
     if (R==1) {
 
@@ -158,10 +158,7 @@ Use_scDesign2=function(ppp.obj,
                                 sim_method = sim_method)
           }
         } # end else of R==1
-    } # end not region specific
-
-  #  region specific model
-  if (identical(region_specific_model, "TRUE")) { #  region specific
+    } else { #  region specific
 
     Runiq=unique(region)
 
@@ -368,14 +365,19 @@ Add.Distance.Asso.Pattern = function(ppp.obj,
                                   interacting.cell.type.pair=c(perturbed.cell.type,
                                                                adjacent.cell.type),
                                   int.dist.threshold=int.dist.threshold)
-      N_b=sum(N0[1:i])
-      N_a=sum(N0[1:(i+1)])
-      idx=seq(N_b+1, N_a)
-      idx1=nbr.idx[,1][which(nbr.idx[,1] %in% idx)]-N_b
-      temp= beta +  beta.matrix[[i]][GeneID, idx1, drop = FALSE]
-      colnames(temp)=idx1
-      temp2=sapply(1:nrow(temp), function(f) tapply(temp[f,], idx1, sum))
-      beta.matrix[[i]][GeneID, as.numeric(rownames(temp2))] =t(temp2)
+      if (nrow(nbr.idx)!=0 ) {
+        N_b=sum(N0[1:i])
+        N_a=sum(N0[1:(i+1)])
+        idx=seq(N_b+1, N_a)
+        idx1=nbr.idx[,1][which(nbr.idx[,1] %in% idx)]-N_b
+        temp= beta +  beta.matrix[[i]][GeneID, idx1, drop = FALSE]
+        colnames(temp)=idx1
+        temp2=sapply(1:nrow(temp), function(f) tapply(temp[f,], idx1, sum))
+        if( length(temp2)>1) {
+          beta.matrix[[i]][GeneID, as.numeric(rownames(temp2))] =t(temp2)
+        } else { beta.matrix[[i]][GeneID, as.numeric(names(temp2))] =t(temp2)}
+      }
+
     }
   } else {  # add interaction in one region
     idx_r=which(names(sim.count)==r)
@@ -383,14 +385,18 @@ Add.Distance.Asso.Pattern = function(ppp.obj,
                                 interacting.cell.type.pair=c(perturbed.cell.type,
                                                              adjacent.cell.type),
                                 int.dist.threshold=int.dist.threshold)
-    idx1=nbr.idx[,1]
+    if (nrow(nbr.idx)!=0 ) {
+      idx1=nbr.idx[,1]
 
-    temp= beta +  beta.matrix[[idx_r]][GeneID,idx1, drop = FALSE]
-    colnames(temp)=idx1
-    temp2=sapply(1:nrow(temp), function(f) tapply(temp[f,], idx1, sum)) # sum signals from all neigbhors
-    beta.matrix[[idx_r]][GeneID,as.numeric(rownames(temp2))] = t(temp2)
+      temp= beta +  beta.matrix[[idx_r]][GeneID,idx1, drop = FALSE]
+      colnames(temp)=idx1
+      temp2=sapply(1:nrow(temp), function(f) tapply(temp[f,], idx1, sum)) # sum signals from all neigbhors
+      if( length(temp2)>1) {
+        beta.matrix[idx_r][GeneID, as.numeric(rownames(temp2))] =t(temp2)
+      } else {      beta.matrix[[idx_r]][GeneID, as.numeric(names(temp2))] =t(temp2)}
 
-  }
+    }
+    }
 
   SignalSummary=data.frame(Type="DistanceAssoGenes",
                            Region=r,

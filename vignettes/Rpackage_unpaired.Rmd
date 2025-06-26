@@ -27,29 +27,38 @@ Download sample data from https://github.com/songxiaoyu/sCCIgen_data/tree/main/i
 
 ```{r, eval=FALSE}
 # This is a subset of MERFISH OV cancer dataset with 1000 cells' expression and 500 cells spatial map.
-load("Github/sCCIgen_data/input_data/MERFISH_OV_2025_unpaired_expr.Rdata")
-load("Github/sCCIgen_data/input_data/MERFISH_OV_2025_unpaired_spatial.Rdata")
+load("MERFISH_OV_2025_expr.Rdata")
+load("MERFISH_OV_2025_spatial.Rdata")
 anno <- colnames(expr)
 
 dim(expr)
-expr[1:3, 1:3]
+# [1]    550 248065
 dim(spatial)
-# Note: Number of cells in expression data and spatial data are not the same, 
-# as they are used to mimic data from different experiments.
+# [1] 209173      3
+
+expr[1:3, 1:3]
+#        Others Others Others
+# PDK4        0      0      0
+# CCL26       0      0      0
+# CX3CL1      0      0      0
+spatial[1:3, ]
+#   Labels center_x  center_y
+# 1 Others 9483.241 -48.53505
+# 2  Tumor 9489.692 -42.11135
+# 3  Tumor 9497.020 -37.24292
+
+# Note: Number of cells in expression data and spatial data are not the same, as they are used to mimic unpaired data from different experiments.
 ```
 
 # Analysis of the existing data to provide insights into the parameters of the simulation
 
 
-This is part is to fit the expression data. When sim_method=="copula", it will fit both the gene marginal distribution and gene-gene correlation. When sim_method=="ind", it will only fit the gene marginal distribution. 
+This is part is to fit the expression data. When sim_method="copula", it will fit both the gene marginal distribution and gene-gene correlation. When sim_method="ind", it will only fit the gene marginal distribution. 
 
-Note: If the number of genes or cells are large, model fitting may take some time. It is suggested to select a reasonable sample size (e.g. <10000 per cell type) before the model fitting, as more cells may not be needed improve the estimation. Similarly, if some genes are extremely zero-inflated, narrowing the simulation to reasonbly variable genes is an option. 
+Note: If the number of genes or cells are large, model fitting may take some time. It is suggested to select a reasonable sample size (e.g. <2500 per cell type) before the model fitting, as more cells may not be needed improve the estimation. Similarly, if some genes are extremely zero-inflated, narrowing the simulation to reasonably variable genes is an option. 
 
-## Task 1: Estimate model parameters from the snRNAseq for simulation
+## Task 1: Estimate model parameters from the unpaired data for simulation
 
-This is part is to fit the expression data. When sim_method=="copula", it will fit both the gene marignal distribution and gene-gene correlation. When sim_method=="ind", it will only fit the gene marginal distribution. 
-
-Note: If the number of genes or cells are large, model fitting may take some time. It is suggested to select a reasonably large sample size per cell type before the model fitting. 
 
 ```{r, eval=FALSE}
 # model fitting
@@ -63,16 +72,16 @@ saveRDS(ModelEst, file = "Unpaired_fit_wo_cor.RDS")
 
 # Create a parameter file
 
-Users need to create a parameter file. The sample parameter file for snRNAseq based simulation is [here](https://github.com/songxiaoyu/sCCIgen_data/tree/main/sample_parameter_file/Unpaired) for downloading and filling in to perform simulations. 
+Users need to create a parameter file. The sample parameter file for snRNAseq based simulation is [here](https://github.com/songxiaoyu/sCCIgen_data/tree/main/sample_parameter_file) for downloading and filling in to perform simulations. 
  
 # Perform the entire simulation and save the results
 Assuming you already have a parameter file, you can run the entire simulation using codes like this:
 
 ```{r, eval=FALSE}
+# Simulate default data - using existing cells but simulate expression with ground truth
+input <- "MERFISH_unpaired_default_param.yml"
 model_param_path <- "Unpaired_fit_wo_cor.RDS"
 
-# Simulate default data - using existing cells but simulate expression with ground truth
-input <- "MERFISH_default.tsv"
 
 ParaSimulation(input = input, ModelFitFile = model_param_path)
 ```

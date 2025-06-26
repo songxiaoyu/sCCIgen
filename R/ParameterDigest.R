@@ -97,7 +97,7 @@ SpatialLoad=function(para){
 #' @param seed_list Seeds for all simulated data
 #' @import parallel foreach doParallel
 #' @export
-ParaCellsNoST=function(para, annoseed_list){
+ParaCellsNoST=function(para, seed_list){
 
   # determine cell type proportion in each region
 
@@ -178,7 +178,9 @@ ParaCellsST=function(para, spatial, seed_list) {
                                     PointRegion=R,
                                     window_method=window_method,
                                     seed=seed_list[[i]],
-                      cell.inh.attr.input1=cell.inh.attr.input1)
+                      cell.inh.attr.input1=cell.inh.attr.input1,
+                      same.dis.cutoff=cell_overlap_cutoff,
+                      even.distribution.coef=cell_even_distribution)
   }
   return(cell_loc)
 }
@@ -223,11 +225,11 @@ ParaPattern=function(para, sim_count, cell_loc_list_i,
     if (tt1==0) {break}
     r_raw =para[[paste0("spatial_int_dist_", tt1, "_region")]]
     r <- if (is.null(r_raw) ) "NULL" else as.character(r_raw)
-    CellType=e=para[[paste0("spatial_pattern_",tt1, "_cell_type")]]
+    CellType=para[[paste0("spatial_pattern_",tt1, "_cell_type")]]
     GeneID=para[[paste0("spatial_pattern_",   tt1, "_gene_id")]]
     PropOfGenes=para[[paste0("spatial_pattern_",  tt1, "_gene_prop")]]
     delta.mean=para[[paste0("spatial_pattern_",  tt1, "_mean")]]
-    delta.sd=epara[[paste0("spatial_pattern_",tt1, "_sd")]]
+    delta.sd=para[[paste0("spatial_pattern_",tt1, "_sd")]]
     beta.all[[tt1]]=Add.Spatial.Expr.Pattern(sim.count = sim_count,
                                              r=r,
                                              CellType=CellType,

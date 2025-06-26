@@ -18,14 +18,19 @@ data, while comprehensively models various cell-cell interaction
 features, including cell colocalization, spatial dependence among gene
 expressions, and gene-gene interactions between nearby cells.
 
-## 2. Installation
+## 2. Reference
 
-``` r
-install.packages("devtools")
-devtools::install_github("songxiaoyu/sCCIgen")
-```
+- [Song, X., et al. sCCIgen: A high-fidelity spatially resolved
+  transcriptomics data simulator for cell-cell interaction studies.
+  bioRxiv
+  (2025)](https://www.biorxiv.org/content/10.1101/2025.01.07.631830v1)
 
-## 3. Simulation options
+## 3. Software Instruction
+
+The installation instruction, documentation, tutorials, and examples are
+accessible at <https://songxiaoyu.github.io/sCCIgen/>.
+
+## 4. Brief overview of simulation options
 
 Users have two options to perform SRT simulations using `sCCIgen`.
 Depending on preference, Users can choose to use:
@@ -55,10 +60,3 @@ Depending on preference, Users can choose to use:
   - [Tutorials for using the R package to simulate SRT based on
     single-cell expression and unpaired spatial
     data.](https://songxiaoyu.github.io/sCCIgen/articles/Rpackage_unpaired.html)
-
-## References
-
-- [Song, X., et al. sCCIgen: A high-fidelity spatially resolved
-  transcriptomics data simulator for cell-cell interaction studies.
-  bioRxiv
-  (2025)](https://www.biorxiv.org/content/10.1101/2025.01.07.631830v1)

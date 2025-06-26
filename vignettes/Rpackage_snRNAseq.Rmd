@@ -26,11 +26,17 @@ library(sCCIgen)
 Download sample data from https://github.com/songxiaoyu/sCCIgen_data/tree/main/input_data
 
 ```{r, eval=FALSE}
-load("Github/sCCIgen_data/input_data/snRNAseq_breast_2025_expr.Rdata")
-anno <- colnames(expr)
+load("snRNAseq_breast_2025_expr.Rdata")
 
 dim(expr)
+#[1] 4751 5990
 expr[1:3, 1:3]
+#        Epithelial Adipocyte Adipocyte
+# NOC2L           0         0         0
+# KLHL17          1         0         0
+# ISG15           0         0         0
+anno <- colnames(expr)
+
 ```
 
 # Analysis of the existing data to provide insights into the parameters of the simulation
@@ -41,9 +47,9 @@ It is especially helpful if the number of genes and/or cells are very large and 
 
 ## Task 1: Estimate model parameters from the snRNAseq for simulation
 
-This is part is to fit the expression data. When sim_method=="copula", it will fit both the gene marginal distribution and gene-gene correlation. When sim_method=="ind", it will only fit the gene marginal distribution. 
+This is part is to fit the expression data. When sim_method="copula", it will fit both the gene marginal distribution and gene-gene correlation. When sim_method="ind", it will only fit the gene marginal distribution. 
 
-Note: If the number of genes or cells are large, model fitting may take some time. It is suggested to select a reasonable sample size (e.g. <10000 per cell type) before the model fitting, as more cells may not be needed improve the estimation. Similarly, if some genes are extremely zero-inflated, narrowing the simulation to reasonably variable genes is an option. 
+Note: If the number of genes or cells are large, model fitting may take some time. It is suggested to select a reasonable sample size (e.g. <2500 per cell type) before the model fitting, as more cells may not be needed improve the estimation. Similarly, if some genes are extremely zero-inflated, narrowing the simulation to reasonably variable genes is an option. 
 
 
 ```{r, eval=FALSE}
@@ -62,30 +68,29 @@ Note: When snRNAseq is used as the only input dataset, users cannot estimate the
 
 # Create a parameter file
 
-Users need to create a parameter file. The sample parameter file for snRNAseq based simulation is [here](https://github.com/songxiaoyu/sCCIgen_data/tree/main/sample_parameter_file/snRNAseq) for downloading and filling in to perform simulations. 
+Users need to create a parameter file. The sample parameter file for snRNAseq based simulation is [here](https://github.com/songxiaoyu/sCCIgen_data/tree/main/sample_parameter_file) for downloading and filling in to perform simulations. 
 
 
 # Run simulation
 
 ```{r, eval=FALSE}
 # load parameter file
-input <- "scRNAseq_default.tsv"
+input <- "snRNAseq_default_param.yml"
 
-# The default parameter file does not provide estimated model parameters.
-# Run simulation, with model parameters added in with ModelFitFile.
-model_param_path <- "snRNAseq_breast_2025_fit_w_cor.RDS"
+# The default parameter file does not provide estimated model parameters. One can run below for simulation
+ParaSimulation(input = input)
 
+# Alternatively, one can run simulation, with model parameters added in with ModelFitFile (optional for speed).
+model_param_path <- "snRNAseq_breast_2025_fit_wo_cor.RDS"
 ParaSimulation(input = input, ModelFitFile = model_param_path)
 
-# Run simulation including the estimation of the model parameters.
-ParaSimulation(input = input)
 ```
 
 # Run nested functions to obtain simulation byproducts
 
 ## Task 1: Plot the spatial regions simulated by sCCIgen
 
-If users are interested to obtain the simulated regions, a nested function RandomRegionWindow can be used as folllows:
+If users are interested to obtain the simulated regions, a nested function `RandomRegionWindow` can be used as follows:
 
 ```{r, eval=FALSE}
 # The parameter file specifies that nRegion=2 and seed=1234

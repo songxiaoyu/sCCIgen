@@ -11,7 +11,9 @@ cell.loc.model.fc(
   PointRegion,
   window_method,
   seed = NULL,
-  cell.inh.attr.input1 = NULL
+  cell.inh.attr.input1 = NULL,
+  same.dis.cutoff = 0.01,
+  even.distribution.coef = 0
 )
 }
 \arguments{
@@ -26,6 +28,10 @@ cell.loc.model.fc(
 \item{window_method}{Method for estimating window of cells.}
 
 \item{seed}{Random seed.}
+
+\item{same.dis.cutoff}{Cutoff value for regarding two cells are in the same location (default = 0).}
+
+\item{even.distribution.coef}{A parameter to avoid cells gathering from each other.}
 }
 \description{
 Generate cell location data by modeling the spatial information of existing data.

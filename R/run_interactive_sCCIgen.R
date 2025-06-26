@@ -1408,6 +1408,7 @@ run_interactive_sCCIgen <- function() {
 
     cell_overlap_cutoff <- shiny::reactiveVal()
 
+    cell_even_distribution <- shiny::reactiveVal() #XS
 
     shiny::observeEvent(simulate_spatial_data(), {
 
@@ -1437,9 +1438,23 @@ run_interactive_sCCIgen <- function() {
           cell_overlap_cutoff(input$overlapcutoff)
         })
 
+        output$ask_even_distribution <- shiny::renderUI({ #XS
+          shiny::sliderInput(inputId = "evendistribution",
+                             label = "Adjusts cells to be evenly distributed on a slide. 0 = uneven distribution, 1 = even distribution.",
+                             min = 0,
+                             max = 1,
+                             value = 0,
+                             width = "100%")
+        })
+
+        shiny::observeEvent(input$evendistribution, { #XS
+          cell_even_distribution(input$evendistribution)
+        })
+
       } else {
         output$ask_numbercells <- NULL
         output$ask_overlapcutoff <- NULL
+        output$ask_even_distribution <-NULL #XS
       }
 
     })
@@ -2173,9 +2188,11 @@ run_interactive_sCCIgen <- function() {
 
         if(simulate_spatial_data() == TRUE) {
           df = data.frame(parameters = c("num_simulated_cells",
-                                         "cell_overlap_cutoff"),
+                                         "cell_overlap_cutoff",
+                                         "cell_even_distribution"),#XS
                           value = c(num_simulated_cells(),
-                                    cell_overlap_cutoff()
+                                    cell_overlap_cutoff(),
+                                    cell_even_distribution() #XS
                           )
           )
 
@@ -2208,8 +2225,8 @@ run_interactive_sCCIgen <- function() {
 
           param_df = rbind(param_df, cell_type_proportions())
 
-          param_df = rbind(param_df,c("cell_even_distribution",
-                                      cell_even_distribution() ))
+          #param_df = rbind(param_df,c("cell_even_distribution", #XS
+          #                            cell_even_distribution() ))
         }
 
         # simulation parameters for expression profiles
