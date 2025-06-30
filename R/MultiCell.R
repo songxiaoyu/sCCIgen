@@ -22,20 +22,17 @@ multicell=function(expr, spatial, NoSpot=500, cl=1) {
   r <- raster::raster(ncols=m, nrows=m,xmn=xrange[1],
                       xmx=xrange[2], ymn=yrange[1], ymx=yrange[2])
   spot.idx=raster::cellFromXY(r, cbind(cell_loc[,1], cell_loc[,2]))
-  # deal with spots with no cell
 
+  # Spot expression
   if (cl==1) {
     expr2=matrix(0, ncol=mm, nrow=nrow(expr))
     for (i in 1: mm) {
-      expr2[,i]=apply(expr, 1, function(f)
-        sum(as.numeric(f)[spot.idx==i], na.rm=T))
+      expr2[,i]=apply(expr, 1, function(f) sum(as.numeric(f)[spot.idx==i], na.rm=T))
     }
   } else {
-
     expr2=foreach (i = 1: mm, .combine="cbind") %dopar% {
       apply(expr, 1, function(f) sum(as.numeric(f)[spot.idx==i], na.rm=T))
     }
-
   }
 
 
@@ -74,7 +71,7 @@ multicell=function(expr, spatial, NoSpot=500, cl=1) {
   # Spot's Cell Type Count
   if (is.null(spatial$annotation)==F) {
 
-    dat=data.frame(spot.idx, spatial) [1:100,] %>%
+    dat=data.frame(spot.idx, spatial) %>%
       group_by(spot.idx, annotation) %>%
       mutate(count=1) %>%
       summarise(abundance = sum(count)) %>%

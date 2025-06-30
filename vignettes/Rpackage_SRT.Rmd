@@ -88,7 +88,7 @@ db <- preprocessGiotto(expr_data = expr,
                        spatial_data = spatial, 
                        run_hvg = TRUE,
                        run_Dist_network = TRUE,
-                       dis.cut=150)
+                       dis.cut=200)
 db
 # Estimate cell-cell attraction and inhibition patterns, and save in pre-defined folder
 cellProximityTable(gobject = db, 
@@ -96,7 +96,7 @@ cellProximityTable(gobject = db,
                    p_adj = 0.05,
                    spatial_network_name = "distance_based_network",
                    save.unfiltered=TRUE,
-                   output_file = "est_CCI_dist_dist.csv",
+                   output_file = "est_CCI_dist_dist_disNet.csv",
                    seed=123)
 
 # Estimate gene expressions of cells impacted by their neighbors, and save in pre-defined folder
@@ -106,7 +106,7 @@ ExprDistanceTable(gobject = db,
                   spatial_network_name = "distance_based_network",
                   abs_log2fc_ICG = 0.3, 
                   p_adj = 0.05,
-                  output_file = "est_CCI_dist_expr.csv",
+                  output_file = "est_CCI_dist_expr_disNet.csv",
                   seed=123)
 
 # Estimate gene expressions of cells impacted by gene expressions of neighboring cells, narrow to
@@ -116,8 +116,9 @@ ExprExprTable(gobject = db,
               region_specific = FALSE, 
               spatial_network_name = "distance_based_network",
               p_adj = 0.05, 
-              abs_log2fc_LR = 0.2,
-              output_file = "est_CCI_expr_expr.csv",
+              abs_log2fc_LR = 0,
+              direction="both",
+              output_file = "est_CCI_expr_expr_disNet.csv",
               seed=123)
 ```
 

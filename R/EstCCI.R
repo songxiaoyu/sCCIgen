@@ -262,13 +262,17 @@ ExprDistanceTable_1region = function (gobject, r, cell_meta, abs_log2fc_ICG=0.25
 #' "Delaunay_network", "distance_based_network", "knn_network".
 #' @param output_file Provide a path and file name to save the CCI results for use in sCCIgen.
 #' @param abs_log2fc_LR Effect size threshold for saving.
+#' @param direction Keep positive, negative, or both associations.
 #' @param p_adj Adjusted p-value threshold (Default = 0.05) for saving.
 #' @param seed Seed.
 #' @export
 
-ExprExprTable = function(gobject, database=c("mouse", "human", "external"), external_database_path=NULL,
-                         region_specific=F, spatial_network_name,
+ExprExprTable = function(gobject,
+                         database=c("mouse", "human", "external"), external_database_path=NULL,
+                         region_specific=F,
+                         spatial_network_name,
                          p_adj=0.05, abs_log2fc_LR=0.25,
+                         direction=c("both", "positive", "negative"),
                          output_file=file.path(getwd(), "est_CCI_expr_expr.csv"), seed=NULL) {
   set.seed(seed)
   future::plan(future::multisession)
@@ -312,10 +316,18 @@ ExprExprTable = function(gobject, database=c("mouse", "human", "external"), exte
         res=rbind(res, res1)
       }
     }
+
     if (region_specific==F) {
       res=ExprExprTable_1region(gobject=gobject, r="NULL", cell_meta=cell_meta, select_ligands=select_ligands,
                                 select_receptors=select_receptors, spatial_network_name=spatial_network_name,
                           abs_log2fc_LR=abs_log2fc_LR, p_adj = p_adj)
+    }
+
+    if (direction=="positive") {
+      res=res[which(res$df_merged.log2fc>=0),]
+    }
+    if (direction=="negative") {
+      res=res[which(res$df_merged.log2fc<=0),]
     }
     # save results in the  format that can be directly used in sCCIgen
     readr::write_csv(res, file=output_file, col_names = F)

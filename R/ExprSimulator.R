@@ -472,7 +472,8 @@ Add.Expr.Asso.Pattern = function(ppp.obj, sim.count, r,
     GenePairIDMatrix=matrix(sample(GeneAll, 2*round(PropOfGenes * G)),ncol=2)
     }
   # effect size
-  beta=stats::rnorm(nrow(GenePairIDMatrix), delta.mean, delta.sd)
+  beta0=stats::rnorm(nrow(GenePairIDMatrix), delta.mean, delta.sd)
+  beta=ifelse(Bidirectional==T, sign(beta0)*sqrt(abs(beta0)), beta0)
 
   if (r == "NULL") { # add interaction to all regions
     # spatial info
@@ -489,7 +490,7 @@ Add.Expr.Asso.Pattern = function(ppp.obj, sim.count, r,
 
     beta.matrix.combined[GenePairIDMatrix[,1], nbr.idx[,1]]=
       beta.matrix.combined[GenePairIDMatrix[,1], nbr.idx[,1]]+
-      beta*(log(count2+1)+1)
+      beta*log2(count2+1)
 
     SignalSummary=data.frame(Type="ExprAssoGenes", Region=r, CellType=perturbed.cell.type,
                              GeneID=GenePairIDMatrix[,1], AdjCellType=adjacent.cell.type,
@@ -500,7 +501,7 @@ Add.Expr.Asso.Pattern = function(ppp.obj, sim.count, r,
 
       beta.matrix.combined[GenePairIDMatrix[,2], nbr.idx[,2]]=
         beta.matrix.combined[GenePairIDMatrix[,2], nbr.idx[,2]]+
-        beta*(log(count2+1)+1)
+        beta*log2(count2+1)
 
       SignalSummary=rbind(SignalSummary,
                           data.frame(Type="ExprAssoGenes", Region=r, CellType=adjacent.cell.type ,
@@ -527,7 +528,7 @@ Add.Expr.Asso.Pattern = function(ppp.obj, sim.count, r,
     idx2=nbr.idx[,2]
     # 1 --> 2
     count2=sim.count[[idx_r]][GenePairIDMatrix[,2], idx2]
-    temp=beta.matrix[[idx_r]][GenePairIDMatrix[,1], idx1]+beta*(1+log(count2+1))
+    temp=beta.matrix[[idx_r]][GenePairIDMatrix[,1], idx1]+beta*log2(count2+1)
     colnames(temp)=idx1
     temp2=sapply(1:nrow(temp), function(f) tapply(temp[f,], idx1, sum))
     beta.matrix[[idx_r]][GeneID, as.numeric(rownames(temp2))] =t(temp2)
@@ -540,7 +541,7 @@ Add.Expr.Asso.Pattern = function(ppp.obj, sim.count, r,
     # 2 --> 1
     if (Bidirectional==T) {
       count1=sim.count[[idx_r]][GenePairIDMatrix[,1], idx1]
-      temp=beta.matrix[[idx_r]][GenePairIDMatrix[,1], idx2]+beta*log(count1+1)
+      temp=beta.matrix[[idx_r]][GenePairIDMatrix[,1], idx2]+beta*log2(count1+1)
       colnames(temp)=idx2
       temp2=sapply(1:nrow(temp), function(f) tapply(temp[f,], idx2, sum))
       beta.matrix[[idx_r]][GeneID, as.numeric(rownames(temp2))] =t(temp2)
@@ -575,14 +576,15 @@ Pattern.adj.1region= function(sim.count1, combined.beta.matrix,
                     integer=T) {
   # w vs w/o combined.beta.matrix
   if (is.null(combined.beta.matrix)) {sim.count1.update=sim.count1} else{
-    sim.count1.update= exp(log(sim.count1+1) +combined.beta.matrix)-1
+    sim.count1.update= 2^(log2(sim.count1+1) +combined.beta.matrix)-1
   }
   # negative
   sim.count1.update[sim.count1.update<0]=0
   # bond extreme values
   if (bond.extreme==T) {
-
-    cut=quantile(sim.count1.update, probs=0.975, na.rm=T)*5
+    m1=max(sim.count1)
+    m2=quantile(sim.count1.update, probs=0.975, na.rm=T)*5
+    cut=max(m1,m2)
     sim.count1.update[which(sim.count1.update>cut)]=cut
 
     ten_pct=apply(sim.count1.update, 2, mean, na.rm=T)*100

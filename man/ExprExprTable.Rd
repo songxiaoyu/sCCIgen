@@ -12,6 +12,7 @@ ExprExprTable(
   spatial_network_name,
   p_adj = 0.05,
   abs_log2fc_LR = 0.25,
+  direction = c("both", "positive", "negative"),
   output_file = file.path(getwd(), "est_CCI_expr_expr.csv"),
   seed = NULL
 )
@@ -33,6 +34,8 @@ If "external" is used, users also need to provide value for \code{external_datab
 \item{p_adj}{Adjusted p-value threshold (Default = 0.05) for saving.}
 
 \item{abs_log2fc_LR}{Effect size threshold for saving.}
+
+\item{direction}{Keep positive, negative, or both associations.}
 
 \item{output_file}{Provide a path and file name to save the CCI results for use in sCCIgen.}
 

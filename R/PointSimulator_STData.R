@@ -121,7 +121,7 @@ cell.loc.1region.model.fc=function(n,
   cell.prop=cell.num/length(PointAnno)
 
 
-  # inflate cell number to accomendate CCI in cell attraction and inhibition
+  # inflate cell number to accommodate CCI in cell attraction and inhibition
   n.inflation=get.n.vec.raw(n=n,
                             cell.prop=cell.prop,
                             cell.inh.attr.input=cell.inh.attr.input1,
@@ -141,16 +141,18 @@ cell.loc.1region.model.fc=function(n,
         p=subset(p, idx==1)
       }
 
-      if(n1>10) {
+      if(n1>20) {
         fit=spatstat.model::ppm(p, ~polynom(x,y,3),spatstat.model::Poisson())
       } else {
         fit=spatstat.model::ppm(p, ~polynom(x,y,2),spatstat.model::Poisson())}
 
-      nsim=ceiling(n.inflation$n.vec.raw[ct]/p$n)
-
-      if (nsim>1) {
-        b=spatstat.geom::superimpose(spatstat.random::rmh(model=fit, nsim=nsim))
-      } else{b=spatstat.random::rmh(model=fit, nsim=nsim)}
+      b <- spatstat.random::rmh(
+        model = fit,
+        start = list(n.start = n.inflation$n.vec.raw[ct]),
+        control = list(p = 1, nrep = 1e5),
+        nsim = 1,
+        condition = "n"
+      )
 
       spatstat.geom::marks(b)=cell.type[ct]
       sim_ppp[[ct]] <- b
@@ -160,15 +162,14 @@ cell.loc.1region.model.fc=function(n,
   merged_ppp$marks=as.factor(merged_ppp$marks)
 
   # get rid of cells on the same location
-  if(merged_ppp$n-n>10) {
-    dis=spatstat.geom::pairdist(merged_ppp)
-    dis[lower.tri(dis, diag=T)]=NA
-    ratio= sqrt(spatstat.geom::area.owin(cell_win)/sum(n))
-    dis2=dis< same.dis.cutoff* ratio
-    same.loc.idx=which(dis2 == T, arr.ind = TRUE)
-    merged_ppp=merged_ppp[setdiff(1:merged_ppp$n, same.loc.idx[,1]), ]
 
-  }
+  dis=spatstat.geom::pairdist(merged_ppp)
+  dis[lower.tri(dis, diag=T)]=NA
+  ratio= sqrt(spatstat.geom::area.owin(cell_win)/sum(n))
+  dis2=dis< same.dis.cutoff* ratio
+  same.loc.idx=which(dis2 == T, arr.ind = TRUE)
+  merged_ppp=merged_ppp[setdiff(1:merged_ppp$n, same.loc.idx[,1]), ]
+
 
   # Add CCI
   ppp2=cell.loc.1region.refine(pt.initial=merged_ppp, n.inflation=n.inflation,
@@ -212,7 +213,7 @@ cell.loc.model.fc=function(n,
 
   for ( i in 1:length(Rcat)) {
     idx= which(PointRegion %in% Rcat[i])
-    n.sim.region=round(n*length(idx)/length(PointAnno))
+    n.sim.region=round(length(idx)/length(PointAnno)*n)
 
     bb[[i]]=cell.loc.1region.model.fc(n=n.sim.region,
                               PointLoc=PointLoc[idx,],

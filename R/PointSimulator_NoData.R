@@ -84,20 +84,21 @@ RandomRegionWindow <- function(nRegion=3, nGrid=20, seed=NULL){
 # This function generates cell pools allowing selection due
 # to cell overlaps, inhibitions and attractions.
 
-get.n.vec.raw=function(n, cell.prop,
+get.n.vec.raw=function(n,
+                       cell.prop,
                        cell.inh.attr.input=NULL,
                        same.dis.cutoff=0.05,
-                       inflate.parameter=0.1) {
+                       inflate.parameter=0.08) {
   n.vec.target=n.vec.use=round(n*cell.prop)
   # if exists cell-cell inhibition & attraction, inflate n.vec.use
   if (is.null(cell.inh.attr.input)==F) {
     for (i in 1:nrow(cell.inh.attr.input)) {
-      if (cell.inh.attr.input[i,1] ==cell.inh.attr.input[i,2]) {
+      if (cell.inh.attr.input[i,1] ==cell.inh.attr.input[i,2]) { # same cell type
         n.vec.use[,cell.inh.attr.input[i,1]]=n.vec.use[,cell.inh.attr.input[i,1]]*
           (1+abs(cell.inh.attr.input[i,3] * inflate.parameter))
       }
 
-      if (cell.inh.attr.input[i,1] !=cell.inh.attr.input[i,2]) {
+      if (cell.inh.attr.input[i,1] !=cell.inh.attr.input[i,2]) { # different cell type
         n.vec.use[,cell.inh.attr.input[i,1]]=
           n.vec.use[,cell.inh.attr.input[i,1]]* (1+abs(cell.inh.attr.input[i,3])* inflate.parameter )
         n.vec.use[,cell.inh.attr.input[i,2]]=
@@ -333,7 +334,7 @@ cell.loc.fc=function(N, win, cell.prop, cell.inh.attr.input=NULL,
                                         grid.size.small=grid.size.small, grid.size.large=grid.size.large,
                                         seed=seed*11+r*141)
   }
-  names(cell.loc)=paste0("Region", 1:R)
+  names(cell.loc)=1:R
 
   return(cell.loc)
 }

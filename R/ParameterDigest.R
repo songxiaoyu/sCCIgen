@@ -223,8 +223,7 @@ ParaPattern=function(para, sim_count, cell_loc_list_i,
   # add spatial
   for (tt1 in t1:1) {
     if (tt1==0) {break}
-    r_raw =para[[paste0("spatial_int_dist_", tt1, "_region")]]
-    r <- if (is.null(r_raw) ) "NULL" else as.character(r_raw)
+    r =para[[paste0("spatial_pattern_", tt1, "_region")]]
     CellType=para[[paste0("spatial_pattern_",tt1, "_cell_type")]]
     GeneID=para[[paste0("spatial_pattern_",   tt1, "_gene_id")]]
     PropOfGenes=para[[paste0("spatial_pattern_",  tt1, "_gene_prop")]]
