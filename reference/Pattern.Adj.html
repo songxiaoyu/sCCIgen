@@ -78,7 +78,8 @@ from <code>Add.Spatial.Expr.Pattern</code>, <code>Add.Distance.Asso.Pattern</cod
 <dt id="arg-bond-extreme">bond.extreme<a class="anchor" aria-label="anchor" href="#arg-bond-extreme"></a></dt>
 <dd><p>Whether to bond extreme high values generated from
 large effect sizes of spatial patterns (default = TRUE). If TRUE, no
-gene can have more than 10% of the total counts across all genes.</p></dd>
+gene can have more than the maximum of (1) 5 times the 97.5 percentile of the pattern adjusted
+count and (2) the maximum of the original count.</p></dd>
 
 
 <dt id="arg-keep-total-count">keep.total.count<a class="anchor" aria-label="anchor" href="#arg-keep-total-count"></a></dt>

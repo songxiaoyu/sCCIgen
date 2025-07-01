@@ -170,7 +170,7 @@ in the input data following the existing Giotto pipeline<a class="anchor" aria-l
 <span>                       spatial_data <span class="op">=</span> <span class="va">spatial</span>, </span>
 <span>                       run_hvg <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                       run_Dist_network <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                       dis.cut<span class="op">=</span><span class="fl">150</span><span class="op">)</span></span>
+<span>                       dis.cut<span class="op">=</span><span class="fl">200</span><span class="op">)</span></span>
 <span><span class="va">db</span></span>
 <span><span class="co"># Estimate cell-cell attraction and inhibition patterns, and save in pre-defined folder</span></span>
 <span><span class="fu"><a href="../reference/cellProximityTable.html">cellProximityTable</a></span><span class="op">(</span>gobject <span class="op">=</span> <span class="va">db</span>, </span>
@@ -178,7 +178,7 @@ in the input data following the existing Giotto pipeline<a class="anchor" aria-l
 <span>                   p_adj <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>                   spatial_network_name <span class="op">=</span> <span class="st">"distance_based_network"</span>,</span>
 <span>                   save.unfiltered<span class="op">=</span><span class="cn">TRUE</span>,</span>
-<span>                   output_file <span class="op">=</span> <span class="st">"est_CCI_dist_dist.csv"</span>,</span>
+<span>                   output_file <span class="op">=</span> <span class="st">"est_CCI_dist_dist_disNet.csv"</span>,</span>
 <span>                   seed<span class="op">=</span><span class="fl">123</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Estimate gene expressions of cells impacted by their neighbors, and save in pre-defined folder</span></span>
@@ -188,7 +188,7 @@ in the input data following the existing Giotto pipeline<a class="anchor" aria-l
 <span>                  spatial_network_name <span class="op">=</span> <span class="st">"distance_based_network"</span>,</span>
 <span>                  abs_log2fc_ICG <span class="op">=</span> <span class="fl">0.3</span>, </span>
 <span>                  p_adj <span class="op">=</span> <span class="fl">0.05</span>,</span>
-<span>                  output_file <span class="op">=</span> <span class="st">"est_CCI_dist_expr.csv"</span>,</span>
+<span>                  output_file <span class="op">=</span> <span class="st">"est_CCI_dist_expr_disNet.csv"</span>,</span>
 <span>                  seed<span class="op">=</span><span class="fl">123</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Estimate gene expressions of cells impacted by gene expressions of neighboring cells, narrow to</span></span>
@@ -198,8 +198,9 @@ in the input data following the existing Giotto pipeline<a class="anchor" aria-l
 <span>              region_specific <span class="op">=</span> <span class="cn">FALSE</span>, </span>
 <span>              spatial_network_name <span class="op">=</span> <span class="st">"distance_based_network"</span>,</span>
 <span>              p_adj <span class="op">=</span> <span class="fl">0.05</span>, </span>
-<span>              abs_log2fc_LR <span class="op">=</span> <span class="fl">0.2</span>,</span>
-<span>              output_file <span class="op">=</span> <span class="st">"est_CCI_expr_expr.csv"</span>,</span>
+<span>              abs_log2fc_LR <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>              direction<span class="op">=</span><span class="st">"both"</span>,</span>
+<span>              output_file <span class="op">=</span> <span class="st">"est_CCI_expr_expr_disNet.csv"</span>,</span>
 <span>              seed<span class="op">=</span><span class="fl">123</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>

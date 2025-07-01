@@ -76,11 +76,11 @@
 
 
 <dt id="arg-sim-method">sim_method<a class="anchor" aria-label="anchor" href="#arg-sim-method"></a></dt>
-<dd><p>c('ind', 'copula')</p></dd>
+<dd><p>c('ind', 'copula'). Use 'ind' if later plans to simulate independent genes (fast). Use 'Coplua" if later plans to simulated gene-gene correlations.</p></dd>
 
 
 <dt id="arg-region">region<a class="anchor" aria-label="anchor" href="#arg-region"></a></dt>
-<dd><p>description</p></dd>
+<dd><p>Region annotation of the input data. NULL if input has no region information.</p></dd>
 
 
 <dt id="arg-ncores">ncores<a class="anchor" aria-label="anchor" href="#arg-ncores"></a></dt>
@@ -88,13 +88,9 @@
 
 
 <dt id="arg-subsetn">subsetN<a class="anchor" aria-label="anchor" href="#arg-subsetn"></a></dt>
-<dd><p>If the number of cells is large, one can use it to estimate expression distribuitons from subset of cells (e.g. subsetN=2500) per cell type.</p></dd>
+<dd><p>If the number of cells is large, one can use it to estimate expression distributions from subset of cells (e.g. subsetN=2500) per cell type.</p></dd>
 
 </dl></div>
-    <div class="section level2">
-    <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>Estimated Gaussian Copula</p>
-    </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>

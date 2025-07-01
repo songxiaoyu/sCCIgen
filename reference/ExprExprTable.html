@@ -61,6 +61,7 @@
 <span>  <span class="va">spatial_network_name</span>,</span>
 <span>  p_adj <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>  abs_log2fc_LR <span class="op">=</span> <span class="fl">0.25</span>,</span>
+<span>  direction <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"both"</span>, <span class="st">"positive"</span>, <span class="st">"negative"</span><span class="op">)</span>,</span>
 <span>  output_file <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">getwd</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"est_CCI_expr_expr.csv"</span><span class="op">)</span>,</span>
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -99,6 +100,10 @@ If "external" is used, users also need to provide value for <code>external_datab
 
 <dt id="arg-abs-log-fc-lr">abs_log2fc_LR<a class="anchor" aria-label="anchor" href="#arg-abs-log-fc-lr"></a></dt>
 <dd><p>Effect size threshold for saving.</p></dd>
+
+
+<dt id="arg-direction">direction<a class="anchor" aria-label="anchor" href="#arg-direction"></a></dt>
+<dd><p>Keep positive, negative, or both associations.</p></dd>
 
 
 <dt id="arg-output-file">output_file<a class="anchor" aria-label="anchor" href="#arg-output-file"></a></dt>
