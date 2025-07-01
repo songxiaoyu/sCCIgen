@@ -389,7 +389,7 @@ ExprExprTable_1region = function(gobject, r, cell_meta, select_ligands, select_r
 #' @param gobject Giotto object.
 #' @param top_num Keep top K number of genes for each cell type
 #' @param fdr_cut Keep genes whose FDR is less than this cutoff.
-#' @param output_file output_file
+#' @param output_file Provide a path and file name to save the spatial table for use in sCCIgen.
 #' @export
 
 SpatialTable=function(gobject, top_num=2, fdr_cut=0.05,

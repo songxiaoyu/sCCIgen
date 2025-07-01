@@ -97,6 +97,8 @@ SpatialLoad=function(para){
 #' @param seed_list Seeds for all simulated data
 #' @import parallel foreach doParallel
 #' @export
+#' @return Simulated cell spatial map file.
+
 ParaCellsNoST=function(para, seed_list){
 
   # determine cell type proportion in each region
@@ -153,6 +155,7 @@ ParaCellsNoST=function(para, seed_list){
 #' @param seed_list Seeds for all simulated data
 #' @import parallel foreach doParallel
 #' @export
+#' @return Simulated cell spatial map file.
 
 ParaCellsST=function(para, spatial, seed_list) {
 
@@ -190,6 +193,7 @@ ParaCellsST=function(para, spatial, seed_list) {
 #' Use parameters to simulate cell location. Here directly use existing SRT data.
 #' @param m No. of simulated data
 #' @param spatial Cell spatial data
+#' @return Simulated cell spatial map file, which is the same as the reference spatial data.
 #' @export
 #'
 ParaExistingCellsST=function(m, spatial) {
@@ -308,9 +312,8 @@ ParaPattern=function(para, sim_count, cell_loc_list_i,
 #' @param para Parameters loaded and cleaned from the parameter file using function
 #' `ParaDigest`.
 #' @param cell_loc_list Simulated cell location data
-#' @param expr Expression data
-#' @param region Region of cell type
-#' @param CopulaEst Estimated Gaussian Copula function for gene-gene correlation. Default=NULL.
+#' @param expr Input or pre-cleaned expression data
+#' @param region Input region of cells
 #' @param seed_list Seeds for all simulated data
 #' @param ncores No. of cores for simulation
 #' @param model_params The fitted models of genes.
@@ -392,11 +395,12 @@ ParaExpr=function(para, cell_loc_list, expr, region,
 #' (Main Function) Simulate spatially resolved transcriptomics data from a parameter file.
 #'
 #' This function simulate spatially resolved transcriptomics data from a parameter file. The
-#' parameter file can be generated with an user interface on Docker.
+#' parameter file can be generated with an user interface `run_interactive_sCCIgen()`.
 #' @param input  The path and name of the parameter file.
 #' @param ModelFitFile Default = NULL, no existing models that fit in the distributions
 #' of input single-cell expression data. Alternatively, if models are provided,
-#' the algorithm will no longer need to fit the input data and be faster.
+#' the algorithm will no longer need to fit the input data and can be faster. Not the input data may
+#' already provides the fitted models, then this can be NULL as well for speedy simulation.
 #' @return Simulated data (e.g. count, spatial feature, expression pattern) will be directly
 #' saved on your computer or cloud based on the path provided by the parameter file.
 #' @import parallel foreach doParallel

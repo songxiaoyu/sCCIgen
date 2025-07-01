@@ -5,7 +5,7 @@
 #' This function esimates window using spatial location data of existing cells.
 #' @param PointLoc The location of input cells on x, y axis.
 #' @param method Options include method=c("network", "convex", "convex2", "convex3",
-#' "convex5", "rectangle"). Network is preferred unless the input data is very large.
+#' "convex5", "rectangle"). Network is preferred.
 #' @return The spatial window of input cells.
 #' @export
 # window=simu.window(PointLoc=NULL)
@@ -185,15 +185,20 @@ cell.loc.1region.model.fc=function(n,
 
 # cell.loc.model.fc ---------------
 #' Generate cell location data by modeling the spatial information of existing data.
+#'
+#' Poisson random process model separately for each cell type is the foundation. The impact of CCIs and other spatial patterns update the
+#' initial cell allocation.
 #' @param n No. of cells
 #' @param PointLoc The location of input cells on x, y axis.
 #' @param PointAnno The cell type annotation of input cells.
 #' @param PointRegion The spatial regions of input cells.
-#' @param window_method Method for estimating window of cells.
+#' @param window_method Method for estimating window of cells. Choices include "network", "convex", "convex2",
+#' "convex3", convex5", "rectangle". Default is "network", which is most accurate.
 #' @param seed Random seed.
 #' @param same.dis.cutoff Cutoff value for regarding two cells are in the same location (default = 0).
 #' @param even.distribution.coef A parameter to avoid cells gathering from each other.
 #' @import spatstat
+#' @return Simulated cell spatial map file.
 #' @export
 cell.loc.model.fc=function(n,
                            PointLoc,
@@ -251,8 +256,10 @@ cell.loc.1region.existing.fc=function(PointLoc,
 #' @param PointLoc The location of input cells on x, y axis.
 #' @param PointAnno The cell type annotation of input cells.
 #' @param PointRegion The spatial regions of input cells.
-#' @param window_method Method for estimating window of cells.
+#' @param window_method Method for estimating window of cells. Choices include "network", "convex", "convex2",
+#' "convex3", convex5", "rectangle". Default is "network", which is most accurate.
 #' @import spatstat
+#' @return Simulated cell spatial map file, which is the same as the reference spatial data.
 #' @export
 cell.loc.existing.fc=function(PointLoc,
                               PointAnno,

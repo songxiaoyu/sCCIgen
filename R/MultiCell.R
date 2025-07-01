@@ -5,6 +5,7 @@
 #' @param expr expression profile of the cells
 #' @param spatial spatial features like their spatial X and Y coordinates.
 #' @param NoSpot Number of targeted spots.
+#' @param cl No. of cores.
 #' @return
 #' \item{count:}{Expression profile of the spots.}
 #' \item{spot_feature:}{Spot feature such as spot center coordinates and cell allocations

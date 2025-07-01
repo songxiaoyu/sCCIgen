@@ -3,7 +3,7 @@
 #'
 #' This function assigns random connected regions on a square. Used within function `RandomRegionWindow`.
 #' @param nRegion nRegion is the No. of regions (e.g. nRegion=3)
-#' @param r poly is a RasterLayer  (e.g. 20 by 20 square).
+#' @param r polygon generated in `RandomRegionWindow` function.
 #' @param seed Random seed.
 #' @return A list of the selected polygons for each region.
 
@@ -303,7 +303,7 @@ cell.loc.1region.refine <- function(pt.initial, n.inflation,
 #' this parameter is needed to cut the simulation window into grids of different
 #' sizes to smooth cell densities.
 #' @param seed Random seed
-#' @return Cell location
+#' @return Cell location file.
 #' @export
 
 

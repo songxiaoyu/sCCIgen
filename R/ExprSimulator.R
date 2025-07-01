@@ -21,10 +21,9 @@
 #' @param expr Expression levels of input data
 #' @param anno Cell type annotation of input data
 #' @param ncores No of cores for parallel computing.
-#' @param region description
-#' @param sim_method c('ind', 'copula')
-#' @param subsetN If the number of cells is large, one can use it to estimate expression distribuitons from subset of cells (e.g. subsetN=2500) per cell type.
-#' @return Estimated Gaussian Copula
+#' @param region Region annotation of the input data. NULL if input has no region information.
+#' @param sim_method c('ind', 'copula'). Use 'ind' if later plans to simulate independent genes (fast). Use 'Coplua" if later plans to simulated gene-gene correlations.
+#' @param subsetN If the number of cells is large, one can use it to estimate expression distributions from subset of cells (e.g. subsetN=2500) per cell type.
 #' @export
 
 Est_ModelPara <- function(expr, anno, sim_method=c('ind', 'copula'), region=NULL, ncores = 1, subsetN=NULL) {
@@ -218,15 +217,16 @@ Find.Neighbor.Pairs=function(ppp.obj,
 #' This function adds one type of spatial differential expressed patterns. This
 #' function can be repeated used to add region-specific effects  in different
 #' regions for different cell types.
-#' @param sim.count Cells as points on a spatial map.
-#' @param r Region index.
-#' @param CellType Cell type index.
+#' @param sim.count Simulated expression counts from single-cell expression
+#' data, before adding in additional spatial patterns.
+#' @param r Which region to add in the spatial pattern.
+#' @param CellType Which cell type to add in the spatial pattern.
 #' @param GeneID Gene(s) index. Default = NULL, and then a random subset
 #' of genes will be perturbed based on the defined spatial patterns.
 #' @param PropOfGenes Proportion of genes with this pattern if GeneID is not
 #' provided.
-#' @param delta.mean Mean effect (on the log count scale).
-#' @param delta.sd SD of effect.
+#' @param delta.mean Expected effect size (at the log scale of the counts).
+#' @param delta.sd Standard deviation of the effect size.
 #' @param seed Seed
 #' @return
 #' \item{SignalSummary:}{Summary of this spatial pattern, including the type
@@ -311,11 +311,11 @@ MergePPP=function(points.list) {
 #' @param adjacent.cell.type Which cell type in the neighbor perturbs from
 #' the cell-cell interaction (e.g. neuron).
 #' @param int.dist.threshold The minimal cell-cell distance for the interaction.
-#' @param delta.mean Expected effect.size (at the log scale of the counts).
-#' @param delta.sd Standard deviation of the effect.size
+#' @param delta.mean Expected effect size (at the log scale of the counts).
+#' @param delta.sd Standard deviation of the effect size.
 #' @param GeneID Affected genes.
 #' @param PropOfGenes Proportion of genes impacted by the cell-cell interaction.
-#' It is used if GenePairIDMatrix is NULL, and a random subset of genes with
+#' It is used if GeneID is NULL, and a random subset of genes with
 #' specified proportion will be perturbed.
 #' @param seed Seed
 #' @return
@@ -421,7 +421,7 @@ Add.Distance.Asso.Pattern = function(ppp.obj,
 #' @param sim.count Simulated expression counts from single-cell expression
 #' data, before adding in additional spatial patterns.
 #' @param r Which region to add in the spatial pattern. If simulated data do
-#' not have multiple regions, r=1.
+#' not have multiple regions, r=NULL.
 #' @param perturbed.cell.type Which cell type is perturbed from this cell-cell
 #' interaction (e.g. microglia).
 #' @param adjacent.cell.type Which cell type in the neighbor perturbs from
@@ -429,7 +429,7 @@ Add.Distance.Asso.Pattern = function(ppp.obj,
 #' @param Bidirectional Whether the perturbation is both directional.
 #' @param int.dist.threshold The minimal cell-cell distance for the interaction.
 #' @param delta.mean Expected effect.size (at the log scale of the counts).
-#' @param delta.sd Standard deviation of the effect.size
+#' @param delta.sd Standard deviation of the effect size.
 #' @param GenePairIDMatrix Affected gene pairs.
 #' @param PropOfGenes Proportion of genes impacted by the cell-cell interaction.
 #' It is used if GenePairIDMatrix is NULL, and a random subset of genes with
@@ -617,7 +617,8 @@ Pattern.adj.1region= function(sim.count1, combined.beta.matrix,
 #' from `Add.Spatial.Expr.Pattern`, `Add.Distance.Asso.Pattern`, or `Add.Expr.Asso.Pattern`.
 #' @param bond.extreme Whether to bond extreme high values generated from
 #' large effect sizes of spatial patterns (default = TRUE). If TRUE, no
-#' gene can have more than 10% of the total counts across all genes.
+#' gene can have more than the maximum of (1) 5 times the 97.5 percentile of the pattern adjusted
+#' count and (2) the maximum of the original count.
 #' @param keep.total.count If additional spatial patterns are added, whether
 #' to rescale expression levels of all genes to keep the sequencing depth
 #' (default = FALSE).
@@ -661,8 +662,8 @@ Pattern.Adj= function(sim.count, pattern.list=NULL,
 #' @param points.list points.list is a list of points from multiple regions
 #' @param expr.list expr.list is a list of expressions from multiple regions
 #' @return
-#' \item{meta:}{meta}
-#' \item{count:}{count}
+#' \item{meta:}{Output the meta data of all cells in all regions}
+#' \item{count:}{Output the count data of all cells in all regions}
 #' @import spatstat
 #' @export
 #'
