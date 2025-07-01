@@ -25,7 +25,8 @@ cell.loc.model.fc(
 
 \item{PointRegion}{The spatial regions of input cells.}
 
-\item{window_method}{Method for estimating window of cells.}
+\item{window_method}{Method for estimating window of cells. Choices include "network", "convex", "convex2",
+"convex3", convex5", "rectangle". Default is "network", which is most accurate.}
 
 \item{seed}{Random seed.}
 
@@ -33,6 +34,10 @@ cell.loc.model.fc(
 
 \item{even.distribution.coef}{A parameter to avoid cells gathering from each other.}
 }
+\value{
+Simulated cell spatial map file.
+}
 \description{
-Generate cell location data by modeling the spatial information of existing data.
+Poisson random process model separately for each cell type is the foundation. The impact of CCIs and other spatial patterns update the
+initial cell allocation.
 }

@@ -17,11 +17,12 @@ Add.Spatial.Expr.Pattern(
 )
 }
 \arguments{
-\item{sim.count}{Cells as points on a spatial map.}
+\item{sim.count}{Simulated expression counts from single-cell expression
+data, before adding in additional spatial patterns.}
 
-\item{r}{Region index.}
+\item{r}{Which region to add in the spatial pattern.}
 
-\item{CellType}{Cell type index.}
+\item{CellType}{Which cell type to add in the spatial pattern.}
 
 \item{GeneID}{Gene(s) index. Default = NULL, and then a random subset
 of genes will be perturbed based on the defined spatial patterns.}
@@ -29,9 +30,9 @@ of genes will be perturbed based on the defined spatial patterns.}
 \item{PropOfGenes}{Proportion of genes with this pattern if GeneID is not
 provided.}
 
-\item{delta.mean}{Mean effect (on the log count scale).}
+\item{delta.mean}{Expected effect size (at the log scale of the counts).}
 
-\item{delta.sd}{SD of effect.}
+\item{delta.sd}{Standard deviation of the effect size.}
 
 \item{seed}{Seed}
 }

@@ -18,16 +18,13 @@ Est_ModelPara(
 
 \item{anno}{Cell type annotation of input data}
 
-\item{sim_method}{c('ind', 'copula')}
+\item{sim_method}{c('ind', 'copula'). Use 'ind' if later plans to simulate independent genes (fast). Use 'Coplua" if later plans to simulated gene-gene correlations.}
 
-\item{region}{description}
+\item{region}{Region annotation of the input data. NULL if input has no region information.}
 
 \item{ncores}{No of cores for parallel computing.}
 
-\item{subsetN}{If the number of cells is large, one can use it to estimate expression distribuitons from subset of cells (e.g. subsetN=2500) per cell type.}
-}
-\value{
-Estimated Gaussian Copula
+\item{subsetN}{If the number of cells is large, one can use it to estimate expression distributions from subset of cells (e.g. subsetN=2500) per cell type.}
 }
 \description{
 Estimate Marginal distribution and Gaussian Copula for Gene Expression Matrix

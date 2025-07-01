@@ -11,7 +11,8 @@ ParaSimulation(input, ModelFitFile = NULL)
 
 \item{ModelFitFile}{Default = NULL, no existing models that fit in the distributions
 of input single-cell expression data. Alternatively, if models are provided,
-the algorithm will no longer need to fit the input data and be faster.}
+the algorithm will no longer need to fit the input data and can be faster. Not the input data may
+already provides the fitted models, then this can be NULL as well for speedy simulation.}
 }
 \value{
 Simulated data (e.g. count, spatial feature, expression pattern) will be directly
@@ -19,5 +20,5 @@ saved on your computer or cloud based on the path provided by the parameter file
 }
 \description{
 This function simulate spatially resolved transcriptomics data from a parameter file. The
-parameter file can be generated with an user interface on Docker.
+parameter file can be generated with an user interface \code{run_interactive_sCCIgen()}.
 }

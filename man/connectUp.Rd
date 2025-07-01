@@ -7,7 +7,7 @@
 connectUp(r, nRegion, seed = NULL)
 }
 \arguments{
-\item{r}{poly is a RasterLayer  (e.g. 20 by 20 square).}
+\item{r}{polygon generated in \code{RandomRegionWindow} function.}
 
 \item{nRegion}{nRegion is the No. of regions (e.g. nRegion=3)}
 

@@ -46,7 +46,7 @@ sizes to smooth cell densities.}
 \item{seed}{Random seed}
 }
 \value{
-Cell location
+Cell location file.
 }
 \description{
 This function generates cell locations for all regions.

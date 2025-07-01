@@ -28,15 +28,14 @@ Default value is 'copula', which selects the copula model.
 'ind' will select the (w/o copula) model.}
 
 \item{marginal}{Specification of the types of marginal distribution.
-Default value is 'auto_choose' which chooses between ZINB, NB, ZIP
-and Poisson by a likelihood ratio test (lrt) and whether there is
-underdispersion.
-'zinb' will fit the ZINB model. If there is underdispersion, it
-will choose between ZIP and Poisson by a lrt. Otherwise, it will try to
-fit the ZINB model. If in this case, there is no zero at all or an error
-occurs, it will fit an NB model instead.
+Default is 'zinb'.  'poisson' simply fits the Poisson model.
 'nb' fits the NB model that chooses between NB and Poisson depending
 on whether there is underdispersion.
+'zinb'  fits the ZINB model. If there is underdispersion, it
+chooses between ZIP and Poisson by a lrt. Otherwise, it tries to
+fit the ZINB model. If in this case, there is no zero at all or an error
+occurs, it will fit an NB model instead.
+'auto' chooses among zinb, NB, ZIP.
 'poisson' simply fits the Poisson model.}
 
 \item{jitter}{Logical, whether a random projection should be performed in the

@@ -20,17 +20,15 @@ ParaExpr(
 
 \item{cell_loc_list}{Simulated cell location data}
 
-\item{expr}{Expression data}
+\item{expr}{Input or pre-cleaned expression data}
 
-\item{region}{Region of cell type}
+\item{region}{Input region of cells}
 
 \item{seed_list}{Seeds for all simulated data}
 
 \item{model_params}{The fitted models of genes.}
 
 \item{ncores}{No. of cores for simulation}
-
-\item{CopulaEst}{Estimated Gaussian Copula function for gene-gene correlation. Default=NULL.}
 }
 \value{
 Simulated gene expression data for each cell.

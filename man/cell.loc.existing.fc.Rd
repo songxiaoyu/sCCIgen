@@ -18,7 +18,11 @@ cell.loc.existing.fc(
 
 \item{PointRegion}{The spatial regions of input cells.}
 
-\item{window_method}{Method for estimating window of cells.}
+\item{window_method}{Method for estimating window of cells. Choices include "network", "convex", "convex2",
+"convex3", convex5", "rectangle". Default is "network", which is most accurate.}
+}
+\value{
+Simulated cell spatial map file, which is the same as the reference spatial data.
 }
 \description{
 Generate cell location data by using existing SRT data directly.

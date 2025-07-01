@@ -13,7 +13,7 @@ simu.window(
 \item{PointLoc}{The location of input cells on x, y axis.}
 
 \item{method}{Options include method=c("network", "convex", "convex2", "convex3",
-"convex5", "rectangle"). Network is preferred unless the input data is very large.}
+"convex5", "rectangle"). Network is preferred.}
 }
 \value{
 The spatial window of input cells.

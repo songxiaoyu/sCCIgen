@@ -11,6 +11,9 @@ ParaExistingCellsST(m, spatial)
 
 \item{spatial}{Cell spatial data}
 }
+\value{
+Simulated cell spatial map file, which is the same as the reference spatial data.
+}
 \description{
 Use parameters to simulate cell location. Here directly use existing SRT data.
 }

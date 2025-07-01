@@ -12,6 +12,9 @@ ParaCellsNoST(para, seed_list)
 
 \item{seed_list}{Seeds for all simulated data}
 }
+\value{
+Simulated cell spatial map file.
+}
 \description{
 Use parameters to simulate cell location. No spatial information is provided from real data.
 }

@@ -26,7 +26,7 @@ Add.Expr.Asso.Pattern(
 data, before adding in additional spatial patterns.}
 
 \item{r}{Which region to add in the spatial pattern. If simulated data do
-not have multiple regions, r=1.}
+not have multiple regions, r=NULL.}
 
 \item{perturbed.cell.type}{Which cell type is perturbed from this cell-cell
 interaction (e.g. microglia).}
@@ -40,7 +40,7 @@ the cell-cell interaction (e.g. neuron).}
 
 \item{delta.mean}{Expected effect.size (at the log scale of the counts).}
 
-\item{delta.sd}{Standard deviation of the effect.size}
+\item{delta.sd}{Standard deviation of the effect size.}
 
 \item{GenePairIDMatrix}{Affected gene pairs.}
 

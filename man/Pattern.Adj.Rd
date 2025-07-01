@@ -21,7 +21,8 @@ from \code{Add.Spatial.Expr.Pattern}, \code{Add.Distance.Asso.Pattern}, or \code
 
 \item{bond.extreme}{Whether to bond extreme high values generated from
 large effect sizes of spatial patterns (default = TRUE). If TRUE, no
-gene can have more than 10\% of the total counts across all genes.}
+gene can have more than the maximum of (1) 5 times the 97.5 percentile of the pattern adjusted
+count and (2) the maximum of the original count.}
 
 \item{keep.total.count}{If additional spatial patterns are added, whether
 to rescale expression levels of all genes to keep the sequencing depth

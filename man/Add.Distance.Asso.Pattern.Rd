@@ -34,14 +34,14 @@ the cell-cell interaction (e.g. neuron).}
 
 \item{int.dist.threshold}{The minimal cell-cell distance for the interaction.}
 
-\item{delta.mean}{Expected effect.size (at the log scale of the counts).}
+\item{delta.mean}{Expected effect size (at the log scale of the counts).}
 
-\item{delta.sd}{Standard deviation of the effect.size}
+\item{delta.sd}{Standard deviation of the effect size.}
 
 \item{GeneID}{Affected genes.}
 
 \item{PropOfGenes}{Proportion of genes impacted by the cell-cell interaction.
-It is used if GenePairIDMatrix is NULL, and a random subset of genes with
+It is used if GeneID is NULL, and a random subset of genes with
 specified proportion will be perturbed.}
 
 \item{seed}{Seed}

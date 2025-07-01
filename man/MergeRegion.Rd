@@ -12,8 +12,8 @@ MergeRegion(points.list, expr.list)
 \item{expr.list}{expr.list is a list of expressions from multiple regions}
 }
 \value{
-\item{meta:}{meta}
-\item{count:}{count}
+\item{meta:}{Output the meta data of all cells in all regions}
+\item{count:}{Output the count data of all cells in all regions}
 }
 \description{
 Merge spatial and expression data from multiple regions

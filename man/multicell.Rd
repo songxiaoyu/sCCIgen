@@ -12,6 +12,8 @@ multicell(expr, spatial, NoSpot = 500, cl = 1)
 \item{spatial}{spatial features like their spatial X and Y coordinates.}
 
 \item{NoSpot}{Number of targeted spots.}
+
+\item{cl}{No. of cores.}
 }
 \value{
 \item{count:}{Expression profile of the spots.}

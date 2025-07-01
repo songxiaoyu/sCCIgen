@@ -18,7 +18,7 @@ SpatialTable(
 
 \item{fdr_cut}{Keep genes whose FDR is less than this cutoff.}
 
-\item{output_file}{output_file}
+\item{output_file}{Provide a path and file name to save the spatial table for use in sCCIgen.}
 }
 \description{
 SpatialTable
