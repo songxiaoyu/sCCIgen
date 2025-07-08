@@ -392,7 +392,7 @@ Add.Distance.Asso.Pattern = function(ppp.obj,
       colnames(temp)=idx1
       temp2=sapply(1:nrow(temp), function(f) tapply(temp[f,], idx1, sum)) # sum signals from all neigbhors
       if( length(temp2)>1) {
-        beta.matrix[idx_r][GeneID, as.numeric(rownames(temp2))] =t(temp2)
+        beta.matrix[[idx_r]][GeneID, as.numeric(rownames(temp2))] =t(temp2)
       } else {      beta.matrix[[idx_r]][GeneID, as.numeric(names(temp2))] =t(temp2)}
 
     }

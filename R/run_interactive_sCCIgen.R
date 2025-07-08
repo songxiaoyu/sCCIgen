@@ -20,7 +20,7 @@ run_interactive_sCCIgen <- function() {
                         shiny::radioButtons(inputId = "dataset",
                                             label = "Select a pre-simulated spatial transcriptomics dataset to download.",
                                             choices = c("Simulated data for 4,751 genes in 4,000 cells of 6 cell types
-                                                        in two regions on a unit square, using normal breast data profiled by
+                                                        in two regions on a unit square, with added three types of CCIs, using normal breast data profiled by
                                                         snRNAseq as reference." = "example1",
                                                         "Simulated data for 2,500 genes in 500 spots of 6 cell types, using
                                                         mouse brain data profiled by SeqFISH+ as reference." = "example2",
@@ -355,7 +355,7 @@ run_interactive_sCCIgen <- function() {
       )
 
       output$downloadParameter <- shiny::downloadHandler(
-        filename = paste0(input$dataset,"_parameter.tsv"),
+        filename = paste0(input$dataset,"_parameter.yml"),
         content = function(con) {
           download.file(url = paste0("https://github.com/songxiaoyu/sCCIgen_data/raw/main/example_data/",input$dataset,"_parameter.tsv"),
                         destfile = con)
