@@ -5,18 +5,20 @@
 
 ## 1. Introduction
 
-Spatially resolved transcriptomics (SRT) provides an invaluable avenue
-for examining cell-cell interactions within native tissue environments.
-The development and evaluation of analytical tools for SRT data
-necessitate tools for generating synthetic datasets with known ground
-truth of cell-cell interaction induced features.
+Spatially resolved transcriptomics (SRT) facilitates the study of
+cell-cell interactions within native tissue environments.
 
-We introduce `sCCIgen`, a novel real-data-based simulator tailored to
-generate high-fidelity SRT data with a focus on cell-cell interactions.
-`sCCIgen` preserves transcriptomic and spatial characteristics in SRT
-data, while comprehensively models various cell-cell interaction
-features, including cell colocalization, spatial dependence among gene
-expressions, and gene-gene interactions between nearby cells.
+To support method development and benchmarking, we introduce `sCCIgen`,
+a real-data-based simulator that generates high-fidelity synthetic SRT
+data with known interaction features. sCCIgen preserves transcriptomic
+and spatial characteristics and provides key interaction features,
+including cell colocalization, spatial dependence of gene expression,
+and gene-gene interactions between neighboring cells.
+
+It supports input from SRT data, single-cell expression data alone, and
+unpaired expression and SRT data. sCCIgen is interactive, user-friendly,
+reproducible, and well-documented for studying cellular interactions and
+spatial biology.
 
 ## 2. Reference
 
