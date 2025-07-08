@@ -357,7 +357,7 @@ run_interactive_sCCIgen <- function() {
       output$downloadParameter <- shiny::downloadHandler(
         filename = paste0(input$dataset,"_parameter.yml"),
         content = function(con) {
-          download.file(url = paste0("https://github.com/songxiaoyu/sCCIgen_data/raw/main/example_data/",input$dataset,"_parameter.tsv"),
+          download.file(url = paste0("https://github.com/songxiaoyu/sCCIgen_data/raw/main/example_data/",input$dataset,"_parameter.yml"),
                         destfile = con)
         }
       )
