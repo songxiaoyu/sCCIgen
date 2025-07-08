@@ -22,9 +22,9 @@ run_interactive_sCCIgen <- function() {
                                             choices = c("Simulated data for 4,751 genes in 4,000 cells of 6 cell types
                                                         in two regions on a unit square, with added three types of CCIs, using normal breast data profiled by
                                                         snRNAseq as reference." = "example1",
-                                                        "Simulated data for 2,500 genes in 500 spots of 6 cell types, using
+                                                        "Simulated data for 2,500 genes in 500 spots from 2000 cells of 6 cell types, with estimated CCI on expression profiles, using
                                                         mouse brain data profiled by SeqFISH+ as reference." = "example2",
-                                                        "Simulated data for 550 genes in 10,000 cells of 6 cell types, using
+                                                        "Simulated the expression profile of 550 genes for 209,173 existing cells of 5 cell types from a different slide, using
                                                         human ovarian cancer data profiled by MERFISH as reference." = "example3"),
                                             width = "100%",
                                             selected = character(0)
