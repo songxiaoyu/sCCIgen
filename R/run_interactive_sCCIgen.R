@@ -24,7 +24,8 @@ run_interactive_sCCIgen <- function() {
                                                         snRNAseq as reference." = "example1",
                                                         "Simulated data for 2,500 genes in 500 spots from 2000 cells of 6 cell types, with estimated CCI on expression profiles, using
                                                         mouse brain data profiled by SeqFISH+ as reference." = "example2",
-                                                        "Simulated the expression profile of 550 genes for 209,173 existing cells of 5 cell types from a different slide, using
+                                                        "Simulated the data for  550 genes in 5000 cells based on the expression profile of 248,065 cells of 5 cell types,
+                                                        and the spatial map of another  209,173 existing cells from a different slide of the same 5 cell types, using
                                                         human ovarian cancer data profiled by MERFISH as reference." = "example3"),
                                             width = "100%",
                                             selected = character(0)
@@ -70,13 +71,13 @@ run_interactive_sCCIgen <- function() {
                                                         "Normal mouse brain SeqFISH+ data: It includes (1) count matrix
                                                         for 2,500 highly variable genes by 511 cells of 6 cell types (excitatory neuron,
                                                         interneuron, astrocyte, microglia, oligodendrocyte and
-                                                        endothelial cells), and (2) cell feature matrix including cell
+                                                        endothelial cells), and (2) spatial feature matrix including cell
                                                         type annotation, spatial coordinates on 2D (x, y), and field of view.
                                                         PMID: 35549429" = "SeqFishPlusCortex_2025",
                                                         "Ovarian cancer MERFISH data: It includes (1) count matrix
-                                                        for 550 genes by 355,633 cells of 6 cell types (tumor, adipocyte,
-                                                        endothelial, T-cell, macrophage, and others), and (2) cell
-                                                        feature matrix including cell type annotation and spatial
+                                                        for 550 genes by  248,065 cells of 5 cell types (tumor,
+                                                        endothelial, fabroblast, macrophage, and others), and (2) spatial
+                                                        feature matrix of a different slide for 209,173 cells cells of the same 5 cell types, including cell type annotation and spatial
                                                         coordinates on 2D. Data source: vizgen" = "MERFISH_OV_2025",
                                                         "I want to use my own dataset" = "user_input"),
                                             width = "100%",
